@@ -77,7 +77,7 @@ async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
 def main() -> None:
     """Start the bot."""
     # Create the Application and pass it your bot's token.
-    TOKEN = os.getenv("TOKEN")
+    TOKEN = os.getenv("TG_TOKEN")
     logger.info("Token: %r", TOKEN)
     application = (
         Application
