@@ -83,7 +83,7 @@ async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_video(video)
 
 
-def error(update, context):
+def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
@@ -113,6 +113,7 @@ def main() -> None:
     # log all errors
     application.add_error_handler(error)
     if HEROKU_APP_NAME:
+        logger.info("Starting webhook on %s:%s", APP_NAME, PORT)
         application.run_webhook(
             listen="0.0.0.0",
             port=PORT,
