@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "tiktok-downloader"
+version = "0.1.0"
+description = ""
+authors = ["Jag_k <jag.konon@gmail.com>"]
+readme = "README.md"
+packages = [{include = "tiktok_downloader"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-telegram-bot = "20.0a4"
+aiohttp = "^3.8.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
