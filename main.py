@@ -15,6 +15,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+PORT = int(os.environ.get('PORT', '8443'))
+
+HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
+
+APP_NAME = os.getenv(
+    'APP_NAME',
+    f"https://{HEROKU_APP_NAME}.herokuapp.com/",
+)
+
 # https://vt.tiktok.com/ZSRq1jcrg/
 TIKTOK_RE = re.compile(
     r"(?:https?://)?(?:\w{,2}\.)?tiktok\.com/(?P<id>\w+)/?"
@@ -74,6 +83,11 @@ async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_video(video)
 
 
+def error(update, context):
+    """Log Errors caused by Updates."""
+    logger.warning('Update "%s" caused error "%s"', update, context.error)
+
+
 def main() -> None:
     """Start the bot."""
     # Create the Application and pass it your bot's token.
@@ -96,7 +110,17 @@ def main() -> None:
     )
 
     # Run the bot until the user presses Ctrl-C
-    application.run_polling()
+    # log all errors
+    application.add_error_handler(error)
+    if HEROKU_APP_NAME:
+        application.run_webhook(
+            listen="0.0.0.0",
+            port=PORT,
+            url_path=TOKEN,
+            webhook_url=APP_NAME + TOKEN
+        )
+    else:
+        application.run_polling()
 
 
 if __name__ == "__main__":
