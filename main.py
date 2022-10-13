@@ -2,7 +2,7 @@ import logging
 import os
 
 import aiohttp as aiohttp
-from telegram import Update, InlineQueryResultVideo, InlineQueryResult
+from telegram import Update, InlineQueryResultVideo
 from telegram.constants import MessageEntityType
 from telegram.ext import Application, CommandHandler, ContextTypes, \
     MessageHandler, InlineQueryHandler, filters
@@ -51,7 +51,7 @@ async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         if entity.type == MessageEntityType.URL
     ]
     async with aiohttp.ClientSession() as session:
-        videos: list[Video] = Parser.parse(session, *message_links)
+        videos: list[Video] = await Parser.parse(session, *message_links)
 
     for video in videos:
         logger.info("Sending video: %s", video)
@@ -68,7 +68,7 @@ async def inline_query(update: Update, _: ContextTypes.DEFAULT_TYPE):
         return
 
     async with aiohttp.ClientSession() as session:
-        videos: list[Video] = Parser.parse(session, query)
+        videos: list[Video] = await Parser.parse(session, query)
 
     logger.info("Inline query: %s", query)
 

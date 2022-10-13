@@ -22,7 +22,7 @@ class Parser(BaseParser, type=ParserType.TIKTOK):
     ]
 
     @classmethod
-    def _parse(
+    async def _parse(
             cls,
             session: aiohttp.ClientSession,
             match: Match

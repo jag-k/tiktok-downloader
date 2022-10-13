@@ -29,7 +29,7 @@ class Parser(ABC):
 
     @classmethod
     @abstractmethod
-    def _parse(
+    async def _parse(
             cls,
             session: aiohttp.ClientSession,
             match: Match
@@ -37,7 +37,7 @@ class Parser(ABC):
         raise NotImplementedError
 
     @classmethod
-    def parse(
+    async def parse(
             cls,
             session: aiohttp.ClientSession,
             *strings: str,
@@ -47,7 +47,7 @@ class Parser(ABC):
             for parser in cls._parsers:
                 for reg_exp in parser.REG_EXPS:
                     for match in reg_exp.finditer(string):
-                        videos = parser._parse(session, match)
+                        videos = await parser._parse(session, match)
                         result.extend(videos)
         return result
 
