@@ -1,14 +1,14 @@
 import logging
 import os
-import re
-from typing import TypedDict
 
 import aiohttp as aiohttp
-from telegram import Update
+from telegram import Update, InlineQueryResultVideo, InlineQueryResult
 from telegram.constants import MessageEntityType
 from telegram.ext import Application, CommandHandler, ContextTypes, \
-    MessageHandler, filters
+    MessageHandler, InlineQueryHandler, filters
 from telegram.helpers import create_deep_linked_url
+
+from parsers import Video, Parser
 
 # Enable logging
 logging.basicConfig(
@@ -17,92 +17,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# TWITTER_API_KEY = os.getenv("TWITTER_API_KEY")
-# TWITTER_API_KEY_SECRET = os.getenv("TWITTER_API_KEY_SECRET")
-TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
-
+TOKEN = os.getenv("TG_TOKEN")
 PORT = int(os.environ.get('PORT', '8443'))
-
 HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
-
 APP_NAME = os.getenv(
     'APP_NAME',
     f"https://{HEROKU_APP_NAME}.herokuapp.com/",
 )
 
-# https://vt.tiktok.com/ZSRq1jcrg/
-TIKTOK_RE = re.compile(
-    r"(?:https?://)?(?:\w{,2}\.)?tiktok\.com/(?P<id>\w+)/?"
-)
 
-# https://vt.tiktok.com/ZSRq1jcrg/
-TIKTOK_VIDEO_RE = re.compile(
-    r"(?:https?://)?(?:www.)?tiktok\.com/(?P<id>\w+)/?"
-)
-
-# https://twitter.com/Yoda4ever/status/1580304802608726016?t=FZclIsr-YgDvIIZdbL9pqg&s=35
-# https://twitter.com/Yoda4ever/status/1580304802608726016
-TWITTER_RE = re.compile(
-    r"(?:https?://)?(?:\w{,3}\.)?twitter\.com/(?P<user>\w+)/status/(?P<id>\d+)"
-)
-
-Video = TypedDict("Video", {"url": str, "caption": str})
-
-
-async def get_tiktok_url_video(
-        session: aiohttp.client.ClientSession,
-        url: str
-) -> Video | None:
-    """Get TikTok video from url."""
-    logger.info("Getting video link from: %s", url)
-    async with session.get(
-            "https://api.douyin.wtf/api", params={"url": url}
-    ) as response:
-        data = await response.json()
-    url = data.get("nwm_video_url", None)
-    if url:
-        return Video(
-            url=url,
-            caption=data.get("video_title", None)
-        )
-
-
-async def get_tweet_videos(
-        session: aiohttp.client.ClientSession,
-        tweet_id: str
-) -> list[Video]:
-    """Get video from Tweet ID."""
-
-    logger.info(
-        "Getting video link from: https://twitter.com/i/status/%s", tweet_id
-    )
-    async with session.get(
-            f"https://api.twitter.com/2/tweets/{tweet_id}",
-            params={
-                "media.fields": ','.join(("type", "variants")),
-                "expansions": "attachments.media_keys",
-            },
-            headers={"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"}
-    ) as response:
-        data = await response.json()
-    medias = data.get("includes", {}).get("media", [])
-    caption = data.get("data", {}).get("text", None)
-
-    return [
-        Video(
-            url=max(
-                media.get('variants', []), key=lambda x: x.get("bit_rate", 0)
-            ).get("url"),
-            caption=caption
-        )
-        for media in medias
-        if not print(media)
-        if media.get('type') == 'video'
-    ]
-
-
-# Define a few command handlers. These usually take the two arguments update
-# and context.
 async def start(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     await update.message.reply_html(
@@ -121,45 +44,54 @@ async def help_command(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
-    tiktok_links: list[str] = []
-    tweets_ids: list[str] = []
-
     text = update.message.text
     message_links = [
         text[entity.offset:entity.offset + entity.length]
         for entity in update.message.entities
         if entity.type == MessageEntityType.URL
     ]
-    for msg_link in message_links:
-        tt_link_match = TIKTOK_RE.match(msg_link)
-        tw_link_match = TWITTER_RE.match(msg_link)
-        if tt_link_match:
-            link = f"https://vm.tiktok.com/{tt_link_match.group('id')}"
-            if link not in tiktok_links:
-                tiktok_links.append(link)
-            continue
+    async with aiohttp.ClientSession() as session:
+        videos: list[Video] = Parser.parse(session, *message_links)
 
-        if tw_link_match:
-            tweets_ids.append(tw_link_match.group('id'))
-
-    async with aiohttp.client.ClientSession() as session:
-        video_links: list[Video] = [
-            video
-            for link in tiktok_links
-            if (video := await get_tiktok_url_video(session, link))
-        ]
-
-        for tweet_id in tweets_ids:
-            tweet_video_links = await get_tweet_videos(session, tweet_id)
-            if tweet_video_links:
-                video_links.extend(tweet_video_links)
-
-    for video in video_links:
+    for video in videos:
         logger.info("Sending video: %s", video)
         await update.message.reply_video(
-            video=video.get('url'),
-            caption=video.get('caption'),
+            video=video.url,
+            caption=video.caption,
         )
+
+
+async def inline_query(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    """Handle the inline query."""
+    query = update.inline_query.query
+    if not query:
+        return
+
+    async with aiohttp.ClientSession() as session:
+        videos: list[Video] = Parser.parse(session, query)
+
+    logger.info("Inline query: %s", query)
+
+    results = [
+        InlineQueryResultVideo(
+            id=video.url,
+            video_url=video.url,
+            mime_type="video/mp4",
+            thumb_url=video.thumbnail_url or video.url,
+            title=video.caption or f"{video.type} Video",
+            caption=(
+                        f"by @{video.author}"
+                        if video.author
+                        else ''
+                    ) + (
+                        f"from {video.type}"
+                        if video.caption
+                        else ''
+                    ),
+        )
+        for video in videos
+    ]
+    return await update.inline_query.answer(results)
 
 
 def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -170,7 +102,6 @@ def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main() -> None:
     """Start the bot."""
     # Create the Application and pass it your bot's token.
-    TOKEN = os.getenv("TG_TOKEN")
     logger.info("Token: %r", TOKEN)
     application = (
         Application
@@ -182,6 +113,7 @@ def main() -> None:
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(InlineQueryHandler(inline_query))
 
     # on non command i.e message - echo the message on Telegram
     application.add_handler(
