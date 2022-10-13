@@ -14,7 +14,7 @@ from parsers import Video, Parser
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO
+    level=logging.DEBUG if os.getenv('DEBUG') else logging.INFO
 )
 logger = logging.getLogger(__name__)
 

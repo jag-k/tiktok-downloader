@@ -41,6 +41,8 @@ class Parser(BaseParser):
         ) as response:
             data = await response.json()
 
+        logger.debug("Got data: %s", data)
+
         url = data.get("nwm_video_url", None)
         if url:
             video = Video(

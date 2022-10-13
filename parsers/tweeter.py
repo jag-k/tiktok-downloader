@@ -59,12 +59,9 @@ class Parser(BaseParser):
                 },
                 headers={"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"}
         ) as response:
-            print(response.url)
-            print('response', response)
             data: dict = await response.json()
-            print(data)
-        logger.debug("Got data: %s", data)
 
+        logger.debug("Got data: %s", data)
         includes = data.get("includes", {})
         medias = includes.get("media", [])
         author = includes.get("users", [{}])[0].get("username", None)
