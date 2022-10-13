@@ -83,6 +83,7 @@ async def get_tweet_video(
     return [
         max(variant, key=lambda x: x.get("bitrate", 0)).get("url")
         for media in medias
+        if not print(media)
         if media.get('type') == 'video'
         for variant in media.get('variants', [])
         if variant.get('content_type') == 'video/mp4'
@@ -102,7 +103,7 @@ async def help_command(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
     link = create_deep_linked_url(ctx.bot.username, 'start', group=True)
     await update.message.reply_text(
-        f"Just simple download a TikTok video.\n\n"
+        f"Just simple download a TikTok and Tweeter video.\n\n"
         f"Link to use in groups: {link}"
     )
 
