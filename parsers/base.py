@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from re import Match
@@ -5,6 +6,9 @@ from typing import re, Type
 
 import aiohttp
 from telegram._utils.enum import StringEnum  # noqa
+
+
+logger = logging.Logger(__name__)
 
 
 class ParserType(StringEnum):
@@ -47,6 +51,7 @@ class Parser(ABC):
             for parser in cls._parsers:
                 for reg_exp in parser.REG_EXPS:
                     for match in reg_exp.finditer(string):
+                        logger.info("Found match for %r: %s", (parser, match))
                         videos = await parser._parse(session, match)
                         result.extend(videos)
         return result

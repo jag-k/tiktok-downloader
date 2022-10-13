@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
 
 
-class Parser(BaseParser, type=ParserType.TIKTOK):
+class Parser(BaseParser):
     REG_EXPS = [
         re.compile(
             r"(?:https?://)?"
@@ -59,7 +59,11 @@ class Parser(BaseParser, type=ParserType.TIKTOK):
                 },
                 headers={"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"}
         ) as response:
+            print(response.url)
+            print('response', response)
             data: dict = await response.json()
+            print(data)
+        logger.debug("Got data: %s", data)
 
         includes = data.get("includes", {})
         medias = includes.get("media", [])

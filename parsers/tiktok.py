@@ -9,7 +9,7 @@ from parsers.base import Parser as BaseParser, ParserType, Video
 logger = logging.getLogger(__name__)
 
 
-class Parser(BaseParser, type=ParserType.TIKTOK):
+class Parser(BaseParser):
     REG_EXPS = [
         # https://vt.tiktok.com/ZSRq1jcrg/
         re.compile(

@@ -1,5 +1,6 @@
 import logging
 import os
+import uuid
 
 import aiohttp as aiohttp
 from telegram import Update, InlineQueryResultVideo
@@ -67,27 +68,26 @@ async def inline_query(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if not query:
         return
 
+    logger.info("Inline query: %s", query)
+
     async with aiohttp.ClientSession() as session:
         videos: list[Video] = await Parser.parse(session, query)
 
-    logger.info("Inline query: %s", query)
+    logger.info("Videos: %s", videos)
 
     results = [
         InlineQueryResultVideo(
-            id=video.url,
+            id=str(uuid.uuid4()),
             video_url=video.url,
             mime_type="video/mp4",
             thumb_url=video.thumbnail_url or video.url,
-            title=video.caption or f"{video.type} Video",
-            caption=(
-                        f"by @{video.author}"
-                        if video.author
-                        else ''
-                    ) + (
-                        f"from {video.type}"
-                        if video.caption
-                        else ''
-                    ),
+            title=video.caption,
+            caption=video.caption,
+            description=(
+                      f"by @{video.author}"
+                      if video.author
+                      else ''
+                  ) + f"from {video.type}"
         )
         for video in videos
     ]
