@@ -11,20 +11,19 @@ logger = logging.getLogger(__name__)
 
 TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
 
+# https://twitter.com/Yoda4ever/status/1580609309217628160
+TWITTER_RE = re.compile(
+    r"(?:https?://)?(?:www\.)?twitter\.com/(?P<user>\w+)/status/(?P<id>\d+)"
+)
+
 
 class Parser(BaseParser):
     REG_EXPS = [
+        TWITTER_RE,
+        # https://t.co/sOHvySZwUo
         re.compile(
-            r"(?:https?://)?"
-            r"(?:www\.)?"
-            r"twitter\.com/"
-            r"(?P<user>\w+)/status/(?P<id>\d+)"
-        ),
-
-        # # https://vt.tiktok.com/ZSRq1jcrg/
-        # re.compile(
-        #     r"(?:https?://)?(?:www.)?tiktok\.com/(?P<id>\w+)/?"
-        # )
+            r"(?:https?://)?t\.co/(?P<tco_id>\w+)"
+        )
     ]
 
     @classmethod
@@ -33,9 +32,16 @@ class Parser(BaseParser):
             session: aiohttp.ClientSession,
             match: Match
     ) -> list[Video]:
-        tweet_id = match.group('id')
-        if not tweet_id:
-            return []
+        try:
+            tweet_id = match.group('id')
+        except IndexError:
+            try:
+                tco_id = match.group('tco_id')
+            except IndexError:
+                return []
+            async with session.get(f"https://t.co/{tco_id}") as response:
+                new_match = TWITTER_RE.match(str(response.real_url))
+            return await cls._parse(session, new_match)
 
         logger.info(
             "Getting video link from: https://twitter.com/i/status/%s",
