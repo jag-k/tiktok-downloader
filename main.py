@@ -4,6 +4,7 @@ import re
 
 import aiohttp as aiohttp
 from telegram import Update
+from telegram.constants import MessageEntityType
 from telegram.ext import Application, CommandHandler, ContextTypes, \
     MessageHandler, filters
 from telegram.helpers import create_deep_linked_url
@@ -60,11 +61,11 @@ async def get_tiktok_url_video(
     return data.get("nwm_video_url", None)
 
 
-async def get_tweet_video(
+async def get_tweet_videos(
         session: aiohttp.client.ClientSession,
         tweet_id: str
 ) -> list[str]:
-    """Get TikTok video from url."""
+    """Get video from Tweet ID."""
 
     logger.info(
         "Getting video link from: https://twitter.com/i/status/%s", tweet_id
@@ -81,12 +82,12 @@ async def get_tweet_video(
     medias = data.get("includes", {}).get("media", [])
 
     return [
-        max(variant, key=lambda x: x.get("bitrate", 0)).get("url")
+        max(
+            media.get('variants', []), key=lambda x: x.get("bitrate", 0)
+        ).get("url")
         for media in medias
         if not print(media)
         if media.get('type') == 'video'
-        for variant in media.get('variants', [])
-        if variant.get('content_type') == 'video/mp4'
     ]
 
 
@@ -111,15 +112,25 @@ async def help_command(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
     tiktok_links: list[str] = []
-    tweets_ids: list[str] = [
-        link_match.group('id')
-        for link_match in TWITTER_RE.finditer(update.message.text)
-    ]
+    tweets_ids: list[str] = []
 
-    for link_match in TIKTOK_RE.finditer(update.message.text):
-        link = f"https://vm.tiktok.com/{link_match.group('id')}"
-        if link not in tiktok_links:
-            tiktok_links.append(link)
+    text = update.message.text
+    message_links = [
+        text[entity.offset:entity.offset + entity.length]
+        for entity in update.message.entities
+        if entity.type == MessageEntityType.URL
+    ]
+    for msg_link in message_links:
+        tt_link_match = TIKTOK_RE.match(msg_link)
+        tw_link_match = TWITTER_RE.match(msg_link)
+        if tt_link_match:
+            link = f"https://vm.tiktok.com/{tt_link_match.group('id')}"
+            if link not in tiktok_links:
+                tiktok_links.append(link)
+            continue
+
+        if tw_link_match:
+            tweets_ids.append(tw_link_match.group('id'))
 
     async with aiohttp.client.ClientSession() as session:
         video_links: list[str] = [
@@ -127,8 +138,9 @@ async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
             for link in tiktok_links
             if (video := await get_tiktok_url_video(session, link))
         ]
+
         for tweet_id in tweets_ids:
-            tweet_video_links = await get_tweet_video(session, tweet_id)
+            tweet_video_links = await get_tweet_videos(session, tweet_id)
             if tweet_video_links:
                 video_links.extend(tweet_video_links)
 
