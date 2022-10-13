@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+from typing import TypedDict
 
 import aiohttp as aiohttp
 from telegram import Update
@@ -45,26 +46,31 @@ TWITTER_RE = re.compile(
     r"(?:https?://)?(?:\w{,3}\.)?twitter\.com/(?P<user>\w+)/status/(?P<id>\d+)"
 )
 
-''
+Video = TypedDict("Video", {"url": str, "caption": str})
 
 
 async def get_tiktok_url_video(
         session: aiohttp.client.ClientSession,
         url: str
-) -> str | None:
+) -> Video | None:
     """Get TikTok video from url."""
     logger.info("Getting video link from: %s", url)
     async with session.get(
             "https://api.douyin.wtf/api", params={"url": url}
     ) as response:
         data = await response.json()
-    return data.get("nwm_video_url", None)
+    url = data.get("nwm_video_url", None)
+    if url:
+        return Video(
+            url=url,
+            caption=data.get("video_title", None)
+        )
 
 
 async def get_tweet_videos(
         session: aiohttp.client.ClientSession,
         tweet_id: str
-) -> list[str]:
+) -> list[Video]:
     """Get video from Tweet ID."""
 
     logger.info(
@@ -80,11 +86,15 @@ async def get_tweet_videos(
     ) as response:
         data = await response.json()
     medias = data.get("includes", {}).get("media", [])
+    caption = data.get("data", {}).get("text", None)
 
     return [
-        max(
-            media.get('variants', []), key=lambda x: x.get("bit_rate", 0)
-        ).get("url")
+        Video(
+            url=max(
+                media.get('variants', []), key=lambda x: x.get("bit_rate", 0)
+            ).get("url"),
+            caption=caption
+        )
         for media in medias
         if not print(media)
         if media.get('type') == 'video'
@@ -133,7 +143,7 @@ async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
             tweets_ids.append(tw_link_match.group('id'))
 
     async with aiohttp.client.ClientSession() as session:
-        video_links: list[str] = [
+        video_links: list[Video] = [
             video
             for link in tiktok_links
             if (video := await get_tiktok_url_video(session, link))
@@ -146,7 +156,10 @@ async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
 
     for video in video_links:
         logger.info("Sending video: %s", video)
-        await update.message.reply_video(video)
+        await update.message.reply_video(
+            video=video.get('url'),
+            caption=video.get('caption'),
+        )
 
 
 def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
