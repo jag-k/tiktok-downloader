@@ -3,7 +3,7 @@ import os
 import re
 
 import aiohttp as aiohttp
-from telegram import ForceReply, Update
+from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, \
     MessageHandler, filters
 from telegram.helpers import create_deep_linked_url
@@ -14,6 +14,10 @@ logging.basicConfig(
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
+
+# TWITTER_API_KEY = os.getenv("TWITTER_API_KEY")
+# TWITTER_API_KEY_SECRET = os.getenv("TWITTER_API_KEY_SECRET")
+TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
 
 PORT = int(os.environ.get('PORT', '8443'))
 
@@ -29,6 +33,19 @@ TIKTOK_RE = re.compile(
     r"(?:https?://)?(?:\w{,2}\.)?tiktok\.com/(?P<id>\w+)/?"
 )
 
+# https://vt.tiktok.com/ZSRq1jcrg/
+TIKTOK_VIDEO_RE = re.compile(
+    r"(?:https?://)?(?:www.)?tiktok\.com/(?P<id>\w+)/?"
+)
+
+# https://twitter.com/Yoda4ever/status/1580304802608726016?t=FZclIsr-YgDvIIZdbL9pqg&s=35
+# https://twitter.com/Yoda4ever/status/1580304802608726016
+TWITTER_RE = re.compile(
+    r"(?:https?://)?(?:\w{,3}\.)?twitter\.com/(?P<user>\w+)/status/(?P<id>\d+)"
+)
+
+''
+
 
 async def get_tiktok_url_video(
         session: aiohttp.client.ClientSession,
@@ -43,13 +60,41 @@ async def get_tiktok_url_video(
     return data.get("nwm_video_url", None)
 
 
+async def get_tweet_video(
+        session: aiohttp.client.ClientSession,
+        tweet_id: str
+) -> list[str]:
+    """Get TikTok video from url."""
+
+    logger.info(
+        "Getting video link from: https://twitter.com/i/status/%s", tweet_id
+    )
+    async with session.get(
+            f"https://api.twitter.com/2/tweets/{tweet_id}",
+            params={
+                "media.fields": ','.join(("type", "variants")),
+                "expansions": "attachments.media_keys",
+            },
+            headers={"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"}
+    ) as response:
+        data = await response.json()
+    medias = data.get("includes", {}).get("media", [])
+
+    return [
+        max(variant, key=lambda x: x.get("bitrate", 0)).get("url")
+        for media in medias
+        if media.get('type') == 'video'
+        for variant in media.get('variants', [])
+        if variant.get('content_type') == 'video/mp4'
+    ]
+
+
 # Define a few command handlers. These usually take the two arguments update
 # and context.
 async def start(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     await update.message.reply_html(
         f"I'm looking for you 👀",
-        reply_markup=ForceReply(selective=True),
     )
 
 
@@ -64,19 +109,27 @@ async def help_command(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
-    links: list[str] = []
+    tiktok_links: list[str] = []
+    tweets_ids: list[str] = [
+        link_match.group('id')
+        for link_match in TWITTER_RE.finditer(update.message.text)
+    ]
 
     for link_match in TIKTOK_RE.finditer(update.message.text):
         link = f"https://vm.tiktok.com/{link_match.group('id')}"
-        if link not in links:
-            links.append(link)
+        if link not in tiktok_links:
+            tiktok_links.append(link)
 
     async with aiohttp.client.ClientSession() as session:
         video_links: list[str] = [
             video
-            for link in links
+            for link in tiktok_links
             if (video := await get_tiktok_url_video(session, link))
         ]
+        for tweet_id in tweets_ids:
+            tweet_video_links = await get_tweet_video(session, tweet_id)
+            if tweet_video_links:
+                video_links.extend(tweet_video_links)
 
     for video in video_links:
         logger.info("Sending video: %s", video)
