@@ -83,7 +83,7 @@ async def get_tweet_videos(
 
     return [
         max(
-            media.get('variants', []), key=lambda x: x.get("bitrate", 0)
+            media.get('variants', []), key=lambda x: x.get("bit_rate", 0)
         ).get("url")
         for media in medias
         if not print(media)
