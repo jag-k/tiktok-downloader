@@ -13,12 +13,14 @@ class Parser(BaseParser):
     REG_EXPS = [
         # https://vt.tiktok.com/ZSRq1jcrg/
         re.compile(
-            r"(?:https?://)?(?:\w{,2}\.)?tiktok\.com/(?P<id>\w+)/?"
+            r"(?:https?://)?(?:vm\.)?tiktok\.com/(?P<id>\w+)/?"
         ),
-        # # https://vt.tiktok.com/ZSRq1jcrg/
-        # re.compile(
-        #     r"(?:https?://)?(?:www.)?tiktok\.com/(?P<id>\w+)/?"
-        # )
+
+        # https://www.tiktok.com/@thejoyegg/video/7136001098841591041
+        re.compile(
+            r"(?:https?://)?"
+            r"(?:www.)?tiktok\.com/@(?P<author>\w+)/video/(?P<video_id>\d+)/?"
+        )
     ]
 
     @classmethod
@@ -27,11 +29,14 @@ class Parser(BaseParser):
             session: aiohttp.ClientSession,
             match: Match
     ) -> list[Video]:
-        video_id = match.group('id')
-        if not video_id:
-            return []
+        try:
+            video_id = match.group('id')
+            url = f"https://vm.tiktok.com/{video_id}"
+        except IndexError:
+            author = match.group('author')
+            video_id = match.group('video_id')
+            url = f"https://www.tiktok.com/@{author}/video/{video_id}"
 
-        url = f"https://vm.tiktok.com/{video_id}"
         logger.info("Getting video link from: %s", url)
         async with session.get(
                 "https://api.douyin.wtf/api",
