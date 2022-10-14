@@ -16,6 +16,7 @@ class ParserType(StringEnum):
 
     TIKTOK = "TikTok"
     TWITTER = "Twitter"
+    YOUTUBE = "YouTube"
 
 
 @dataclass

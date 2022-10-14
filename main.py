@@ -74,7 +74,6 @@ async def inline_query(update: Update, _: ContextTypes.DEFAULT_TYPE):
         videos: list[Video] = await Parser.parse(session, query)
 
     logger.info("Videos: %s", videos)
-
     results = [
         InlineQueryResultVideo(
             id=str(uuid.uuid4()),
@@ -84,7 +83,7 @@ async def inline_query(update: Update, _: ContextTypes.DEFAULT_TYPE):
             title=video.caption,
             caption=video.caption,
             description=(
-                      f"by @{video.author}"
+                      f"by @{video.author} "
                       if video.author
                       else ''
                   ) + f"from {video.type}"
