@@ -4,9 +4,9 @@ from typing import Match
 
 import aiohttp
 import pytube as pytube
-from pytube.exceptions import VideoUnavailable, PytubeError
+from pytube.exceptions import PytubeError
 
-from parsers.base import Parser as BaseParser, ParserType, Video
+from parsers.base import Parser as BaseParser, ParserType, Video, Media
 
 logger = logging.getLogger(__name__)
 
@@ -28,22 +28,27 @@ class Parser(BaseParser):
             r"(?:https?://)?(?:www\.)?youtube\.com/shorts/(?P<id>\w+)"
         )
     ]
+    CUSTOM_EMOJI_ID = 5463206079913533096  # 📹
+
+    @classmethod
+    def _is_supported(cls) -> bool:
+        return True
 
     @classmethod
     async def _parse(
             cls,
             session: aiohttp.ClientSession,
             match: Match
-    ) -> list[Video]:
+    ) -> list[Media]:
         try:
             yt_id = match.group('id')
         except IndexError:
             return []
 
-        url = f"https://youtu.be/{yt_id}"
+        original_url = f"https://youtu.be/{yt_id}"
 
-        logger.info("Getting video link from: %s", url)
-        yt = pytube.YouTube(url)
+        logger.info("Getting video link from: %s", original_url)
+        yt = pytube.YouTube(original_url)
 
         try:
             # FIXME: This solution is extremely slow + it's synchronous
@@ -53,7 +58,13 @@ class Parser(BaseParser):
                 thumbnail_url=yt.thumbnail_url,
                 type=ParserType.YOUTUBE,
                 url=yt.streams.get_highest_resolution().url,
+                original_url=original_url,
             )
-        except PytubeError:
+        except PytubeError as err:
+            logger.error(
+                "Failed to get video %r with error: %s",
+                original_url,
+                err
+            )
             return []
         return [video]

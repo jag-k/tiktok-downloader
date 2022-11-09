@@ -5,7 +5,7 @@ from typing import Match
 
 import aiohttp
 
-from parsers.base import Parser as BaseParser, ParserType, Video
+from parsers.base import Parser as BaseParser, ParserType, Video, Media
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +25,18 @@ class Parser(BaseParser):
             r"(?:https?://)?t\.co/(?P<tco_id>\w+)"
         )
     ]
+    CUSTOM_EMOJI_ID = 5465453979896913711  # 💬
+
+    @classmethod
+    def _is_supported(cls) -> bool:
+        return bool(TWITTER_BEARER_TOKEN)
 
     @classmethod
     async def _parse(
             cls,
             session: aiohttp.ClientSession,
             match: Match
-    ) -> list[Video]:
+    ) -> list[Media]:
         try:
             tweet_id = match.group('id')
         except IndexError:
@@ -43,9 +48,11 @@ class Parser(BaseParser):
                 new_match = TWITTER_RE.match(str(response.real_url))
             return await cls._parse(session, new_match)
 
+        original_url = f"https://twitter.com/i/status/{tweet_id}"
+
         logger.info(
-            "Getting video link from: https://twitter.com/i/status/%s",
-            tweet_id
+            "Getting video link from: %s",
+            original_url
         )
 
         async with session.get(
@@ -87,6 +94,7 @@ class Parser(BaseParser):
                         thumbnail_url=thumbnail_url,
                         type=ParserType.TWITTER,
                         author=author,
+                        original_url=original_url,
                     )
                 )
         return result
