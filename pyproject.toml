@@ -11,6 +11,9 @@ python = "^3.10"
 python-telegram-bot = "20.0a4"
 aiohttp = "^3.8.3"
 pytube = "^12.1.0"
+setuptools = "^65.5.0"
+python-dotenv = "^0.21.0"
+orjson = "^3.8.1"
 
 
 [build-system]
