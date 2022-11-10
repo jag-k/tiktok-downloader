@@ -67,8 +67,8 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script_stop: true
-          envs: CONTAINER_NAME,FULL_IMAGE_NAME
-          script: | 
+          envs: CONTAINER_NAME,CONTAINER_PATH,FULL_IMAGE_NAME
+          script: |
             whoami
             mkdir -p $CONTAINER_PATH
             cd $CONTAINER_PATH
