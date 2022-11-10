@@ -15,8 +15,8 @@ RUN apk add --update --no-cache --virtual .tmp-build-deps \
 RUN pip install "poetry==$POETRY_VERSION"
 
 # Copy only requirements to cache them in docker layer
-WORKDIR /code
-COPY poetry.lock pyproject.toml /code/
+WORKDIR /
+COPY poetry.lock pyproject.toml /
 
 # Project initialization:
 RUN poetry config virtualenvs.create false \
@@ -24,7 +24,7 @@ RUN poetry config virtualenvs.create false \
 RUN pip install setuptools
 
 # Creating folders, and files for a project:
-COPY . /code
+COPY . /
 
 CMD python main.py
 

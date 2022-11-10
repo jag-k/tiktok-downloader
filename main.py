@@ -16,7 +16,6 @@ BASE_PATH = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_PATH / 'config'
 DATA_PATH = BASE_PATH / 'config'
 
-
 ENV_PATHS = [
     BASE_PATH / '.env',
     BASE_PATH / '.env.local',
@@ -25,12 +24,14 @@ ENV_PATHS = [
 ]
 
 for env_path in ENV_PATHS:
-    if os.path.exists(env_path):
+    if env_path and env_path.exists() and env_path.is_file():
         from dotenv import load_dotenv
 
         load_dotenv(env_path)
         print(f"Loaded env from {env_path}")
         break
+else:
+    print("No .env file found")
 
 from parsers import Parser, Video, MediaGroup, Media
 
