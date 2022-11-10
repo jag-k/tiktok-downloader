@@ -31,19 +31,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cache-to: type=inline
 
@@ -61,17 +56,20 @@ jobs:
           CONTAINER_NAME: ${{ env.IMAGE_NAME }}
           CONTAINER_PATH: /opt/docker_containers/${{ env.IMAGE_NAME }}
           FULL_IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          CR_PAT: ${{ secrets.CR_PAT }}
+          CR_USER: ${{ secrets.CR_USER }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script_stop: true
-          envs: CONTAINER_NAME,CONTAINER_PATH,FULL_IMAGE_NAME
+          envs: CONTAINER_NAME,CONTAINER_PATH,FULL_IMAGE_NAME,CR_PAT,CR_USER
           script: |
             whoami
             mkdir -p $CONTAINER_PATH
             cd $CONTAINER_PATH
+            echo $CR_PAT | docker login ghcr.io -u $CR_USER --password-stdin
             docker pull $FULL_IMAGE_NAME
             docker stop $CONTAINER_NAME || echo "Nothing to stop"
             docker rm $CONTAINER_NAME || echo "Nothing to remove"
