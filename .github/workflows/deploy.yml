@@ -58,6 +58,7 @@ jobs:
         env:
           CONTAINER_NAME: ${{ github.event.repository.name }}
           CONTAINER_PATH: /opt/docker_containers/${{ github.event.repository.name }}
+          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           FULL_IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           CR_PAT: ${{ secrets.CR_PAT }}
           CR_USER: ${{ secrets.CR_USER }}
@@ -67,7 +68,7 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script_stop: true
-          envs: CONTAINER_NAME,CONTAINER_PATH,FULL_IMAGE_NAME,CR_PAT,CR_USER
+          envs: CONTAINER_NAME,CONTAINER_PATH,IMAGE_NAME,FULL_IMAGE_NAME,CR_PAT,CR_USER
           script: |
             whoami
             mkdir -p $CONTAINER_PATH
@@ -76,7 +77,9 @@ jobs:
             echo $CR_PAT | docker login ghcr.io -u $CR_USER --password-stdin
             docker pull $FULL_IMAGE_NAME
             docker stop $CONTAINER_NAME || echo "Nothing to stop"
-            docker rm $CONTAINER_NAME || echo "Nothing to remove"
+            docker rm $CONTAINER_NAME || echo "Nothing to remove from containers"
+            docker rmi $(docker images --filter=reference="$IMAGE_NAME:*" -q) || \
+              echo "Nothing to remove from images"
             docker run \
               -d \
               --name $CONTAINER_NAME \
