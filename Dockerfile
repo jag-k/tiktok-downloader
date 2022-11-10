@@ -6,7 +6,9 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION=1.1.14
+  POETRY_VERSION=1.1.14 \
+  RUNNING_IN_DOCKER=true \
+  BASE_PATH=/
 
 # System deps:
 RUN apk add --update --no-cache --virtual .tmp-build-deps \

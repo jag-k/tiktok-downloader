@@ -12,7 +12,12 @@ from telegram.ext import Application, CommandHandler, ContextTypes, \
     MessageHandler, InlineQueryHandler, filters, Defaults, PicklePersistence
 from telegram.helpers import create_deep_linked_url
 
-BASE_PATH = Path(__file__).resolve().parent
+BASE_PATH = (
+    Path(__file__).resolve().parent
+    if os.getenv('BASE_PATH') is None
+    else Path(os.getenv('BASE_PATH'))
+)
+
 CONFIG_PATH = BASE_PATH / 'config'
 DATA_PATH = BASE_PATH / 'config'
 
