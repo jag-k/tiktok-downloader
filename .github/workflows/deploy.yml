@@ -72,7 +72,7 @@ jobs:
             whoami
             mkdir -p $CONTAINER_PATH
             cd $CONTAINER_PATH
-            mkdir -p data logs
+            mkdir -p data config
             echo $CR_PAT | docker login ghcr.io -u $CR_USER --password-stdin
             docker pull $FULL_IMAGE_NAME
             docker stop $CONTAINER_NAME || echo "Nothing to stop"
@@ -80,8 +80,8 @@ jobs:
             docker run \
               -d \
               --name $CONTAINER_NAME \
-              $FULL_IMAGE_NAME \
               --restart=unless-stopped \
               --volume $CONTAINER_PATH/config:/config \
-              --volume $CONTAINER_PATH/data:/data
+              --volume $CONTAINER_PATH/data:/data \
+              $FULL_IMAGE_NAME
             docker ps -a
