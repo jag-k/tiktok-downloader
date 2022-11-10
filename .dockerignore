@@ -1,6 +1,7 @@
 .idea/
 .vscode/
 .github/
+.git/
 data/
 config/
 .env.local
