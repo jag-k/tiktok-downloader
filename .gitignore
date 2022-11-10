@@ -1,2 +1,6 @@
 .idea/
+.vscode/
+data/
+config/
 .env.local
+.env

@@ -8,15 +8,24 @@ from telegram import Update, InlineQueryResultVideo, InlineQueryResult
 from telegram.constants import MessageEntityType, ParseMode, ChatType
 from telegram.error import BadRequest
 from telegram.ext import Application, CommandHandler, ContextTypes, \
-    MessageHandler, InlineQueryHandler, filters, Defaults
+    MessageHandler, InlineQueryHandler, filters, Defaults, PicklePersistence
 from telegram.helpers import create_deep_linked_url
 
+ENV_PATHS = [
+    '.env',
+    '.env.local',
+    'config/.env',
+    'config/.env.local',
+]
+
+for env_path in ENV_PATHS:
+    if os.path.exists(env_path):
+        from dotenv import load_dotenv
+
+        load_dotenv(env_path)
+        break
+
 from parsers import Parser, Video, MediaGroup, Media
-
-if os.path.exists('.env.local'):
-    from dotenv import load_dotenv
-
-    load_dotenv('.env.local', override=True)
 
 # Enable logging
 logging.basicConfig(
@@ -175,6 +184,7 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main() -> None:
     """Start the bot."""
     logger.info("Token: %r", TOKEN)
+    persistence = PicklePersistence(filepath="data/persistence.pickle")
     defaults = Defaults(
         parse_mode=ParseMode.HTML,
         tzinfo=pytz.timezone(os.getenv('TZ', 'Europe/Moscow')),
@@ -182,6 +192,7 @@ def main() -> None:
     application = (
         Application
         .builder()
+        .persistence(persistence)
         .defaults(defaults=defaults)
         .token(TOKEN)
         .build()
