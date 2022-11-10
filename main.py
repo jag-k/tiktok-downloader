@@ -1,6 +1,7 @@
 import logging
 import os
 import uuid
+from pathlib import Path
 
 import aiohttp as aiohttp
 import pytz
@@ -11,11 +12,16 @@ from telegram.ext import Application, CommandHandler, ContextTypes, \
     MessageHandler, InlineQueryHandler, filters, Defaults, PicklePersistence
 from telegram.helpers import create_deep_linked_url
 
+BASE_PATH = Path(__file__).resolve().parent
+CONFIG_PATH = BASE_PATH / 'config'
+DATA_PATH = BASE_PATH / 'config'
+
+
 ENV_PATHS = [
-    '.env',
-    '.env.local',
-    'config/.env',
-    'config/.env.local',
+    BASE_PATH / '.env',
+    BASE_PATH / '.env.local',
+    CONFIG_PATH / '.env',
+    CONFIG_PATH / '.env.local',
 ]
 
 for env_path in ENV_PATHS:
@@ -23,6 +29,7 @@ for env_path in ENV_PATHS:
         from dotenv import load_dotenv
 
         load_dotenv(env_path)
+        print(f"Loaded env from {env_path}")
         break
 
 from parsers import Parser, Video, MediaGroup, Media
@@ -184,7 +191,7 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main() -> None:
     """Start the bot."""
     logger.info("Token: %r", TOKEN)
-    persistence = PicklePersistence(filepath="data/persistence.pickle")
+    persistence = PicklePersistence(filepath=DATA_PATH / "persistence.pickle")
     defaults = Defaults(
         parse_mode=ParseMode.HTML,
         tzinfo=pytz.timezone(os.getenv('TZ', 'Europe/Moscow')),

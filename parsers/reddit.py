@@ -15,10 +15,10 @@ USER_AGENT = os.getenv("REDDIT_USER_AGENT", "video downloader (by u/Jag_k)")
 REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
 REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
 
-AUTH = aiohttp.BasicAuth(
+AUTH: aiohttp.BasicAuth | None = aiohttp.BasicAuth(
     REDDIT_CLIENT_ID,
     REDDIT_CLIENT_SECRET,
-)
+) if REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET else None
 
 
 def id_from_url(url: str) -> str:
