@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+.github/
+data/
+config/
+.env.local
+Procfile
+requirements.txt
+README.md
+.DS_Store

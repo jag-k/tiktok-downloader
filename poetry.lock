@@ -193,14 +193,6 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
-name = "orjson"
-version = "3.8.1"
-description = "Fast, correct Python JSON library supporting dataclasses, datetimes, and numpy"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-
-[[package]]
 name = "python-dotenv"
 version = "0.21.0"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -348,7 +340,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "c6d2e491a8c9a04baab9a382ff28a3f1e130e7e07aa601381454462b3e32d2d1"
+content-hash = "97d926c32d28f23af3585bcdc858941a1ed0046ce85ea78fda9e5236aedb9e6b"
 
 [metadata.files]
 aiohttp = []
@@ -387,7 +379,6 @@ idna = [
     {file = "idna-3.4.tar.gz", hash = "sha256:814f528e8dead7d329833b91c5faa87d60bf71824cd12a7530b5526063d02cb4"},
 ]
 multidict = []
-orjson = []
 python-dotenv = []
 python-telegram-bot = [
     {file = "python-telegram-bot-20.0a4.tar.gz", hash = "sha256:3ec10b5169d40697aba77f245538ecdf989e9ae429fcaddc69a202579b4a6dcb"},
