@@ -79,8 +79,6 @@ class Parser(BaseParser):
 
         media_type: Literal['video', 'image', None] = data.get('type', None)
 
-        print(data)
-
         if media_type == 'video':
             return cls._process_video(data, original_url)
         elif media_type == 'image':
@@ -154,7 +152,6 @@ class Parser(BaseParser):
                         "aid": 1180,
                     },
             ) as resp:
-                print(resp.real_url)
                 raw_data: dict = await resp.json()
         if not raw_data.get('aweme_list', []):
             logger.info('No aweme_list in response')
