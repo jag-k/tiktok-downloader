@@ -58,7 +58,7 @@ class Media:
 
     @property
     def language_emoji(self) -> str:
-        return lang_emoji(self.language.upper())
+        return lang_emoji(self.language.upper()) if self.language else ''
 
     @language_emoji.setter
     def language_emoji(self, value: str):

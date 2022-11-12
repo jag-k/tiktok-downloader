@@ -75,7 +75,6 @@ jobs:
             cd $CONTAINER_PATH
             mkdir -p data config
             echo $CR_PAT | docker login ghcr.io -u $CR_USER --password-stdin
-            docker pull $FULL_IMAGE_NAME
             docker stop $CONTAINER_NAME || echo "Nothing to stop"
             docker rm $CONTAINER_NAME || echo "Nothing to remove from containers"
             docker rmi $(docker images --filter=reference="$IMAGE_NAME:*" -q) || \

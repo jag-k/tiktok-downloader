@@ -1,5 +1,6 @@
 import logging
 import os
+import traceback
 import uuid
 from pathlib import Path
 
@@ -192,6 +193,7 @@ async def inline_query(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
+    traceback.print_tb(context.error.__traceback__)
 
 
 def main() -> None:

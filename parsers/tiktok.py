@@ -20,8 +20,10 @@ TT_USER_AGENT = (
 class Parser(BaseParser):
     REG_EXPS = [
         # https://vt.tiktok.com/ZSRq1jcrg/
+        # https://vm.tiktok.com/ZSRq1jcrg/
         re.compile(
-            r"(?:https?://)?(?:vm\.)?tiktok\.com/(?P<id>\w+)/?"
+            r"(?:https?://)?"
+            r"(?:(?P<domain>[a-z]{2})\.)?tiktok\.com/(?P<id>\w+)/?"
         ),
 
         # https://www.tiktok.com/@thejoyegg/video/7136001098841591041
@@ -42,20 +44,28 @@ class Parser(BaseParser):
             session: aiohttp.ClientSession,
             match: Match
     ) -> list[Media]:
+        m = match.groupdict({})
         try:
-            url_id = match.group('id')
-            original_url = f"https://vm.tiktok.com/{url_id}"
+            url_id = m.get('id')
+            if not url_id:
+                raise IndexError
+            domain = m.get('domain', 'vm')
+            original_url = f"https://{domain}.tiktok.com/{url_id}"
             logger.info("Get video id from: %s", original_url)
             video_id: int = await cls._get_video_id(original_url)
 
         except IndexError:
-            nickname = match.group('author')
-            video_id: int = int(match.group('video_id'))
+            nickname = m.get('author')
+            video_id: int = int(m.get('video_id'))
             original_url = (
                 f"https://www.tiktok.com/@{nickname}/video/{video_id}"
             )
 
-        logger.info("Getting video link from: %s", original_url)
+        logger.info(
+            "Getting video link from: %s (video_id=%d)",
+            original_url,
+            video_id,
+        )
 
         try:
             data: dict = await cls._get_video_data(video_id)
@@ -69,6 +79,8 @@ class Parser(BaseParser):
 
         media_type: Literal['video', 'image', None] = data.get('type', None)
 
+        print(data)
+
         if media_type == 'video':
             return cls._process_video(data, original_url)
         elif media_type == 'image':
@@ -80,6 +92,7 @@ class Parser(BaseParser):
         url = data.get('video_data', {}).get('nwm_video_url_HQ')
 
         if not url:
+            logger.info('No url in response')
             return []
 
         caption: str | None = data.get('desc', None)
@@ -109,7 +122,7 @@ class Parser(BaseParser):
         return []
 
     @classmethod
-    async def _get_video_id(cls, url: str) -> int:
+    async def _get_video_id(cls, url: str) -> int | None:
         async with ClientSession() as session:
             async with session.get(url, allow_redirects=False) as resp:
                 if resp.status == 301:
@@ -118,6 +131,12 @@ class Parser(BaseParser):
                         .split('?', 1)[0]
                         .rsplit('/', 1)[-1]
                     )
+            async with session.get(url) as resp:
+                return int(
+                    resp.url
+                    .split('?', 1)[0]
+                    .rsplit('/', 1)[-1]
+                )
 
     @staticmethod
     async def _get_video_data(video_id: int) -> dict:
@@ -135,8 +154,10 @@ class Parser(BaseParser):
                         "aid": 1180,
                     },
             ) as resp:
+                print(resp.real_url)
                 raw_data: dict = await resp.json()
         if not raw_data.get('aweme_list', []):
+            logger.info('No aweme_list in response')
             return {}
         data = raw_data['aweme_list'][0]
         url_type_code = data['aweme_type']

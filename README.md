@@ -4,10 +4,17 @@
 
 Download video in Telegram
 
-# Support
+# Support services
 
 - [x] TikTok
-- [x] Youtube
+  - [x] Video
+  - [ ] Music from video
+  - [ ] Images
+- [x] YouTube  (only "short" videos, Telegram doesn't support big files from bots)
 - [x] Reddit
+  - [x] Video without audio
+  - [ ] Video with audio
 - [x] Twitter
+  - [x] Video
+  - [ ] Images
 - [ ] Instagram

@@ -45,7 +45,7 @@ class Parser(BaseParser):
         except IndexError:
             return []
 
-        original_url = f"https://youtu.be/{yt_id}"
+        original_url = f"https://youtube.com/watch?v={yt_id}"
 
         logger.info("Getting video link from: %s", original_url)
         yt = pytube.YouTube(original_url)
