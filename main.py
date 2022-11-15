@@ -52,17 +52,27 @@ async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
                 else ""
             )
             logger.info("Sending video%s: %s", _from_location, media)
+            extra_caption = (
+                f'\n\n\n<i>Original video is larger than <b>20 MB</b>,'
+                f' and bot can\'t send it.</i> '
+                f'<a href="{media.max_quality_url}">'
+                f'This is original link</a>'
+                if media.max_quality_url and media.max_quality_url != media.url
+                else ''
+            )
             try:
                 res = await update.message.reply_video(
                     video=media.url,
-                    caption=media.caption,
+                    caption=media.caption + extra_caption,
                     supports_streaming=True,
 
                 )
                 if media.update:
                     await media.update(update, res, ctx)
-            except BadRequest:
+            except BadRequest as e:
                 logger.error("Error sending video: %s", media.url)
+                print(e)
+                traceback.print_tb(e.__traceback__)
                 if update.effective_chat.type == ChatType.PRIVATE:
                     logger.info("Sending video as link: %s", media)
                     await update.message.reply_text(
@@ -132,12 +142,13 @@ async def inline_query(update: Update, ctx: CallbackContext):
 
     logger.info("Medias: %s", medias)
     if not medias:
-        logger.info(await update.inline_query.answer(
-            inline_query_video_from_media(history[::-1]),
-            is_personal=True,
-            switch_pm_text='Recently added',
-            switch_pm_parameter='start',
-        ))
+        logger.info(
+            await update.inline_query.answer(
+                inline_query_video_from_media(history[::-1]),
+                is_personal=True,
+                switch_pm_text='Recently added',
+                switch_pm_parameter='start',
+            ))
         return
 
     for media in medias:

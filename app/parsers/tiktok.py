@@ -5,6 +5,17 @@ from typing import Match, Literal
 import aiohttp
 from aiohttp import ClientSession
 
+from app import constants
+from app.parsers.base import Parser as BaseParser, ParserType, Video, Media, \
+    MediaGroup
+import logging
+import re
+from typing import Match, Literal
+
+import aiohttp
+from aiohttp import ClientSession
+
+from app import constants
 from app.parsers.base import Parser as BaseParser, ParserType, Video, Media, \
     MediaGroup
 
@@ -79,7 +90,7 @@ class Parser(BaseParser):
             return []
 
         media_type: Literal['video', 'image', None] = data.get('type', None)
-
+        logger.info('Media type: %s', media_type)
         if media_type == 'video':
             return cls._process_video(data, original_url)
         elif media_type == 'image':
@@ -88,7 +99,19 @@ class Parser(BaseParser):
 
     @staticmethod
     def _process_video(data: dict, original_url: str) -> list[Video]:
-        url = data.get('video_data', {}).get('nwm_video_url_HQ')
+        max_quality_url = data.get('video_data', {}).get('nwm_video_url_HQ')
+        url = max(
+            filter(
+                lambda x: x.get('data_size', 0) <= constants.TG_FILE_LIMIT,
+                map(
+                    lambda x: x.get('play_addr', {}),
+                    data
+                    .get('video', {})
+                    .get('bit_rate', [])
+                ),
+            ),
+            key=lambda x: x.get('data_size', 0),
+        ).get('url_list', [None])[0]
 
         if not url:
             logger.info('No url in response')
@@ -112,6 +135,7 @@ class Parser(BaseParser):
             author=author,
             original_url=original_url,
             language=language,
+            max_quality_url=max_quality_url,
         )
         if video:
             return [video]

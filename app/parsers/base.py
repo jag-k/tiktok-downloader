@@ -78,6 +78,7 @@ class Media:
 @dataclass(kw_only=True)
 class Video(Media):
     url: str = ''
+    max_quality_url: str | None = None
     audio_url: str | None = None
     mime_type: str = "video/mp4"
 

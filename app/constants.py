@@ -36,6 +36,7 @@ LOCALE_PATH = PROJECT_PATH / 'locale'
 DEFAULT_LOCALE = os.getenv('DEFAULT_LOCALE', 'en')
 DOMAIN = os.getenv('LOCALE_DOMAIN', 'messages')
 
+# Other
 CONTACTS_PATH = Path(os.getenv('CONTACTS_PATH', CONFIG_PATH / 'contacts.json'))
 _CONTACT = TypedDict('_CONTACT', {
     'type': str,
@@ -48,3 +49,5 @@ CONTACTS: list[_CONTACT] = []
 if CONTACTS_PATH.exists():
     with open(CONTACTS_PATH, 'r') as f:
         CONTACTS = json.load(f)
+
+TG_FILE_LIMIT = 20 * 1024 * 1024  # 20 MB
