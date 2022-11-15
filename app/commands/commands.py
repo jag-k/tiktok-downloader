@@ -42,12 +42,13 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
             if url:
                 return f'<a href="{url}">{text}</a>'
             return text
-
-        contacts = "\n\nContacts:\n" + '\n'.join(
+        contacts_list = '\n'.join(
             f'{c["type"]}: {a(c["text"], c.get("url"))}'
             for c in constants.CONTACTS
-            if all(map(c.get, ('type', 'name')))
+            if all(map(c.get, ('type', 'text')))
         )
+        contacts = f"\n\nContacts:\n{contacts_list}" if contacts_list else ''
+
     await update.message.reply_text(
         f"{start_text()}\n\n"
         f"Link to add in groups: {link}\n\n"
