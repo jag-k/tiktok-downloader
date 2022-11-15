@@ -39,8 +39,8 @@ DOMAIN = os.getenv('LOCALE_DOMAIN', 'messages')
 CONTACTS_PATH = Path(os.getenv('CONTACTS_PATH', CONFIG_PATH / 'contacts.json'))
 _CONTACT = TypedDict('_CONTACT', {
     'type': str,
-    'link': str,
-    'name': str,
+    'text': str,
+    'url': str,
 })
 
 CONTACTS: list[_CONTACT] = []

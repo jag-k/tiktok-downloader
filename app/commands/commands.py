@@ -38,10 +38,15 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
     )
     contacts = ''
     if constants.CONTACTS:
+        def a(text: str, url: str = None) -> str:
+            if url:
+                return f'<a href="{url}">{text}</a>'
+            return text
+
         contacts = "\n\nContacts:\n" + '\n'.join(
-            f'{c["type"]}: <a href="{c["link"]}">{c["name"]}</a>'
+            f'{c["type"]}: {a(c["text"], c.get("url"))}'
             for c in constants.CONTACTS
-            if all(map(c.get, ('type', 'link', 'name')))
+            if all(map(c.get, ('type', 'name')))
         )
     await update.message.reply_text(
         f"{start_text()}\n\n"
@@ -56,6 +61,7 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
         f"add link to video after mention bot.\n"
         f"{contacts}"
     )
+    await commands.send_commands(update, ctx)
 
 
 @commands.add()
