@@ -38,7 +38,7 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
     )
     contacts = ''
     if constants.CONTACTS:
-        contacts = "\n\nContacts:" + '\n'.join(
+        contacts = "\n\nContacts:\n" + '\n'.join(
             f'{c["type"]}: <a href="{c["link"]}">{c["name"]}</a>'
             for c in constants.CONTACTS
             if all(map(c.get, ('type', 'link', 'name')))
