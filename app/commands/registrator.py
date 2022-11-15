@@ -50,10 +50,11 @@ class CommandRegistrator:
                         handler.callback.__doc__ or ''
                 ).strip().split('\n')[0].strip()
             }
+        old_callback = handler.callback
 
-        @functools.wraps(handler.callback)
+        @functools.wraps(old_callback)
         async def wrap(update: Update, context: CallbackContext):
-            res = await handler.callback(update, context)
+            res = await old_callback(update, context)
             await self.send_commands(update, context)
             return res
 

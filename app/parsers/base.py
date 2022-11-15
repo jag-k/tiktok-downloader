@@ -3,15 +3,15 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from re import Match
-from typing import re, Type, Awaitable, Callable
 from string import ascii_uppercase
+from typing import re, Type, Awaitable, Callable
 
 import aiohttp
 import telegram
 from telegram._utils.enum import StringEnum  # noqa
 from telegram.ext import ContextTypes
 
-logger = logging.Logger(__name__)
+logger = logging.getLogger(__name__)
 
 FLAG_OFFSET = ord("🇦") - ord("A")
 
@@ -143,9 +143,9 @@ class Parser(ABC):
             for parser in cls._parsers:
                 for reg_exp in parser.REG_EXPS:
                     for match in reg_exp.finditer(string):
-                        logger.info("Found match for %r: %s", (parser, match))
-                        videos = await parser._parse(session, match)
-                        result.extend(videos)
+                        logger.info("Found match for %r: %s", parser, match)
+                        medias = await parser._parse(session, match)
+                        result.extend(medias)
         return result
 
     def __init_subclass__(cls, **kwargs):

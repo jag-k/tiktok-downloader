@@ -1,16 +1,17 @@
 from telegram import Update
 from telegram.helpers import create_deep_linked_url
 
-from app import constants, settings
+from app import constants
 from app.commands.registrator import CommandRegistrator
 from app.context import CallbackContext
 from app.parsers.base import Parser
+from app.utils import a, b
 
 commands = CommandRegistrator()
 
 
 def start_text() -> str:
-    services: list[str] = [i.TYPE for i in Parser.parsers() if i.TYPE]
+    services: list[str] = [b(i.TYPE) for i in Parser.parsers() if i.TYPE]
     services_str = " or ".join((", ".join(services[:-1]), services[-1]))
     return (
         f"Send me a link to a {services_str} video and "
@@ -37,10 +38,6 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
     )
     contacts = ''
     if constants.CONTACTS:
-        def a(text: str, url: str = None) -> str:
-            if url:
-                return f'<a href="{url}">{text}</a>'
-            return text
         contacts_list = '\n'.join(
             f'{c["type"]}: {a(c["text"], c.get("url"))}'
             for c in constants.CONTACTS
@@ -68,6 +65,5 @@ async def clear_history(update: Update, ctx: CallbackContext) -> None:
     """Clear your history from inline queries."""
     ctx.history = []
     await update.message.reply_text("History cleared.")
-
 
 # commands.add_handler(settings.command_handler(), "Bot settings")
