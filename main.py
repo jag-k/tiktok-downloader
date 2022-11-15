@@ -2,44 +2,19 @@ import logging
 import os
 import traceback
 import uuid
-from pathlib import Path
 
 import aiohttp as aiohttp
 import pytz
 from telegram import Update, InlineQueryResultVideo, InlineQueryResult
 from telegram.constants import MessageEntityType, ParseMode, ChatType
 from telegram.error import BadRequest
-from telegram.ext import Application, CommandHandler, ContextTypes, \
+from telegram.ext import Application, ContextTypes, \
     MessageHandler, InlineQueryHandler, filters, Defaults, PicklePersistence
-from telegram.helpers import create_deep_linked_url
 
-BASE_PATH = (
-    Path(__file__).resolve().parent
-    if os.getenv('BASE_PATH') is None
-    else Path(os.getenv('BASE_PATH'))
-)
-
-CONFIG_PATH = BASE_PATH / 'config'
-DATA_PATH = BASE_PATH / 'config'
-
-ENV_PATHS = [
-    BASE_PATH / '.env',
-    BASE_PATH / '.env.local',
-    CONFIG_PATH / '.env',
-    CONFIG_PATH / '.env.local',
-]
-
-for env_path in ENV_PATHS:
-    if env_path and env_path.exists() and env_path.is_file():
-        from dotenv import load_dotenv
-
-        load_dotenv(env_path)
-        print(f"Loaded env from {env_path}")
-        break
-else:
-    print("No .env file found")
-
-from parsers import Parser, Video, MediaGroup, Media
+from app import commands, settings
+from app.constants import DATA_PATH
+from app.context import CallbackContext
+from app.parsers import Parser, Video, MediaGroup, Media
 
 # Enable logging
 logging.basicConfig(
@@ -57,24 +32,8 @@ APP_NAME = os.getenv(
 )
 
 
-async def start(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send a message when the command /start is issued."""
-    await update.message.reply_html(
-        f"I'm looking for you 👀",
-    )
-
-
-async def help_command(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send a message when the command /help is issued."""
-    link = create_deep_linked_url(ctx.bot.username, 'start', group=True)
-    await update.message.reply_text(
-        f"Just simple download a TikTok and Tweeter video.\n\n"
-        f"Link to use in groups: {link}"
-    )
-
-
-async def echo(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the user message."""
+async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
+    """Parse link from the user message."""
     text = getattr(update.message, "text", "")
     message_links = [
         text[entity.offset:entity.offset + entity.length]
@@ -151,10 +110,10 @@ def inline_query_video_from_media(
     ]
 
 
-async def inline_query(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+async def inline_query(update: Update, ctx: CallbackContext):
     """Handle the inline query."""
     query = update.inline_query.query
-    history = ctx.user_data.get('history', [])
+    history: list[Media] = ctx.history
     logger.info('history: %s', history)
 
     if not query:
@@ -210,17 +169,18 @@ def main() -> None:
         .persistence(persistence)
         .defaults(defaults=defaults)
         .token(TOKEN)
+        .context_types(ContextTypes(context=CallbackContext))
         .build()
     )
 
     # on different commands - answer in Telegram
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(InlineQueryHandler(inline_query))
+    commands.connect_commands(application)
 
     # on non command i.e. message - echo the message on Telegram
+    application.add_handler(InlineQueryHandler(inline_query))
+    application.add_handler(settings.callback_handler())
     application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, echo)
+        MessageHandler(filters.TEXT & ~filters.COMMAND, link_parser)
     )
 
     # Run the bot until the user presses Ctrl-C

@@ -5,7 +5,7 @@ from typing import Match
 
 import aiohttp
 
-from parsers.base import Parser as BaseParser, ParserType, Video, Media
+from app.parsers.base import Parser as BaseParser, ParserType, Video, Media
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +18,7 @@ TWITTER_RE = re.compile(
 
 
 class Parser(BaseParser):
+    TYPE = ParserType.TWITTER
     REG_EXPS = [
         TWITTER_RE,
         # https://t.co/sOHvySZwUo

@@ -6,12 +6,13 @@ import aiohttp
 import pytube as pytube
 from pytube.exceptions import PytubeError
 
-from parsers.base import Parser as BaseParser, ParserType, Video, Media
+from app.parsers.base import Parser as BaseParser, ParserType, Video, Media
 
 logger = logging.getLogger(__name__)
 
 
 class Parser(BaseParser):
+    TYPE = ParserType.YOUTUBE
     REG_EXPS = [
         # https://www.youtube.com/watch?v=TCrP1SE2DkY
         # https://youtu.be/TCrP1SE2DkY

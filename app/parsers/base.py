@@ -71,10 +71,14 @@ class Media:
         else:
             self.language = None
 
+    def __hash__(self):
+        return hash(self.original_url)
+
 
 @dataclass(kw_only=True)
 class Video(Media):
     url: str = ''
+    audio_url: str | None = None
     mime_type: str = "video/mp4"
 
     def __bool__(self):
@@ -92,12 +96,19 @@ class MediaGroup(Media):
 
 
 @dataclass(kw_only=True)
+class Images(Media):
+    images: list[str] = field(default_factory=list)
+    audio_url: str | None = None
+
+
+@dataclass(kw_only=True)
 class Audio(Media):
     url: str = ''
     mime_type: str = "video/mp4"
 
 
 class Parser(ABC):
+    TYPE: ParserType | None = None
     REG_EXPS: list[re] = []
     _parsers: list[Type['Parser']] = []
     CUSTOM_EMOJI_ID: int = 0
@@ -106,6 +117,10 @@ class Parser(ABC):
     @abstractmethod
     def _is_supported(cls) -> bool:
         raise NotImplementedError
+
+    @classmethod
+    def parsers(cls) -> list[Type['Parser']]:
+        return Parser._parsers
 
     @classmethod
     @abstractmethod

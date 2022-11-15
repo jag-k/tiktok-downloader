@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import aiohttp
 from aiohttp import InvalidURL
 
-from parsers.base import Parser as BaseParser, ParserType, Video, Media
+from app.parsers.base import Parser as BaseParser, ParserType, Video, Media
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,7 @@ async def comment(session: aiohttp.ClientSession, comment_id: str) -> dict:
 
 
 class Parser(BaseParser):
+    TYPE = ParserType.REDDIT
     REG_EXPS = [
         # redd.it/2gmzqe
         re.compile(

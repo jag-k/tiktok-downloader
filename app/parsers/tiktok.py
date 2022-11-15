@@ -5,7 +5,7 @@ from typing import Match, Literal
 import aiohttp
 from aiohttp import ClientSession
 
-from parsers.base import Parser as BaseParser, ParserType, Video, Media, \
+from app.parsers.base import Parser as BaseParser, ParserType, Video, Media, \
     MediaGroup
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,7 @@ TT_USER_AGENT = (
 
 
 class Parser(BaseParser):
+    TYPE = ParserType.TIKTOK
     REG_EXPS = [
         # https://vt.tiktok.com/ZSRq1jcrg/
         # https://vm.tiktok.com/ZSRq1jcrg/
@@ -70,7 +71,7 @@ class Parser(BaseParser):
         try:
             data: dict = await cls._get_video_data(video_id)
 
-        except BaseException as e:
+        except Exception as e:
             logger.exception(
                 'Error while getting video data: %s', original_url,
                 exc_info=e,
