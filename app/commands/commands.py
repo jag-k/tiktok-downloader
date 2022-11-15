@@ -62,7 +62,6 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
         f"add link to video after mention bot.\n"
         f"{contacts}"
     )
-    await commands.send_commands(update, ctx)
 
 
 @commands.add()

@@ -1,3 +1,4 @@
+import functools
 from typing import Callable
 
 from telegram import BotCommandScopeChat, Update
@@ -20,6 +21,7 @@ class CommandRegistrator:
             self,
             name: str = None,
             description: str | dict[str, str] = None,
+            auto_send_commands: bool = True,
             **kwargs
     ) -> Callable[[Callable], Callable]:
         def decorator(func: Callable) -> Callable:
@@ -29,7 +31,8 @@ class CommandRegistrator:
                     func,
                     **kwargs
                 ),
-                description=description
+                description=description,
+                auto_send_commands=auto_send_commands,
             )
             return func
 
@@ -39,6 +42,7 @@ class CommandRegistrator:
             self,
             handler: CommandHandler,
             description: str | dict[str, str] = None,
+            auto_send_commands: bool = True,
     ):
         if description is None:
             description = {
@@ -47,8 +51,17 @@ class CommandRegistrator:
                 ).strip().split('\n')[0].strip()
             }
 
+        @functools.wraps(handler.callback)
+        async def wrap(update: Update, context: CallbackContext):
+            res = await handler.callback(update, context)
+            await self.send_commands(update, context)
+            return res
+
         if isinstance(description, str):
             description = {constants.DEFAULT_LOCALE: description}
+
+        if auto_send_commands:
+            handler.callback = wrap
 
         self._command_descriptions[handler] = description
         return handler
@@ -70,6 +83,6 @@ class CommandRegistrator:
                     for cmd_name, desc in commands_list.items()
                 ],
                 scope=BotCommandScopeChat(update.effective_chat.id),
-                language_code=lang,
+                language_code=lang if len(lang) > 1 else None,
             )
         return commands
