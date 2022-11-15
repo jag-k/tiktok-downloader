@@ -25,7 +25,6 @@ async def start(update: Update, ctx: CallbackContext) -> None:
     await update.message.reply_html(
         f"{start_text()}\n\nUse /help to get more information.",
     )
-    await commands.send_commands(update, ctx)
 
 
 @commands.add('help', "Get more information about the bot.")
