@@ -4,8 +4,7 @@
 .git/
 data/
 config/
+.gitignore
 .env.local
-Procfile
-requirements.txt
 README.md
 .DS_Store

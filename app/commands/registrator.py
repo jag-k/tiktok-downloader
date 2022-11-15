@@ -1,4 +1,5 @@
 import functools
+import logging
 from typing import Callable
 
 from telegram import BotCommandScopeChat, Update
@@ -7,15 +8,18 @@ from telegram.ext import CommandHandler, Application
 from app import constants
 from app.context import CallbackContext
 
+logger = logging.getLogger(__name__)
+
 
 class CommandRegistrator:
     def __init__(self):
         self._command_descriptions: dict[CommandHandler, dict[str, str]] = {}
 
-    def connect_commands(self, application: Application) -> Application:
-        for command in self._command_descriptions:
-            application.add_handler(command)
-        return application
+    def connect_commands(self, app: Application) -> Application:
+        for handler in self._command_descriptions:
+            app.add_handler(handler)
+            logger.info("Added commands %s to %s", handler.commands, app)
+        return app
 
     def add(
             self,
@@ -50,20 +54,23 @@ class CommandRegistrator:
                         handler.callback.__doc__ or ''
                 ).strip().split('\n')[0].strip()
             }
-        old_callback = handler.callback
-
-        @functools.wraps(old_callback)
-        async def wrap(update: Update, context: CallbackContext):
-            res = await old_callback(update, context)
-            await self.send_commands(update, context)
-            return res
-
         if isinstance(description, str):
             description = {constants.DEFAULT_LOCALE: description}
 
-        if auto_send_commands:
-            handler.callback = wrap
+        old_callback = handler.callback
+        command = list(handler.commands)[0]
 
+        @functools.wraps(old_callback)
+        async def wrap(update: Update, context: CallbackContext):
+            logger.info('Command /%s called', command)
+
+            res = await old_callback(update, context)
+
+            if auto_send_commands:
+                await self.send_commands(update, context)
+            return res
+
+        handler.callback = wrap
         self._command_descriptions[handler] = description
         return handler
 
@@ -77,6 +84,10 @@ class CommandRegistrator:
 
     async def send_commands(self, update: Update, context: CallbackContext):
         commands = self.get_command_description()
+        logger.info(
+            'Sending commands to Chat[%s]',
+            update.effective_chat.id,
+        )
         for lang, commands_list in commands.items():
             await context.bot.set_my_commands(
                 commands=[

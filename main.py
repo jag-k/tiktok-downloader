@@ -11,25 +11,12 @@ from telegram.error import BadRequest
 from telegram.ext import Application, ContextTypes, \
     MessageHandler, InlineQueryHandler, filters, Defaults, PicklePersistence
 
-from app import commands, settings
+from app import commands, settings, constants
 from app.constants import DATA_PATH
 from app.context import CallbackContext
 from app.parsers import Parser, Video, MediaGroup, Media
 
-# Enable logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.DEBUG if os.getenv('DEBUG') else logging.INFO
-)
 logger = logging.getLogger(__name__)
-
-TOKEN = os.getenv("TG_TOKEN")
-PORT = int(os.environ.get('PORT', '8443'))
-HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
-APP_NAME = os.getenv(
-    'APP_NAME',
-    f"https://{HEROKU_APP_NAME}.herokuapp.com/",
-)
 
 
 async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
@@ -168,7 +155,7 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main() -> None:
     """Start the bot."""
-    logger.info("Token: %r", TOKEN)
+    logger.debug("Token: %r", constants.TOKEN)
     persistence = PicklePersistence(filepath=DATA_PATH / "persistence.pickle")
     defaults = Defaults(
         parse_mode=ParseMode.HTML,
@@ -179,7 +166,7 @@ def main() -> None:
         .builder()
         .persistence(persistence)
         .defaults(defaults=defaults)
-        .token(TOKEN)
+        .token(constants.TOKEN)
         .context_types(ContextTypes(context=CallbackContext))
         .build()
     )
@@ -197,13 +184,13 @@ def main() -> None:
     # Run the bot until the user presses Ctrl-C
     # log all errors
     application.add_error_handler(error)
-    if HEROKU_APP_NAME:
-        logger.info("Starting webhook on %s", APP_NAME)
+    if constants.HEROKU_APP_NAME:
+        logger.info("Starting webhook on %s", constants.APP_NAME)
         application.run_webhook(
             listen="0.0.0.0",
-            port=PORT,
-            url_path=TOKEN,
-            webhook_url=APP_NAME + TOKEN
+            port=constants.PORT,
+            url_path=constants.TOKEN,
+            webhook_url=constants.APP_NAME + constants.TOKEN
         )
     else:
         application.run_polling()

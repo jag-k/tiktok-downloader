@@ -151,4 +151,5 @@ class Parser(ABC):
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         if cls._is_supported():
+            logger.info("Registering Parser[%s]", cls.TYPE)
             Parser._parsers.append(cls)

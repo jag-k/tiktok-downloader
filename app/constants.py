@@ -1,7 +1,15 @@
 import json
+import logging
 import os
 from pathlib import Path
 from typing import TypedDict
+
+# Enable logger
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.DEBUG if os.getenv('DEBUG') else logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 APP_PATH = Path(__file__).resolve().parent
 PROJECT_PATH = APP_PATH.parent
@@ -25,10 +33,10 @@ for env_path in ENV_PATHS:
         from dotenv import load_dotenv
 
         load_dotenv(env_path)
-        # print(f"Loaded env from {env_path}")
+        logger.info(f"Loaded env from %s", env_path)
         break
-# else:
-#     print("No .env file found")
+else:
+    logger.info("No .env file found")
 
 
 # Localizations
@@ -51,3 +59,11 @@ if CONTACTS_PATH.exists():
         CONTACTS = json.load(f)
 
 TG_FILE_LIMIT = 20 * 1024 * 1024  # 20 MB
+
+TOKEN = os.getenv("TG_TOKEN")
+PORT = int(os.environ.get('PORT', '8443'))
+HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
+APP_NAME = os.getenv(
+    'APP_NAME',
+    f"https://{HEROKU_APP_NAME}.herokuapp.com/",
+)
