@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -98,12 +99,19 @@ class Parser(BaseParser):
 
         logger.info("Getting video link from: %s", original_url)
         cmt = await comment(session, comment_id)
-        media = cmt.get("media", {}).get("reddit_video", {})
+        print(json.dumps(cmt, indent=4, ensure_ascii=False))
+        media = cmt.get("media", {})
         if not media:
+            logger.info("No media found")
             return []
 
-        video_url = media.get("fallback_url", '').rstrip('?source=fallback')
+        video_url = (
+            media.get("reddit_video", {})
+            .get("fallback_url", '')
+            .rstrip('?source=fallback')
+        )
         if not video_url:
+            logger.info("No video found")
             return []
 
         author = cmt.get("author")
