@@ -109,18 +109,21 @@ def inline_query_video_from_media(
 
 async def inline_query(update: Update, ctx: CallbackContext):
     """Handle the inline query."""
-    query = update.inline_query.query
-    history: list[Media] = ctx.history
-    logger.info('history: %s', history)
+    logger.info("Checking inline query...")
+    query = (update.inline_query.query or '').strip()
 
-    if not query:
-        logger.info(await update.inline_query.answer(
-            inline_query_video_from_media(history[::-1]),
+    async def send_history():
+        return await update.inline_query.answer(
+            inline_query_video_from_media(ctx.history[::-1]),
             is_personal=True,
             switch_pm_text='Recently added',
-            switch_pm_parameter='start',
-        ))
-        return
+            switch_pm_parameter='help',
+        )
+
+    if not query:
+        answer = await send_history()
+        logger.info('Send history from inline query: %s', answer)
+        return answer
 
     logger.info("Inline query: %s", query)
 
@@ -129,19 +132,16 @@ async def inline_query(update: Update, ctx: CallbackContext):
 
     logger.info("Medias: %s", medias)
     if not medias:
+        answer = await send_history()
         logger.info(
-            await update.inline_query.answer(
-                inline_query_video_from_media(history[::-1]),
-                is_personal=True,
-                switch_pm_text='Recently added',
-                switch_pm_parameter='start',
-            ))
+            'No medias found. Send history from inline query: %s',
+            answer,
+        )
         return
 
     for media in medias:
-        if media not in history:
-            history.append(media)
-    ctx.user_data['history'] = history
+        if media not in ctx.history:
+            ctx.history.append(media)
 
     results: list[InlineQueryResult] = inline_query_video_from_media(medias)
     await update.inline_query.answer(results)
@@ -171,12 +171,9 @@ def main() -> None:
         .build()
     )
 
-    # on different commands - answer in Telegram
     commands.connect_commands(application)
-
-    # on non command i.e. message - echo the message on Telegram
-    application.add_handler(InlineQueryHandler(inline_query))
     application.add_handler(settings.callback_handler())
+    application.add_handler(InlineQueryHandler(inline_query))
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, link_parser)
     )

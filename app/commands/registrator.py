@@ -85,16 +85,30 @@ class CommandRegistrator:
     async def send_commands(self, update: Update, context: CallbackContext):
         commands = self.get_command_description()
         logger.info(
-            'Sending commands to Chat[%s]',
+            'Sending commands to Chat[%s]...',
             update.effective_chat.id,
         )
         for lang, commands_list in commands.items():
+            lang = (
+                lang
+                if len(commands) > 1
+                else update.effective_user.language_code
+            )
             await context.bot.set_my_commands(
                 commands=[
                     (cmd_name, desc)
                     for cmd_name, desc in commands_list.items()
                 ],
                 scope=BotCommandScopeChat(update.effective_chat.id),
-                language_code=lang if len(lang) > 1 else None,
+                language_code=lang,
             )
+            logger.info(
+                'Sent commands with lang %s to Chat[%s]',
+                lang,
+                update.effective_chat.id
+            )
+        logger.info(
+            'Commands are sended to Chat[%s]',
+            update.effective_chat.id,
+        )
         return commands
