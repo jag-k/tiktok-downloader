@@ -1,6 +1,7 @@
 import gettext
 from typing import Type, Any
 
+from telegram import Update
 from telegram.constants import ChatType
 from telegram.ext import CallbackContext as CallbackContextBase, ExtBot, \
     Application
@@ -41,15 +42,15 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
 
     @property
     def settings_data(self) -> dict:
-        if self._chat_type == ChatType.PRIVATE:
-            return self.user_data
-        return self.chat_data
+        if self._chat_type != ChatType.PRIVATE:
+            return self.chat_data
+        return self.user_data
 
     def settings_get(self, key: str, default: Any = None) -> Any:
         first, second = (
-            (self.user_data, self.chat_data)
-            if self._chat_type == ChatType.PRIVATE
-            else (self.chat_data, self.user_data)
+            (self.chat_data, self.user_data)
+            if self._chat_type != ChatType.PRIVATE
+            else (self.user_data, self.chat_data)
         )
         return first.get(key, second.get(key, default))
 
@@ -59,9 +60,13 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
     @classmethod
     def from_update(
             cls: Type["CallbackContext"],
-            update: object,
+            update: Update,
             application: Application,
     ) -> "CallbackContext":
         ctx = super().from_update(update, application)
-        ctx._chat_type = update.effective_chat.type
+        ctx._chat_type = (
+            update.effective_chat.type
+            if update.effective_chat else
+            ChatType.PRIVATE
+        )
         return ctx
