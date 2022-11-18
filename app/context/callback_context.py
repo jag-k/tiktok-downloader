@@ -42,15 +42,15 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
 
     @property
     def settings_data(self) -> dict:
-        if self._chat_type != ChatType.PRIVATE:
-            return self.chat_data
-        return self.user_data
+        if self._chat_type == ChatType.PRIVATE:
+            return self.user_data
+        return self.chat_data
 
     def settings_get(self, key: str, default: Any = None) -> Any:
         first, second = (
-            (self.chat_data, self.user_data)
-            if self._chat_type != ChatType.PRIVATE
-            else (self.user_data, self.chat_data)
+            (self.user_data, self.chat_data)
+            if self._chat_type == ChatType.PRIVATE
+            else (self.chat_data, self.user_data)
         )
         return first.get(key, second.get(key, default))
 
