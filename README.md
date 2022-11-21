@@ -4,8 +4,7 @@
 
 Telegram bot for downloading videos from social networks.
 
-
-# Support services
+## Support services
 
 - [x] TikTok
   - [x] Video
@@ -19,3 +18,14 @@ Telegram bot for downloading videos from social networks.
   - [x] Video
   - [ ] Images
 - [ ] Instagram
+
+## Development
+
+### I18n
+
+```bash
+python -m cli extract  # Extract strings from code to .POT file
+python -m cli update -l ru  #  Update .PO file for Russian language
+python -m cli full-update -l ru  #  Extract strings and update .PO file for Russian language
+python -m cli compile  # Compile .PO files to .MO files
+```

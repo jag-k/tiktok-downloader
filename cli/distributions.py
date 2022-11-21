@@ -52,7 +52,6 @@ with (PROJECT_PATH / 'pyproject.toml').open('r') as pyproject:
             if line.startswith('['):
                 parse = False
                 break
-            print(line, file=stderr)
             key, value = map(str.strip, line.split('=', 1))
             if key in ignore_fields:
                 continue

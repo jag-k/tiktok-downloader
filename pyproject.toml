@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "Telegram bot for downloading videos from social networks"
 authors = ["Jag_k <jag-k@users.noreply.github.com>"]
 readme = "README.md"
-packages = [{ include = "cli" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -16,12 +15,6 @@ python-dotenv = "^0.21.0"
 
 [tool.poetry.dev-dependencies]
 Babel = "^2.11.0"
-
-[tool.poetry.scripts]
-update-locale = "cli.__main__:update_locale"
-full-update-locale = "cli.__main__:full_update_locale"
-compile-locale = "cli:compile_locale"
-extract-locale = "cli:extract_locale"
 
 [build-system]
 requires = ["poetry-core"]
