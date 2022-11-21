@@ -5,11 +5,15 @@ from telegram.constants import ChatType
 from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
 
 from app.context import CallbackContext
+from app.utils import ContextGetText
+from app.utils.i18n import _
 
 BASE_SETTINGS_ID = "settings"
 SETTINGS_SEPARATOR = ":"
 
 _KEY_TYPE = TypeVar("_KEY_TYPE")
+
+Str = str | ContextGetText
 
 
 class Settings:
@@ -147,12 +151,12 @@ class Settings:
                 func: Callable,
                 base_settings: 'Settings',
                 parent: Union[str, 'Settings.Context'] = BASE_SETTINGS_ID,
-                display_name: str | None = None,
+                display_name: Str | None = None,
                 settings_data_key: str = None,
                 settings_data_default: _KEY_TYPE | None = None,
                 short_display_dict: (
-                        dict[_KEY_TYPE, str]
-                        | Callable[[_KEY_TYPE], str]
+                        dict[_KEY_TYPE, Str]
+                        | Callable[[_KEY_TYPE], Str]
                 ) = None,
                 display_in_chat: bool = True,
         ):
@@ -161,8 +165,8 @@ class Settings:
             self.display_name = (display_name or (
                 getattr(func, '__name__', 'unknown')
                 .replace("_", " ")
-                .title()
-            )).strip()
+                .title().strip()
+            ))
             self._id = getattr(
                 func,
                 "__name__",
@@ -209,7 +213,7 @@ class Settings:
 
             if r is None:
                 return await update.callback_query.answer(
-                    "Not implemented yet"
+                    _("Not implemented yet")
                 )
 
             update.callback_query.data = result
@@ -221,7 +225,7 @@ class Settings:
                 parent=self.full_id
             )
 
-    def __init__(self, settings_title: str = "Settings"):
+    def __init__(self, settings_title: str = _("Settings")):
         self.settings_title = settings_title
         self._settings: dict[str, Settings.SubSettings] = {
             BASE_SETTINGS_ID: self._base_settings
@@ -229,12 +233,12 @@ class Settings:
 
     def add_settings(
             self,
-            display_name: str = None,
+            display_name: Str = None,
             settings_data_key: str = None,
             settings_data_default: _KEY_TYPE = None,
             short_display_dict: (
-                    dict[_KEY_TYPE, str]
-                    | Callable[[_KEY_TYPE], str]
+                    dict[_KEY_TYPE, Str]
+                    | Callable[[_KEY_TYPE], Str]
             ) = None,
             display_in_chat: bool = True,
             parent: str | Context = BASE_SETTINGS_ID,
@@ -257,7 +261,7 @@ class Settings:
 
     def add_bool_settings(
             self,
-            display_name: str = None,
+            display_name: Str = None,
             settings_data_key: str = None,
             settings_data_default: bool = False,
             parent: str | Context = BASE_SETTINGS_ID
@@ -273,9 +277,9 @@ class Settings:
     def bool_settings_template(
             self,
             id_: str,
-            template_str_answer: str,
-            template_str_menu: str,
-            display_name: str = None,
+            template_str_answer: Str,
+            template_str_menu: Str,
+            display_name: Str = None,
             settings_data_key: str = None,
             settings_data_default: bool = False,
             parent: str | Context = BASE_SETTINGS_ID,
@@ -287,16 +291,16 @@ class Settings:
                 ctx.data = ctx.result == 'on'
                 return await ctx.query_answer(
                     template_str_answer.format(
-                        "enabled ✅" if ctx.data else "disabled ❌"
+                        str(_("enabled ✅") if ctx.data else _("disabled ❌"))
                     )
                 )
 
             await ctx.update_message_with_boolean_btn(
                 template_str_menu.format(
-                    (
-                        "✅ <b>Enabled</b>"
+                    str(
+                        _("✅ <b>Enabled</b>")
                         if ctx.data
-                        else "❌ <b>Disabled</b>"
+                        else _("❌ <b>Disabled</b>")
                     )
                 )
             )
@@ -314,7 +318,6 @@ class Settings:
             update: Update,
             context: CallbackContext
     ):
-        print("base")
         func = (
             update.callback_query.message.edit_text
             if update.callback_query and update.callback_query.message
@@ -357,7 +360,7 @@ class Settings:
             )
 
         return await func(
-            self.settings_title,
+            str(self.settings_title),
             reply_markup=InlineKeyboardMarkup([[b] for b in buttons])
         )
 
@@ -370,10 +373,9 @@ class Settings:
         func = self._settings.get(data)
         if callable(func):
             return await func(update, context)
-        return await update.callback_query.answer('Not implemented yet')
+        return await update.callback_query.answer(_('Not implemented yet').s)
 
     def command_handler(self, command: str = BASE_SETTINGS_ID):
-        print(self._settings)
         return CommandHandler(command, self._base_settings)
 
     def callback_handler(self):

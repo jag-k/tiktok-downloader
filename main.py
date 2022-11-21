@@ -15,6 +15,7 @@ from app import commands, settings, constants
 from app.constants import DATA_PATH
 from app.context import CallbackContext
 from app.parsers import Parser, Video, MediaGroup, Media
+from app.utils import translate_patch_app
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,6 @@ async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
                     await media.update(update, res, ctx)
             except BadRequest as e:
                 logger.error("Error sending video: %s", media.url)
-                print(e)
                 traceback.print_tb(e.__traceback__)
                 if update.effective_chat.type == ChatType.PRIVATE:
                     logger.info("Sending video as link: %s", media)
@@ -149,7 +149,12 @@ async def inline_query(update: Update, ctx: CallbackContext):
 
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Log Errors caused by Updates."""
-    logger.warning('Update "%s" caused error "%s"', update, context.error)
+    logger.warning(
+        '%s: %s. Update: "%s"',
+        type(context.error).__name__,
+        context.error,
+        update,
+    )
     traceback.print_tb(context.error.__traceback__)
 
 
@@ -177,6 +182,7 @@ def main() -> None:
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, link_parser)
     )
+    translate_patch_app(application)
 
     # Run the bot until the user presses Ctrl-C
     # log all errors

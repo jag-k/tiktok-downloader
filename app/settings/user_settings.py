@@ -1,4 +1,5 @@
 from app.settings.base import Settings
+from app.utils.i18n import _
 
 s = Settings()
 
@@ -13,33 +14,33 @@ SHORT_LANGUAGES = {
 }
 
 
-# @s.add_settings(_('🇪🇺 Change language'), 'language', 'us', SHORT_LANGUAGES)
-# async def change_language(ctx: Settings.Context[str]):
-#     if ctx.result and (lang := ctx.result.strip().lower()) in LANGUAGES:
-#         ctx.data = lang
-#         return await ctx.query_answer(
-#             f'Language changed to {LANGUAGES[lang]}!'
-#         )
-#
-#     def check(lang: str):
-#         if ctx.data == lang:
-#             return ' ✅'
-#         return ''
-#
-#     await ctx.update_message(
-#         text='Choose language',
-#         buttons=[
-#             ctx.btn(text=f'{lang_name}{check(lang_code)}', result=lang_code)
-#             for lang_code, lang_name in LANGUAGES.items()
-#         ]
-#     )
+@s.add_settings(_('🇪🇺 Change language'), 'language', 'us', SHORT_LANGUAGES)
+async def change_language(ctx: Settings.Context[str]):
+    if ctx.result and (lang := ctx.result.strip().lower()) in LANGUAGES:
+        ctx.data = lang
+        return await ctx.query_answer(
+            _('Language changed to {}!').format(LANGUAGES[lang])
+        )
 
+    def check(lang: str):
+        if ctx.data == lang:
+            return ' ✅'
+        return ''
 
+    await ctx.update_message(
+        text=_('Choose language').s,
+        buttons=[
+            ctx.btn(text=f'{lang_name}{check(lang_code)}', result=lang_code)
+            for lang_code, lang_name in LANGUAGES.items()
+        ]
+    )
+
+"""
 add_author_mention = s.bool_settings_template(
     id_='add_author_mention',
-    display_name='👤 Add author in media',
-    template_str_answer='Add author in media are {}!',
-    template_str_menu=(
+    display_name=_('👤 Add author in media'),
+    template_str_answer=_('Add author in media are {}!'),
+    template_str_menu=_(
         'Add author in media (video/audio/images):'
         '\n\n{}\n\n'
         'Example: So funny video by <code>@username</code> from TikTok'
@@ -49,9 +50,9 @@ add_author_mention = s.bool_settings_template(
 
 add_original_link = s.bool_settings_template(
     id_='add_original_link',
-    display_name='🔗 Add original link in media',
-    template_str_answer='Add original link in media are {}!',
-    template_str_menu=(
+    display_name=_('🔗 Add original link in media'),
+    template_str_answer=_('Add original link in media are {}!'),
+    template_str_menu=_(
         'Add original link in media:'
         '\n\n{}\n\n'
         '<i>️📝 NOTE!</i> Twitter always add original link in media.'
@@ -61,37 +62,39 @@ add_original_link = s.bool_settings_template(
 
 tiktok_flag = s.bool_settings_template(
     id_='tiktok_flag',
-    display_name='🏳️ Add flag to TikTok videos/images',
-    template_str_answer='Add flag to TikTok videos/images are {}!',
-    template_str_menu=(
+    display_name=_('🏳️ Add flag to TikTok videos/images'),
+    template_str_answer=_('Add flag to TikTok videos/images are {}!'),
+    template_str_menu=_(
         "Adds the flag of the country from which the videos/images was "
         "uploaded (author's country):\n\n{}"
     ),
 )
 
 HISTORY_SHORT = {
-    'all': '📜 All',
-    'groups': '👥 Groups',
-    'private': '👤 Private',
-    'inline': '🔎 Inline',
-    'none': '❌ Not save',
+    'all': _('📜 All'),
+    'groups': _('👥 Groups'),
+    'private': _('👤 Private'),
+    'inline': _('🔎 Inline'),
+    'none': _('❌ Not save'),
 }
 
 HISTORY_DISPLAY = {
-    'all': '📜 All',
-    'groups': '👥 Groups, where bot are added',
-    'private': '👤 Private (in bot chat)',
-    'inline': "🔎 Inline queries (saves even if you didn't send the video)",
-    'none': '❌ Not saving history',
+    'all': _('📜 All'),
+    'groups': _('👥 Groups, where bot are added'),
+    'private': _('👤 Private (in bot chat)'),
+    'inline': _("🔎 Inline queries (saves even if you didn't send the video)"),
+    'none': _('❌ Not saving history'),
 }
 
 
-@s.add_settings('📝 Saving History', 'history', 'all', HISTORY_SHORT, False)
+@s.add_settings(_('📝 Saving History'), 'history', 'all', HISTORY_SHORT, False)
 async def saving_history(ctx: Settings.Context[dict]):
     if ctx.result:
         ctx.data = ctx.result
         return await ctx.query_answer(
-            f'History saving changed to {HISTORY_DISPLAY[ctx.result]}!'
+            _(
+                'History saving changed to {}!'
+            ).format(HISTORY_DISPLAY[ctx.result])
         )
 
     def check(history: str):
@@ -100,9 +103,11 @@ async def saving_history(ctx: Settings.Context[dict]):
         return ''
 
     await ctx.update_message(
-        text='Choose source to save in history. '
-             'To see the history, use <i>Inline Query</i>.\n\n'
-             f'Current: <b>{HISTORY_DISPLAY[ctx.data]}</b>',
+        text=_(
+            'Choose source to save in history. '
+            'To see the history, use <i>Inline Query</i>.\n\n'
+            'Current: <b>{}</b>'
+        ).format(HISTORY_DISPLAY[ctx.data]),
         buttons=[
             ctx.btn(
                 text=f"{history_name}{check(history_type)}",
@@ -112,3 +117,4 @@ async def saving_history(ctx: Settings.Context[dict]):
         ],
         columns=1,
     )
+"""

@@ -1,39 +1,40 @@
 from telegram import Update
 from telegram.helpers import create_deep_linked_url
 
-from app import constants
+from app import constants, settings
 from app.commands.registrator import CommandRegistrator
 from app.context import CallbackContext
 from app.parsers.base import Parser
 from app.utils import a, b
+from app.utils.i18n import _
 
 commands = CommandRegistrator()
 
 
 def start_text() -> str:
     services: list[str] = [b(i.TYPE) for i in Parser.parsers() if i.TYPE]
-    services_str = " or ".join((", ".join(services[:-1]), services[-1]))
-    return (
-        f"Send me a link to a {services_str} video and "
-        f"I'll send this video back to you.\n\n"
-        f"Also, you can use me in groups. "
-        f"Just add me to the group and send a link to a video."
-    )
+    services_str = _(" or ").join((", ".join(services[:-1]), services[-1]))
+    return _(
+        "Send me a link to a {} video and "
+        "I'll send this video back to you.\n\n"
+        "Also, you can use me in groups. "
+        "Just add me to the group and send a link to a video."
+    ).format(services_str)
 
 
-@commands.add(description="Start using the bot")
+@commands.add(description=_("Start using the bot"))
 async def start(update: Update, ctx: CallbackContext) -> None:
     await update.message.reply_html(
-        f"{start_text()}\n\nUse /help to get more information.",
+        _("{}\n\nUse /help to get more information.").format(start_text())
     )
 
 
-@commands.add('help', "Get more information about the bot.")
+@commands.add('help', _("Get more information about the bot."))
 async def help_command(update: Update, ctx: CallbackContext) -> None:
     link = create_deep_linked_url(ctx.bot.username, 'start', group=True)
-    cmds = commands.get_command_description().get(constants.DEFAULT_LOCALE)
+    cmds = commands.get_command_description()
     supported_commands = '\n'.join(
-        f"- /{command} - {description}"
+        f"- /{command} - {str(description)}"
         for command, description in cmds.items()
     )
     contacts = ''
@@ -46,24 +47,32 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
         contacts = f"\n\nContacts:\n{contacts_list}" if contacts_list else ''
 
     await update.message.reply_text(
-        f"{start_text()}\n\n"
-        f"Link to add in groups: {link}\n\n"
-        f"Supported Commands:\n"
-        f"{supported_commands}\n\n"
-        f"Inline queries are supported.\n"
-        f"Use @{ctx.bot.username} in any chat to get started.\n"
-        f"To get history of your inline queries, "
-        f"set empty after mention bot (or add some spaces).\n"
-        f"To get video from inline query, "
-        f"add link to video after mention bot.\n"
-        f"{contacts}"
+        _(
+            "{}\n\n"
+            "Link to add in groups: {}\n\n"
+            "Supported Commands:\n"
+            "{}\n\n"
+            "Inline queries are supported.\n"
+            "Use @{} in any chat to get started.\n"
+            "To get history of your inline queries, "
+            "set empty after mention bot (or add some spaces).\n"
+            "To get video from inline query, "
+            "add link to video after mention bot.\n"
+            "{}"
+        ).format(
+            start_text(),
+            link,
+            supported_commands,
+            ctx.bot.username,
+            contacts,
+        )
     )
 
 
-@commands.add()
+@commands.add(description=_("Clear your history from inline queries."))
 async def clear_history(update: Update, ctx: CallbackContext) -> None:
-    """Clear your history from inline queries."""
     ctx.history = []
-    await update.message.reply_text("History cleared.")
+    await update.message.reply_text(_("History cleared.").s)
 
-# commands.add_handler(settings.command_handler(), "Bot settings")
+
+commands.add_handler(settings.command_handler(), _("Bot settings"))

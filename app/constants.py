@@ -4,11 +4,15 @@ import os
 from pathlib import Path
 from typing import TypedDict
 
+
 # Enable logger
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.DEBUG if os.getenv('DEBUG') else logging.INFO
-)
+if os.getenv('DISABLE_LOG'):
+    logging.disable()
+else:
+    logging.basicConfig(
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        level=logging.DEBUG if os.getenv('DEBUG') else logging.INFO
+    )
 logger = logging.getLogger(__name__)
 
 APP_PATH = Path(__file__).resolve().parent
@@ -40,7 +44,7 @@ else:
 
 
 # Localizations
-LOCALE_PATH = PROJECT_PATH / 'locale'
+LOCALE_PATH = PROJECT_PATH / 'locales'
 DEFAULT_LOCALE = os.getenv('DEFAULT_LOCALE', 'en')
 DOMAIN = os.getenv('LOCALE_DOMAIN', 'messages')
 

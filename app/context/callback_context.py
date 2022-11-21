@@ -1,4 +1,3 @@
-import gettext
 from typing import Type, Any
 
 from telegram import Update
@@ -6,13 +5,14 @@ from telegram.constants import ChatType
 from telegram.ext import CallbackContext as CallbackContextBase, ExtBot, \
     Application
 
-from app.constants import LOCALE_PATH, DOMAIN, DEFAULT_LOCALE
+from app.constants import DEFAULT_LOCALE
 
 
 class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__chat_type: ChatType | None = None
+        self._user_lang: str | None = None
 
     @property
     def history(self):
@@ -29,16 +29,6 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
     @_chat_type.setter
     def _chat_type(self, value: ChatType) -> None:
         self.__chat_type = value
-        # self.update_lang()
-
-    def update_lang(self):
-        print(f"Start translate")
-        lang = self.settings_get('language', DEFAULT_LOCALE)
-        print(f"Start translate {lang}")
-        t = gettext.translation(DOMAIN, LOCALE_PATH, languages=[lang])
-        print(f"Installing translate {lang}")
-        t.install([])
-        print(f"Finish")
 
     @property
     def settings_data(self) -> dict:
@@ -57,6 +47,13 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
     def settings_set(self, key: str, value: Any) -> None:
         self.settings_data[key] = value
 
+    @property
+    def user_lang(self) -> str:
+        return self.settings_get(
+            'language',
+            self._user_lang or DEFAULT_LOCALE
+        )
+
     @classmethod
     def from_update(
             cls: Type["CallbackContext"],
@@ -69,4 +66,6 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
             if update.effective_chat else
             ChatType.PRIVATE
         )
+        if update.effective_user:
+            ctx._user_lang = update.effective_user.language_code
         return ctx

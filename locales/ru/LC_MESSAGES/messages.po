@@ -1,0 +1,254 @@
+# Russian translations for PROJECT.
+# Copyright (C) 2022 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-11-21 22:31+0400\n"
+"PO-Revision-Date: 2022-11-21 16:35+0400\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: app/commands/commands.py:16
+msgid " or "
+msgstr " или "
+
+#: app/commands/commands.py:17
+msgid ""
+"Send me a link to a {} video and I'll send this video back to you.\n"
+"\n"
+"Also, you can use me in groups. Just add me to the group and send a link to a"
+" video."
+msgstr ""
+"Отправьте мне ссылку на видео {} и я отправлю его вам.\n"
+"\n"
+"Также вы можете использовать меня в группах. Просто добавьте меня в группу и "
+"отправьте ссылку на видео."
+
+#: app/commands/commands.py:25
+msgid "Start using the bot"
+msgstr "Начать использовать бота"
+
+#: app/commands/commands.py:28
+msgid ""
+"{}\n"
+"\n"
+"Use /help to get more information."
+msgstr ""
+"{}\n"
+"\n"
+"Используйте /help, чтобы получить больше информации."
+
+#: app/commands/commands.py:32
+msgid "Get more information about the bot."
+msgstr "Получить больше информации о боте."
+
+#: app/commands/commands.py:50
+msgid ""
+"{}\n"
+"\n"
+"Link to add in groups: {}\n"
+"\n"
+"Supported Commands:\n"
+"{}\n"
+"\n"
+"Inline queries are supported.\n"
+"Use @{} in any chat to get started.\n"
+"To get history of your inline queries, set empty after mention bot (or add "
+"some spaces).\n"
+"To get video from inline query, add link to video after mention bot.\n"
+"{}"
+msgstr ""
+"{}\n"
+"\n"
+"Ссылка для добавления бота в группу: {}\n"
+"\n"
+"Поддерживаемые команды:\n"
+"{}\n"
+"\n"
+"Inline запросы поддерживаются.\n"
+"Напишите @{} в любом чате для начала работы с ними.\n"
+"Чтобы получить историю ваших встроенных запросов, установите пустое место "
+"после упоминания бота (или добавьте несколько пробелов).\n"
+"Чтобы получить видео из встроенного запроса, добавьте ссылку на видео после "
+"упоминания бота.\n"
+"{}"
+
+#: app/commands/commands.py:72
+msgid "Clear your history from inline queries."
+msgstr "Отчистите Вашу историю из inline запросов."
+
+#: app/commands/commands.py:75
+msgid "History cleared."
+msgstr "История очищена."
+
+#: app/commands/commands.py:78
+msgid "Bot settings"
+msgstr "Настройки бота"
+
+#: app/settings/base.py:216 app/settings/base.py:376
+msgid "Not implemented yet"
+msgstr "Ещё не реализовано"
+
+#: app/settings/base.py:228
+msgid "Settings"
+msgstr "Настройки"
+
+#: app/settings/base.py:294
+msgid "enabled ✅"
+msgstr "включено ✅"
+
+#: app/settings/base.py:294
+msgid "disabled ❌"
+msgstr "выключено ❌"
+
+#: app/settings/base.py:301
+msgid "✅ <b>Enabled</b>"
+msgstr "✅ <b>Включено</b>"
+
+#: app/settings/base.py:303
+msgid "❌ <b>Disabled</b>"
+msgstr "❌ <b>Выключено</b>"
+
+#: app/settings/user_settings.py:17
+msgid "🇪🇺 Change language"
+msgstr "🇪🇺 Изменить язык"
+
+#: app/settings/user_settings.py:22
+msgid "Language changed to {}!"
+msgstr "Сохранение истории изменено на {}!"
+
+#: app/settings/user_settings.py:31
+msgid "Choose language"
+msgstr "Выберите язык"
+
+#: app/settings/user_settings.py:41
+msgid "👤 Add author in media"
+msgstr "👤 Добавить автора в медиа"
+
+#: app/settings/user_settings.py:42
+msgid "Add author in media are {}!"
+msgstr "Добавление автора в медиа {}!"
+
+#: app/settings/user_settings.py:43
+msgid ""
+"Add author in media (video/audio/images):\n"
+"\n"
+"{}\n"
+"\n"
+"Example: So funny video by <code>@username</code> from TikTok"
+msgstr ""
+"Добавление автора в медиа (видео/аудио/изображения):\n"
+"\n"
+"{}\n"
+"\n"
+"Пример: Смешное видео от <code>@username</code> с TikTok"
+
+#: app/settings/user_settings.py:53
+msgid "🔗 Add original link in media"
+msgstr "🔗 Добавить оригинальную ссылку в медиа"
+
+#: app/settings/user_settings.py:54
+msgid "Add original link in media are {}!"
+msgstr "Добавление оригинальной ссылки в медиа {}!"
+
+#: app/settings/user_settings.py:55
+msgid ""
+"Add original link in media:\n"
+"\n"
+"{}\n"
+"\n"
+"<i>️📝 NOTE!</i> Twitter always add original link in media."
+msgstr ""
+"Добавление оригинальной ссылки в медиа:\n"
+"\n"
+"{}\n"
+"\n"
+"<i>️📝 ПРИМЕЧАНИЕ!</i> Twitter всегда добавляет оригинальную ссылку в медиа."
+
+#: app/settings/user_settings.py:65
+msgid "🏳️ Add flag to TikTok videos/images"
+msgstr "🏳️ Добавить флаг к видео/изображениям TikTok"
+
+#: app/settings/user_settings.py:66
+msgid "Add flag to TikTok videos/images are {}!"
+msgstr "Добавление флага к видео/изображениям TikTok {}!"
+
+#: app/settings/user_settings.py:67
+msgid ""
+"Adds the flag of the country from which the videos/images was uploaded "
+"(author's country):\n"
+"\n"
+"{}"
+msgstr ""
+"Добавляет флаг страны, из которой было загружено видео/изображение (страна "
+"автора):\n"
+"\n"
+"{}"
+
+#: app/settings/user_settings.py:74 app/settings/user_settings.py:82
+msgid "📜 All"
+msgstr "📜 Все"
+
+#: app/settings/user_settings.py:75
+msgid "👥 Groups"
+msgstr "👥 Группы"
+
+#: app/settings/user_settings.py:76
+msgid "👤 Private"
+msgstr "👤 Приватные"
+
+#: app/settings/user_settings.py:77
+msgid "🔎 Inline"
+msgstr "🔎 Инлайн"
+
+#: app/settings/user_settings.py:78
+msgid "❌ Not save"
+msgstr "❌ Не сохранять"
+
+#: app/settings/user_settings.py:83
+msgid "👥 Groups, where bot are added"
+msgstr "👥 Группы, в которых бот добавлен"
+
+#: app/settings/user_settings.py:84
+msgid "👤 Private (in bot chat)"
+msgstr "👤 Приватные (в чате бота)"
+
+#: app/settings/user_settings.py:85
+msgid "🔎 Inline queries (saves even if you didn't send the video)"
+msgstr "🔎 Инлайн запросы (сохраняет даже если вы не отправили видео)"
+
+#: app/settings/user_settings.py:86
+msgid "❌ Not saving history"
+msgstr "❌ Не сохранять историю"
+
+#: app/settings/user_settings.py:90
+msgid "📝 Saving History"
+msgstr "📝 Сохранение истории"
+
+#: app/settings/user_settings.py:95
+msgid "History saving changed to {}!"
+msgstr "Сохранение истории изменено на {}!"
+
+#: app/settings/user_settings.py:106
+msgid ""
+"Choose source to save in history. To see the history, use <i>Inline "
+"Query</i>.\n"
+"\n"
+"Current: <b>{}</b>"
+msgstr ""
+"Выберите источник для сохранения в истории. Чтобы посмотреть историю, "
+"используйте <i>Инлайн-Запросы</i>.\n"
+"\n"
+"Текущий: <b>{}</b>"
+

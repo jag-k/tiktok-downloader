@@ -2,7 +2,8 @@
 
 [![Build and deploy Python app](https://github.com/jag-k/tiktok-downloader/actions/workflows/deploy.yml/badge.svg)](https://github.com/jag-k/tiktok-downloader/actions/workflows/deploy.yml)
 
-Download video in Telegram
+Telegram bot for downloading videos from social networks.
+
 
 # Support services
 

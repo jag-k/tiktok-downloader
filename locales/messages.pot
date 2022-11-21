@@ -1,0 +1,214 @@
+# Translations template for video-downloader-bot.
+# Copyright (C) 2022 ORGANIZATION
+# This file is distributed under the same license as the video-downloader-bot
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: video-downloader-bot 0.1.0\n"
+"Report-Msgid-Bugs-To: jag-k@users.noreply.github.com\n"
+"POT-Creation-Date: 2022-11-21 22:31+0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: app/commands/commands.py:16
+msgid " or "
+msgstr ""
+
+#: app/commands/commands.py:17
+msgid ""
+"Send me a link to a {} video and I'll send this video back to you.\n"
+"\n"
+"Also, you can use me in groups. Just add me to the group and send a link to a"
+" video."
+msgstr ""
+
+#: app/commands/commands.py:25
+msgid "Start using the bot"
+msgstr ""
+
+#: app/commands/commands.py:28
+msgid ""
+"{}\n"
+"\n"
+"Use /help to get more information."
+msgstr ""
+
+#: app/commands/commands.py:32
+msgid "Get more information about the bot."
+msgstr ""
+
+#: app/commands/commands.py:50
+msgid ""
+"{}\n"
+"\n"
+"Link to add in groups: {}\n"
+"\n"
+"Supported Commands:\n"
+"{}\n"
+"\n"
+"Inline queries are supported.\n"
+"Use @{} in any chat to get started.\n"
+"To get history of your inline queries, set empty after mention bot (or add "
+"some spaces).\n"
+"To get video from inline query, add link to video after mention bot.\n"
+"{}"
+msgstr ""
+
+#: app/commands/commands.py:72
+msgid "Clear your history from inline queries."
+msgstr ""
+
+#: app/commands/commands.py:75
+msgid "History cleared."
+msgstr ""
+
+#: app/commands/commands.py:78
+msgid "Bot settings"
+msgstr ""
+
+#: app/settings/base.py:216 app/settings/base.py:376
+msgid "Not implemented yet"
+msgstr ""
+
+#: app/settings/base.py:228
+msgid "Settings"
+msgstr ""
+
+#: app/settings/base.py:294
+msgid "enabled ✅"
+msgstr ""
+
+#: app/settings/base.py:294
+msgid "disabled ❌"
+msgstr ""
+
+#: app/settings/base.py:301
+msgid "✅ <b>Enabled</b>"
+msgstr ""
+
+#: app/settings/base.py:303
+msgid "❌ <b>Disabled</b>"
+msgstr ""
+
+#: app/settings/user_settings.py:17
+msgid "🇪🇺 Change language"
+msgstr ""
+
+#: app/settings/user_settings.py:22
+msgid "Language changed to {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:31
+msgid "Choose language"
+msgstr ""
+
+#: app/settings/user_settings.py:41
+msgid "👤 Add author in media"
+msgstr ""
+
+#: app/settings/user_settings.py:42
+msgid "Add author in media are {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:43
+msgid ""
+"Add author in media (video/audio/images):\n"
+"\n"
+"{}\n"
+"\n"
+"Example: So funny video by <code>@username</code> from TikTok"
+msgstr ""
+
+#: app/settings/user_settings.py:53
+msgid "🔗 Add original link in media"
+msgstr ""
+
+#: app/settings/user_settings.py:54
+msgid "Add original link in media are {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:55
+msgid ""
+"Add original link in media:\n"
+"\n"
+"{}\n"
+"\n"
+"<i>️📝 NOTE!</i> Twitter always add original link in media."
+msgstr ""
+
+#: app/settings/user_settings.py:65
+msgid "🏳️ Add flag to TikTok videos/images"
+msgstr ""
+
+#: app/settings/user_settings.py:66
+msgid "Add flag to TikTok videos/images are {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:67
+msgid ""
+"Adds the flag of the country from which the videos/images was uploaded "
+"(author's country):\n"
+"\n"
+"{}"
+msgstr ""
+
+#: app/settings/user_settings.py:74 app/settings/user_settings.py:82
+msgid "📜 All"
+msgstr ""
+
+#: app/settings/user_settings.py:75
+msgid "👥 Groups"
+msgstr ""
+
+#: app/settings/user_settings.py:76
+msgid "👤 Private"
+msgstr ""
+
+#: app/settings/user_settings.py:77
+msgid "🔎 Inline"
+msgstr ""
+
+#: app/settings/user_settings.py:78
+msgid "❌ Not save"
+msgstr ""
+
+#: app/settings/user_settings.py:83
+msgid "👥 Groups, where bot are added"
+msgstr ""
+
+#: app/settings/user_settings.py:84
+msgid "👤 Private (in bot chat)"
+msgstr ""
+
+#: app/settings/user_settings.py:85
+msgid "🔎 Inline queries (saves even if you didn't send the video)"
+msgstr ""
+
+#: app/settings/user_settings.py:86
+msgid "❌ Not saving history"
+msgstr ""
+
+#: app/settings/user_settings.py:90
+msgid "📝 Saving History"
+msgstr ""
+
+#: app/settings/user_settings.py:95
+msgid "History saving changed to {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:106
+msgid ""
+"Choose source to save in history. To see the history, use <i>Inline "
+"Query</i>.\n"
+"\n"
+"Current: <b>{}</b>"
+msgstr ""
+
