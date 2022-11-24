@@ -37,10 +37,13 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
         return self.chat_data
 
     def settings_get(self, key: str, default: Any = None) -> Any:
+        ud = self.user_data or {}
+        cd = self.chat_data or {}
+
         first, second = (
-            (self.user_data, self.chat_data)
+            (ud, cd)
             if self._chat_type == ChatType.PRIVATE
-            else (self.chat_data, self.user_data)
+            else (cd, ud)
         )
         return first.get(key, second.get(key, default))
 
@@ -56,9 +59,9 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
 
     @classmethod
     def from_update(
-            cls: Type["CallbackContext"],
-            update: Update,
-            application: Application,
+        cls: Type["CallbackContext"],
+        update: Update,
+        application: Application,
     ) -> "CallbackContext":
         ctx = super().from_update(update, application)
         ctx._chat_type = (
