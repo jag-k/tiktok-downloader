@@ -1,10 +1,9 @@
 import logging
-import os
 import traceback
 import uuid
 
 import aiohttp as aiohttp
-import pytz
+from aiohttp import ClientSession
 from telegram import Update, InlineQueryResultVideo, InlineQueryResult
 from telegram.constants import MessageEntityType, ParseMode, ChatType
 from telegram.error import BadRequest
@@ -15,12 +14,13 @@ from app import commands, settings, constants
 from app.constants import DATA_PATH
 from app.context import CallbackContext
 from app.parsers import Parser, Video, MediaGroup, Media
-from app.utils import translate_patch_app
+from app.utils import translate_patch_app, a
+from app.utils.i18n import _n, _
 
 logger = logging.getLogger(__name__)
 
 
-async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
+async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     """Parse link from the user message."""
     text = getattr(update.message, "text", "")
     message_links = [
@@ -35,38 +35,65 @@ async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
     for media in medias:
         if isinstance(media, Video):
             _from_location = (
-                f" from {media.language_emoji}"
+                _(" from {flag}").format(flag=media.language_emoji)
                 if media.language_emoji
                 else ""
             )
             logger.info("Sending video%s: %s", _from_location, media)
             extra_caption = (
-                f'\n\n\n<i>Original video is larger than <b>20 MB</b>,'
-                f' and bot can\'t send it.</i> '
-                f'<a href="{media.max_quality_url}">'
-                f'This is original link</a>'
+                _(
+                    '\n\n\n<i>Original video is larger than <b>20 MB</b>,'
+                    ' and bot can\'t send it.</i> '
+                    '<a href="{url}">'
+                    'This is original link</a>'
+                ).format(url=media.max_quality_url)
                 if media.max_quality_url and media.max_quality_url != media.url
                 else ''
             )
             try:
-                res = await update.message.reply_video(
-                    video=media.url,
-                    caption=media.caption + extra_caption,
-                    supports_streaming=True,
-
-                )
-                if media.update:
-                    await media.update(update, res, ctx)
+                try:
+                    # async with ClientSession() as session:
+                    #     async with session.get(media.url) as resp:
+                    #         video_content = await resp.content.read()
+                    res = await update.message.reply_video(
+                        video=media.url,
+                        # video=video_content,
+                        caption=media.caption + extra_caption,
+                        supports_streaming=True,
+                    )
+                    if media.update:
+                        return await media.update(update, res, ctx)
+                    return res
+                except BadRequest as e:
+                    if e.message == 'Failed to get http url content':
+                        async with ClientSession() as session:
+                            async with session.get(media.url) as resp:
+                                video_content = await resp.content.read()
+                        res = await update.message.reply_video(
+                            video=video_content,
+                            caption=media.caption + extra_caption,
+                            supports_streaming=True,
+                        )
+                        if media.update:
+                            return await media.update(update, res, ctx)
+                        return res
+                    raise e
             except BadRequest as e:
-                logger.error("Error sending video: %s", media.url)
-                traceback.print_tb(e.__traceback__)
+                logger.error(
+                    "Error sending video: %s",
+                    media.url,
+                    exc_info=e,
+                    stack_info=True
+                )
                 if update.effective_chat.type == ChatType.PRIVATE:
                     logger.info("Sending video as link: %s", media)
+                    title = a(media.caption, media.original_url)
                     await update.message.reply_text(
-                        f'Error sending video: {media.caption}\n'
-                        f'\n\n'
-                        f'<a href="{media.url}">Direct link to video</a>',
-                        # f'\n\nLink to original video: {media.original_url}',
+                        _(
+                            'Error sending video: {title}\n'
+                            '\n\n'
+                            '<a href="{url}">Direct link to video</a>'
+                        ).format(title=title, url=media.url),
                     )
                     logger.info("Send video as link: %s", media.url)
         elif isinstance(media, MediaGroup):
@@ -82,7 +109,7 @@ async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 def inline_query_video_from_media(
-        medias: list[Media]
+    medias: list[Media]
 ) -> list[InlineQueryResultVideo]:
     return [
         InlineQueryResultVideo(
@@ -94,13 +121,15 @@ def inline_query_video_from_media(
             caption=video.caption,
             description=(
                             (
-                                f"{video.extra_description}"
+                                video.extra_description
                                 if video.extra_description
-                                else f"by @{video.author} "
+                                else _("by @{author} ").format(
+                                    author=video.author
+                                )
                             )
                             if video.author
                             else ''
-                        ) + f"from {video.type}",
+                        ) + _("from {m_type}").format(m_type=video.type),
         )
         for video in medias
         if isinstance(video, Video)
@@ -116,7 +145,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
         return await update.inline_query.answer(
             inline_query_video_from_media(ctx.history[::-1]),
             is_personal=True,
-            switch_pm_text='Recently added',
+            switch_pm_text=_('Recently added').s,
             switch_pm_parameter='help',
         )
 
@@ -144,7 +173,16 @@ async def inline_query(update: Update, ctx: CallbackContext):
             ctx.history.append(media)
 
     results: list[InlineQueryResult] = inline_query_video_from_media(medias)
-    await update.inline_query.answer(results)
+    await update.inline_query.answer(
+        results,
+        switch_pm_text=(
+            _n('Found %d video', 'Found %d videos', len(results))
+            % str(len(results))
+            if results
+            else _('No videos found')
+        ).s,
+        switch_pm_parameter='help',
+    )
 
 
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -164,7 +202,7 @@ def main() -> None:
     persistence = PicklePersistence(filepath=DATA_PATH / "persistence.pickle")
     defaults = Defaults(
         parse_mode=ParseMode.HTML,
-        tzinfo=pytz.timezone(os.getenv('TZ', 'Europe/Moscow')),
+        tzinfo=constants.TIME_ZONE,
     )
     application = (
         Application
@@ -187,16 +225,7 @@ def main() -> None:
     # Run the bot until the user presses Ctrl-C
     # log all errors
     application.add_error_handler(error)
-    if constants.HEROKU_APP_NAME:
-        logger.info("Starting webhook on %s", constants.APP_NAME)
-        application.run_webhook(
-            listen="0.0.0.0",
-            port=constants.PORT,
-            url_path=constants.TOKEN,
-            webhook_url=constants.APP_NAME + constants.TOKEN
-        )
-    else:
-        application.run_polling()
+    application.run_polling()
 
 
 if __name__ == "__main__":

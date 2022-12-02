@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-11-21 22:31+0400\n"
+"POT-Creation-Date: 2022-11-26 09:28+0400\n"
 "PO-Revision-Date: 2022-11-21 16:35+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -132,123 +132,161 @@ msgstr "Сохранение истории изменено на {}!"
 msgid "Choose language"
 msgstr "Выберите язык"
 
-#: app/settings/user_settings.py:41
-msgid "👤 Add author in media"
-msgstr "👤 Добавить автора в медиа"
+#: main.py:38
+msgid " from {flag}"
+msgstr " из {flag}"
 
-#: app/settings/user_settings.py:42
-msgid "Add author in media are {}!"
-msgstr "Добавление автора в медиа {}!"
-
-#: app/settings/user_settings.py:43
+#: main.py:44
 msgid ""
-"Add author in media (video/audio/images):\n"
 "\n"
-"{}\n"
 "\n"
-"Example: So funny video by <code>@username</code> from TikTok"
+"\n"
+"<i>Original video is larger than <b>20 MB</b>, and bot can't send it.</i> <a "
+"href=\"{url}\">This is original link</a>"
 msgstr ""
-"Добавление автора в медиа (видео/аудио/изображения):\n"
 "\n"
-"{}\n"
 "\n"
-"Пример: Смешное видео от <code>@username</code> с TikTok"
+"\n"
+"<i>Оригинальное видео больше, чем <b>20 МБ</b>, и бот не может его "
+"отправить.</i> <a href=\"{url}\">Это прямая ссылка на оригинальное видео</a>"
 
-#: app/settings/user_settings.py:53
-msgid "🔗 Add original link in media"
-msgstr "🔗 Добавить оригинальную ссылку в медиа"
-
-#: app/settings/user_settings.py:54
-msgid "Add original link in media are {}!"
-msgstr "Добавление оригинальной ссылки в медиа {}!"
-
-#: app/settings/user_settings.py:55
+#: main.py:92
 msgid ""
-"Add original link in media:\n"
+"Error sending video: {title}\n"
 "\n"
-"{}\n"
 "\n"
-"<i>️📝 NOTE!</i> Twitter always add original link in media."
+"<a href=\"{url}\">Direct link to video</a>"
 msgstr ""
-"Добавление оригинальной ссылки в медиа:\n"
+"Ошибка отправки видео: {title}\n"
 "\n"
-"{}\n"
 "\n"
-"<i>️📝 ПРИМЕЧАНИЕ!</i> Twitter всегда добавляет оригинальную ссылку в медиа."
+"<a href=\"{url}\">Прямая ссылка на видео</a>"
 
-#: app/settings/user_settings.py:65
-msgid "🏳️ Add flag to TikTok videos/images"
-msgstr "🏳️ Добавить флаг к видео/изображениям TikTok"
+#: main.py:126
+msgid "by @{author} "
+msgstr "от @{author} "
 
-#: app/settings/user_settings.py:66
-msgid "Add flag to TikTok videos/images are {}!"
-msgstr "Добавление флага к видео/изображениям TikTok {}!"
+#: main.py:132
+msgid "from {m_type}"
+msgstr "с {m_type}"
 
-#: app/settings/user_settings.py:67
-msgid ""
-"Adds the flag of the country from which the videos/images was uploaded "
-"(author's country):\n"
-"\n"
-"{}"
-msgstr ""
-"Добавляет флаг страны, из которой было загружено видео/изображение (страна "
-"автора):\n"
-"\n"
-"{}"
+#: main.py:148
+msgid "Recently added"
+msgstr "Недавно добавленные"
 
-#: app/settings/user_settings.py:74 app/settings/user_settings.py:82
-msgid "📜 All"
-msgstr "📜 Все"
+#: main.py:179
+#, fuzzy, python-format
+#| msgid "Found %d media"
+#| msgid_plural "Found %d medias"
+msgid "Found %d video"
+msgid_plural "Found %d videos"
+msgstr[0] "Найдено %d видео"
+msgstr[1] "Найдено %d видео"
+msgstr[2] "Найдено %d видео"
 
-#: app/settings/user_settings.py:75
-msgid "👥 Groups"
-msgstr "👥 Группы"
+#: main.py:181
+msgid "No videos found"
+msgstr "Видео не найдены"
 
-#: app/settings/user_settings.py:76
-msgid "👤 Private"
-msgstr "👤 Приватные"
+#~ msgid "👤 Add author in media"
+#~ msgstr "👤 Добавить автора в медиа"
 
-#: app/settings/user_settings.py:77
-msgid "🔎 Inline"
-msgstr "🔎 Инлайн"
+#~ msgid "Add author in media are {}!"
+#~ msgstr "Добавление автора в медиа {}!"
 
-#: app/settings/user_settings.py:78
-msgid "❌ Not save"
-msgstr "❌ Не сохранять"
+#~ msgid ""
+#~ "Add author in media (video/audio/images):\n"
+#~ "\n"
+#~ "{}\n"
+#~ "\n"
+#~ "Example: So funny video by <code>@username</code> from TikTok"
+#~ msgstr ""
+#~ "Добавление автора в медиа (видео/аудио/изображения):\n"
+#~ "\n"
+#~ "{}\n"
+#~ "\n"
+#~ "Пример: Смешное видео от <code>@username</code> с TikTok"
 
-#: app/settings/user_settings.py:83
-msgid "👥 Groups, where bot are added"
-msgstr "👥 Группы, в которых бот добавлен"
+#~ msgid "🔗 Add original link in media"
+#~ msgstr "🔗 Добавить оригинальную ссылку в медиа"
 
-#: app/settings/user_settings.py:84
-msgid "👤 Private (in bot chat)"
-msgstr "👤 Приватные (в чате бота)"
+#~ msgid "Add original link in media are {}!"
+#~ msgstr "Добавление оригинальной ссылки в медиа {}!"
 
-#: app/settings/user_settings.py:85
-msgid "🔎 Inline queries (saves even if you didn't send the video)"
-msgstr "🔎 Инлайн запросы (сохраняет даже если вы не отправили видео)"
+#~ msgid ""
+#~ "Add original link in media:\n"
+#~ "\n"
+#~ "{}\n"
+#~ "\n"
+#~ "<i>️📝 NOTE!</i> Twitter always add original link in media."
+#~ msgstr ""
+#~ "Добавление оригинальной ссылки в медиа:\n"
+#~ "\n"
+#~ "{}\n"
+#~ "\n"
+#~ "<i>️📝 ПРИМЕЧАНИЕ!</i> Twitter всегда добавляет оригинальную ссылку в медиа."
 
-#: app/settings/user_settings.py:86
-msgid "❌ Not saving history"
-msgstr "❌ Не сохранять историю"
+#~ msgid "🏳️ Add flag to TikTok videos/images"
+#~ msgstr "🏳️ Добавить флаг к видео/изображениям TikTok"
 
-#: app/settings/user_settings.py:90
-msgid "📝 Saving History"
-msgstr "📝 Сохранение истории"
+#~ msgid "Add flag to TikTok videos/images are {}!"
+#~ msgstr "Добавление флага к видео/изображениям TikTok {}!"
 
-#: app/settings/user_settings.py:95
-msgid "History saving changed to {}!"
-msgstr "Сохранение истории изменено на {}!"
+#~ msgid ""
+#~ "Adds the flag of the country from "
+#~ "which the videos/images was uploaded "
+#~ "(author's country):\n"
+#~ "\n"
+#~ "{}"
+#~ msgstr ""
+#~ "Добавляет флаг страны, из которой было "
+#~ "загружено видео/изображение (страна автора):\n"
+#~ "\n"
+#~ "{}"
 
-#: app/settings/user_settings.py:106
-msgid ""
-"Choose source to save in history. To see the history, use <i>Inline "
-"Query</i>.\n"
-"\n"
-"Current: <b>{}</b>"
-msgstr ""
-"Выберите источник для сохранения в истории. Чтобы посмотреть историю, "
-"используйте <i>Инлайн-Запросы</i>.\n"
-"\n"
-"Текущий: <b>{}</b>"
+#~ msgid "📜 All"
+#~ msgstr "📜 Все"
+
+#~ msgid "👥 Groups"
+#~ msgstr "👥 Группы"
+
+#~ msgid "👤 Private"
+#~ msgstr "👤 Приватные"
+
+#~ msgid "🔎 Inline"
+#~ msgstr "🔎 Инлайн"
+
+#~ msgid "❌ Not save"
+#~ msgstr "❌ Не сохранять"
+
+#~ msgid "👥 Groups, where bot are added"
+#~ msgstr "👥 Группы, в которых бот добавлен"
+
+#~ msgid "👤 Private (in bot chat)"
+#~ msgstr "👤 Приватные (в чате бота)"
+
+#~ msgid "🔎 Inline queries (saves even if you didn't send the video)"
+#~ msgstr "🔎 Инлайн запросы (сохраняет даже если вы не отправили видео)"
+
+#~ msgid "❌ Not saving history"
+#~ msgstr "❌ Не сохранять историю"
+
+#~ msgid "📝 Saving History"
+#~ msgstr "📝 Сохранение истории"
+
+#~ msgid "History saving changed to {}!"
+#~ msgstr "Сохранение истории изменено на {}!"
+
+#~ msgid ""
+#~ "Choose source to save in history. To"
+#~ " see the history, use <i>Inline "
+#~ "Query</i>.\n"
+#~ "\n"
+#~ "Current: <b>{}</b>"
+#~ msgstr ""
+#~ "Выберите источник для сохранения в истории."
+#~ " Чтобы посмотреть историю, используйте "
+#~ "<i>Инлайн-Запросы</i>.\n"
+#~ "\n"
+#~ "Текущий: <b>{}</b>"
 

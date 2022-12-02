@@ -11,6 +11,7 @@ __all__ = (
     "_np",
 )
 
+
 def gettext(message: str) -> ContextGetText:
     return ContextGetText(message, type_='gettext')
 
@@ -23,8 +24,7 @@ def pgettext(context: str, message: str) -> ContextGetText:
     return ContextGetText(context, message, type_='pgettext')
 
 
-def npgettext(context: str, msgid1: str, msgid2: str,
-              n: int) -> ContextGetText:
+def npgettext(context: str, msgid1: str, msgid2: str, n: int) -> ContextGetText:
     return ContextGetText(context, msgid1, msgid2, n, type_='npgettext')
 
 

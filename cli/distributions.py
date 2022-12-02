@@ -1,7 +1,6 @@
 import json
 import os.path
 from distutils.dist import Distribution
-from sys import stderr
 
 from app.constants import PROJECT_PATH
 

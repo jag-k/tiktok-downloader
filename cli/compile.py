@@ -7,7 +7,7 @@ from cli.distributions import dist
 def main():
     obj = compile_catalog(dist)
     obj.domain = DOMAIN
-    obj.output_dir = LOCALE_PATH
+    obj.directory = LOCALE_PATH
     obj.statistics = True
     obj.description = dist.get_description()
     obj.finalize_options()

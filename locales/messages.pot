@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: video-downloader-bot 0.1.0\n"
 "Report-Msgid-Bugs-To: jag-k@users.noreply.github.com\n"
-"POT-Creation-Date: 2022-11-21 22:31+0400\n"
+"POT-Creation-Date: 2022-11-26 18:06+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -110,105 +110,47 @@ msgstr ""
 msgid "Choose language"
 msgstr ""
 
-#: app/settings/user_settings.py:41
-msgid "👤 Add author in media"
+#: main.py:38
+msgid " from {flag}"
 msgstr ""
 
-#: app/settings/user_settings.py:42
-msgid "Add author in media are {}!"
-msgstr ""
-
-#: app/settings/user_settings.py:43
+#: main.py:44
 msgid ""
-"Add author in media (video/audio/images):\n"
 "\n"
-"{}\n"
 "\n"
-"Example: So funny video by <code>@username</code> from TikTok"
+"\n"
+"<i>Original video is larger than <b>20 MB</b>, and bot can't send it.</i> <a "
+"href=\"{url}\">This is original link</a>"
 msgstr ""
 
-#: app/settings/user_settings.py:53
-msgid "🔗 Add original link in media"
-msgstr ""
-
-#: app/settings/user_settings.py:54
-msgid "Add original link in media are {}!"
-msgstr ""
-
-#: app/settings/user_settings.py:55
+#: main.py:92
 msgid ""
-"Add original link in media:\n"
+"Error sending video: {title}\n"
 "\n"
-"{}\n"
 "\n"
-"<i>️📝 NOTE!</i> Twitter always add original link in media."
+"<a href=\"{url}\">Direct link to video</a>"
 msgstr ""
 
-#: app/settings/user_settings.py:65
-msgid "🏳️ Add flag to TikTok videos/images"
+#: main.py:126
+msgid "by @{author} "
 msgstr ""
 
-#: app/settings/user_settings.py:66
-msgid "Add flag to TikTok videos/images are {}!"
+#: main.py:132
+msgid "from {m_type}"
 msgstr ""
 
-#: app/settings/user_settings.py:67
-msgid ""
-"Adds the flag of the country from which the videos/images was uploaded "
-"(author's country):\n"
-"\n"
-"{}"
+#: main.py:148
+msgid "Recently added"
 msgstr ""
 
-#: app/settings/user_settings.py:74 app/settings/user_settings.py:82
-msgid "📜 All"
-msgstr ""
+#: main.py:179
+#, python-format
+msgid "Found %d video"
+msgid_plural "Found %d videos"
+msgstr[0] ""
+msgstr[1] ""
 
-#: app/settings/user_settings.py:75
-msgid "👥 Groups"
-msgstr ""
-
-#: app/settings/user_settings.py:76
-msgid "👤 Private"
-msgstr ""
-
-#: app/settings/user_settings.py:77
-msgid "🔎 Inline"
-msgstr ""
-
-#: app/settings/user_settings.py:78
-msgid "❌ Not save"
-msgstr ""
-
-#: app/settings/user_settings.py:83
-msgid "👥 Groups, where bot are added"
-msgstr ""
-
-#: app/settings/user_settings.py:84
-msgid "👤 Private (in bot chat)"
-msgstr ""
-
-#: app/settings/user_settings.py:85
-msgid "🔎 Inline queries (saves even if you didn't send the video)"
-msgstr ""
-
-#: app/settings/user_settings.py:86
-msgid "❌ Not saving history"
-msgstr ""
-
-#: app/settings/user_settings.py:90
-msgid "📝 Saving History"
-msgstr ""
-
-#: app/settings/user_settings.py:95
-msgid "History saving changed to {}!"
-msgstr ""
-
-#: app/settings/user_settings.py:106
-msgid ""
-"Choose source to save in history. To see the history, use <i>Inline "
-"Query</i>.\n"
-"\n"
-"Current: <b>{}</b>"
+#: main.py:181
+msgid "No videos found"
 msgstr ""
 

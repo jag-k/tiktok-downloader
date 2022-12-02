@@ -1,4 +1,7 @@
 import argparse
+import os
+
+os.putenv('CLI_MODE', '1')
 
 from app.constants import DEFAULT_LOCALE
 from cli.compile import main as compile_locale

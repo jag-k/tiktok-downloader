@@ -26,6 +26,6 @@ Telegram bot for downloading videos from social networks.
 ```bash
 python -m cli extract  # Extract strings from code to .POT file
 python -m cli update -l ru  #  Update .PO file for Russian language
-python -m cli full-update -l ru  #  Extract strings and update .PO file for Russian language
+python -m cli full_update -l ru  #  Extract strings and update .PO file for Russian language
 python -m cli compile  # Compile .PO files to .MO files
 ```
