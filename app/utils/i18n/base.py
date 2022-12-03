@@ -63,7 +63,7 @@ class ContextGetText:
     def __rmul__(self, __n: int) -> str:
         return str(self).__rmul__(__n)
 
-    def __mod__(self, __other: str) -> str:
+    def __mod__(self, __other) -> str:
         return str(self).__mod__(__other)
 
     def __contains__(self, __other: str) -> bool:

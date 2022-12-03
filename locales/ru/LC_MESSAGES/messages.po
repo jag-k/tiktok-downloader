@@ -175,7 +175,7 @@ msgid "Recently added"
 msgstr "Недавно добавленные"
 
 #: main.py:179
-#, fuzzy, python-format
+#, python-format
 #| msgid "Found %d media"
 #| msgid_plural "Found %d medias"
 msgid "Found %d video"

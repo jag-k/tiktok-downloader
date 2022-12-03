@@ -108,6 +108,17 @@ async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             )
 
 
+def inline_query_description(video: Video):
+    resp = ''
+    if video.author:
+        if video.extra_description:
+            resp += video.extra_description
+        else:
+            resp += _("by @{author} ").format(author=video.author)
+    resp += _("from {m_type}").format(m_type=video.type)
+    return resp
+
+
 def inline_query_video_from_media(
     medias: list[Media]
 ) -> list[InlineQueryResultVideo]:
@@ -119,17 +130,7 @@ def inline_query_video_from_media(
             thumb_url=video.thumbnail_url or video.url,
             title=video.caption,
             caption=video.caption,
-            description=(
-                            (
-                                video.extra_description
-                                if video.extra_description
-                                else _("by @{author} ").format(
-                                    author=video.author
-                                )
-                            )
-                            if video.author
-                            else ''
-                        ) + _("from {m_type}").format(m_type=video.type),
+            description=inline_query_description(video),
         )
         for video in medias
         if isinstance(video, Video)
@@ -156,17 +157,20 @@ async def inline_query(update: Update, ctx: CallbackContext):
 
     logger.info("Inline query: %s", query)
 
+    not_found_text = _('No videos found').s
+
     async with aiohttp.ClientSession() as session:
         medias: list[Media] = await Parser.parse(session, query)
 
     logger.info("Medias: %s", medias)
     if not medias:
-        answer = await send_history()
-        logger.info(
-            'No medias found. Send history from inline query: %s',
-            answer,
+        logger.info('No medias found')
+        return await update.inline_query.answer(
+            [],
+            is_personal=True,
+            switch_pm_text=not_found_text,
+            switch_pm_parameter='help',
         )
-        return
 
     for media in medias:
         if media not in ctx.history:
@@ -175,12 +179,11 @@ async def inline_query(update: Update, ctx: CallbackContext):
     results: list[InlineQueryResult] = inline_query_video_from_media(medias)
     await update.inline_query.answer(
         results,
+        is_personal=True,
         switch_pm_text=(
-            _n('Found %d video', 'Found %d videos', len(results))
-            % str(len(results))
-            if results
-            else _('No videos found')
-        ).s,
+            _n('Found %d video', 'Found %d videos', len(results)) % len(results)
+            if results else not_found_text
+        ),
         switch_pm_parameter='help',
     )
 

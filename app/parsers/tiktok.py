@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from random import randint
@@ -55,20 +56,21 @@ class Parser(BaseParser):
         match: Match
     ) -> list[Media]:
         m = match.groupdict({})
+        author = ''
         try:
             url_id = m.get('id')
             if not url_id:
                 raise IndexError
-            domain = m.get('domain', 'vm')
+            domain = m.get('domain', 'vt')
             original_url = f"https://{domain}.tiktok.com/{url_id}"
             logger.info("Get video id from: %s", original_url)
             video_id: int = await cls._get_video_id(original_url)
 
         except IndexError:
-            nickname = m.get('author')
+            author = m.get('author', '').lower()
             video_id: int = int(m.get('video_id'))
             original_url = (
-                f"https://www.tiktok.com/@{nickname}/video/{video_id}"
+                f"https://www.tiktok.com/@{author}/video/{video_id}"
             )
 
         logger.info(
@@ -86,6 +88,12 @@ class Parser(BaseParser):
                 exc_info=e,
             )
             return []
+        real_author = data.get('author', {}).get('unique_id', '').lower()
+        if author and author != real_author:
+            logger.info(
+                "Author mismatch: %s != %s", author, real_author,
+            )
+            return []
 
         media_type: Literal['video', 'image', None] = data.get('type', None)
         logger.info('Media type: %s', media_type)
@@ -98,18 +106,21 @@ class Parser(BaseParser):
     @staticmethod
     def _process_video(data: dict, original_url: str) -> list[Video]:
         max_quality_url = data.get('video_data', {}).get('nwm_video_url_HQ')
-        url = max(
-            filter(
-                lambda x: x.get('data_size', 0) <= constants.TG_FILE_LIMIT,
-                map(
-                    lambda x: x.get('play_addr', {}),
-                    data
-                    .get('video', {})
-                    .get('bit_rate', [])
+        try:
+            url: str | None = max(
+                filter(
+                    lambda x: x.get('data_size', 0) <= constants.TG_FILE_LIMIT,
+                    map(
+                        lambda x: x.get('play_addr', {}),
+                        data
+                        .get('video', {})
+                        .get('bit_rate', [])
+                    ),
                 ),
-            ),
-            key=lambda x: x.get('data_size', 0),
-        ).get('url_list', [None])[0]
+                key=lambda x: x.get('data_size', 0),
+            ).get('url_list', [None])[0]
+        except ValueError:
+            url = None
 
         if not url:
             logger.info('No url in response')
@@ -122,7 +133,7 @@ class Parser(BaseParser):
             .get('origin_cover', {})
             .get('url_list', [None])[0]
         )
-        author: str | None = data.get('author', {}).get('nickname', None)
+        nickname: str | None = data.get('author', {}).get('nickname', None)
         language: str | None = data.get('region', None)
 
         video = Video(
@@ -130,7 +141,7 @@ class Parser(BaseParser):
             type=ParserType.TIKTOK,
             caption=caption,
             thumbnail_url=thumbnail_url,
-            author=author,
+            author=nickname,
             original_url=original_url,
             language=language,
             max_quality_url=max_quality_url,
