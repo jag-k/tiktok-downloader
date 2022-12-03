@@ -1,15 +1,6 @@
 import logging
 import re
-from typing import Match, Literal
-
-import aiohttp
-from aiohttp import ClientSession
-
-from app import constants
-from app.parsers.base import Parser as BaseParser, ParserType, Video, Media, \
-    MediaGroup
-import logging
-import re
+from random import randint
 from typing import Match, Literal
 
 import aiohttp
@@ -26,6 +17,13 @@ TT_USER_AGENT = (
     "(Linux; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; "
     "Cronet/58.0.2991.0)"
 )
+
+DEVICE_ID_A = 10 * 10 * 10
+DEVICE_ID_B = 9 * 10 ** 10
+
+
+def _device_id() -> int:
+    return randint(DEVICE_ID_A, DEVICE_ID_A)
 
 
 class Parser(BaseParser):
@@ -52,9 +50,9 @@ class Parser(BaseParser):
 
     @classmethod
     async def _parse(
-            cls,
-            session: aiohttp.ClientSession,
-            match: Match
+        cls,
+        session: aiohttp.ClientSession,
+        match: Match
     ) -> list[Media]:
         m = match.groupdict({})
         try:
@@ -164,20 +162,24 @@ class Parser(BaseParser):
     @staticmethod
     async def _get_video_data(video_id: int) -> dict:
         async with ClientSession(
-                headers={
-                    "Accept": "application/json",
-                    "User-Agent": TT_USER_AGENT,
-                }
+            headers={
+                "Accept": "application/json",
+                "User-Agent": TT_USER_AGENT,
+            }
         ) as session:
             async with session.get(
-                    "https://api-h2.tiktokv.com/aweme/v1/feed/",
-                    params={
-                        "aweme_id": video_id,
-                        "version_code": 2613,
-                        "aid": 1180,
-                    },
+                "https://api.tiktokv.com/aweme/v1/feed/",
+                params={
+                    "iid": 6165993682518218889,
+                    "device_id": _device_id(),
+                    "aweme_id": video_id,
+                    "aid": 1180,
+                },
             ) as resp:
                 raw_data: dict = await resp.json()
+            if not raw_data:
+                logger.error("Empty response with %r", resp.url)
+                return {}
         if not raw_data.get('aweme_list', []):
             logger.info('No aweme_list in response')
             return {}
