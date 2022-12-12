@@ -51,7 +51,7 @@ jobs:
 
     environment:
         name: production
-        url: "{{ secrets.ENV_URL }}"
+        url: https://t.me/tt_dwnldr_bot
 
     permissions:
       contents: none
