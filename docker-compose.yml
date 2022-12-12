@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  bot:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    container_name: tiktok-downloader
+    image: ghcr.io/jag-k/tiktok-downloader:latest
+    restart: unless-stopped
+    volumes:
+      - ./config:/config
+      - ./data:/data
+
+

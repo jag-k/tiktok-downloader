@@ -45,9 +45,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Save compose to env
+        run: echo "COMPOSE_FILE=$(cat docker-compose.yml)" >> $GITHUB_ENV
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment: production
 
     permissions:
       contents: none
@@ -59,9 +63,9 @@ jobs:
           CONTAINER_NAME: ${{ github.event.repository.name }}
           CONTAINER_PATH: /opt/docker_containers/${{ github.event.repository.name }}
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          FULL_IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           CR_PAT: ${{ secrets.CR_PAT }}
           CR_USER: ${{ secrets.CR_USER }}
+          COMPOSE_FILE: ${{ env.COMPOSE_FILE }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -70,7 +74,6 @@ jobs:
           script_stop: true
           envs: CONTAINER_NAME,CONTAINER_PATH,IMAGE_NAME,FULL_IMAGE_NAME,CR_PAT,CR_USER
           script: |
-            whoami
             mkdir -p $CONTAINER_PATH
             cd $CONTAINER_PATH
             mkdir -p data config
@@ -79,11 +82,7 @@ jobs:
             docker rm $CONTAINER_NAME || echo "Nothing to remove from containers"
             docker rmi $(docker images --filter=reference="$IMAGE_NAME:*" -q) || \
               echo "Nothing to remove from images"
-            docker run \
-              -d \
-              --name $CONTAINER_NAME \
-              --restart=unless-stopped \
-              --volume $CONTAINER_PATH/config:/config \
-              --volume $CONTAINER_PATH/data:/data \
-              $FULL_IMAGE_NAME
+            rm -rf docker-compose.yml || echo "Nothing to remove"
+            echo $COMPOSE_FILE > docker-compose.yml
+            docker-compose up -d
             docker ps -a
