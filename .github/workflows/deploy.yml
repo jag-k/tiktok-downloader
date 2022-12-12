@@ -46,7 +46,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Save compose to env
-        run: echo "COMPOSE_FILE=$(cat docker-compose.yml)" >> $GITHUB_ENV
+        run: echo "COMPOSE_FILE='$(cat docker-compose.yml)'" >> $GITHUB_ENV
 
   deploy:
     runs-on: ubuntu-latest
