@@ -49,7 +49,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
 
-    environment: production
+    environment:
+        name: production
+        url: "{{ secrets.ENV_URL }}"
 
     permissions:
       contents: none
