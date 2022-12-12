@@ -45,8 +45,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Save compose to env
-        run: echo "COMPOSE_FILE='$(cat docker-compose.yml)'" >> $GITHUB_ENV
+      - name: Save docker compose file
+        id: compose
+        run: |
+          export FILE="$(cat docker-compose.yml)"
+          echo "FILE=$FILE" >> $GITHUB_OUTPUT
 
   deploy:
     runs-on: ubuntu-latest
@@ -65,7 +68,7 @@ jobs:
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           CR_PAT: ${{ secrets.CR_PAT }}
           CR_USER: ${{ secrets.CR_USER }}
-          COMPOSE_FILE: ${{ env.COMPOSE_FILE }}
+          COMPOSE_FILE: ${{ steps.compose.outputs.FILE }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
