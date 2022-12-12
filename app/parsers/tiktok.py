@@ -179,7 +179,7 @@ class Parser(BaseParser):
             }
         ) as session:
             async with session.get(
-                "https://api.tiktokv.com/aweme/v1/feed/",
+                "https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/",
                 params={
                     "iid": 6165993682518218889,
                     "device_id": _device_id(),
