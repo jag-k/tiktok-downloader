@@ -4,6 +4,10 @@
 
 Telegram bot for downloading videos from social networks.
 
+## Translation
+
+![POEditor ru lang](https://img.shields.io/poeditor/progress/580945/ru?token=d1b892d4d62ccf68a483db6de40a1cac)
+
 ## Support services
 
 - [x] TikTok
