@@ -8,7 +8,8 @@ from telegram import Update, InlineQueryResultVideo, InlineQueryResult
 from telegram.constants import MessageEntityType, ParseMode, ChatType
 from telegram.error import BadRequest
 from telegram.ext import Application, ContextTypes, \
-    MessageHandler, InlineQueryHandler, filters, Defaults, PicklePersistence
+    MessageHandler, InlineQueryHandler, filters, Defaults, PicklePersistence, \
+    ChosenInlineResultHandler
 
 from app import commands, settings, constants
 from app.constants import DATA_PATH
@@ -128,13 +129,23 @@ def inline_query_video_from_media(
             video_url=video.url,
             mime_type=video.mime_type,
             thumb_url=video.thumbnail_url or video.url,
-            title=video.caption,
+            title=video.caption or "video",
             caption=video.caption,
             description=inline_query_description(video),
         )
         for video in medias
         if isinstance(video, Video)
     ]
+
+
+async def chosen_inline_query(update: Update, ctx: CallbackContext):
+    video = ctx.temp_history.pop(update.chosen_inline_result.result_id, None)
+    logger.info("Chosen video: %s", video)
+    ctx.temp_history.clear()
+
+    if video and video not in ctx.history:
+        logger.info("Add %s video to history", video)
+        ctx.history.append(video)
 
 
 async def inline_query(update: Update, ctx: CallbackContext):
@@ -148,6 +159,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
             is_personal=True,
             switch_pm_text=_('Recently added').s,
             switch_pm_parameter='help',
+            cache_time=1,
         )
 
     if not query:
@@ -170,13 +182,16 @@ async def inline_query(update: Update, ctx: CallbackContext):
             is_personal=True,
             switch_pm_text=not_found_text,
             switch_pm_parameter='help',
+            cache_time=1,
         )
 
-    for media in medias:
-        if media not in ctx.history:
-            ctx.history.append(media)
-
     results: list[InlineQueryResult] = inline_query_video_from_media(medias)
+    for video, iq_video in zip(
+        filter(lambda x: isinstance(x, Video), medias),
+        results
+    ):
+        ctx.temp_history[iq_video.id] = video
+
     await update.inline_query.answer(
         results,
         is_personal=True,
@@ -185,6 +200,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
             if results else not_found_text
         ),
         switch_pm_parameter='help',
+        cache_time=1,
     )
 
 
@@ -219,6 +235,7 @@ def main() -> None:
 
     commands.connect_commands(application)
     application.add_handler(settings.callback_handler())
+    application.add_handler(ChosenInlineResultHandler(chosen_inline_query))
     application.add_handler(InlineQueryHandler(inline_query))
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, link_parser)

@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 from random import randint
@@ -14,9 +13,10 @@ from app.parsers.base import Parser as BaseParser, ParserType, Video, Media, \
 logger = logging.getLogger(__name__)
 
 TT_USER_AGENT = (
-    "com.ss.android.ugc.trill/2613 "
-    "(Linux; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; "
-    "Cronet/58.0.2991.0)"
+    "com.ss.android.ugc.trill/494+Mozilla/5.0+"
+    "(Linux;+Android+12;+2112123G+Build/SKQ1.211006.001;+wv)+"
+    "AppleWebKit/537.36+(KHTML,+like+Gecko)+Version/4.0+"
+    "Chrome/107.0.5304.105+Mobile+Safari/537.36"
 )
 
 DEVICE_ID_A = 10 * 10 * 10
@@ -181,10 +181,7 @@ class Parser(BaseParser):
             async with session.get(
                 "https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/",
                 params={
-                    "iid": 6165993682518218889,
-                    "device_id": _device_id(),
                     "aweme_id": video_id,
-                    "aid": 1180,
                 },
             ) as resp:
                 raw_data: dict = await resp.json()

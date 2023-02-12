@@ -15,8 +15,16 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
         self._user_lang: str | None = None
 
     @property
-    def history(self):
+    def history(self) -> list:
         return self.user_data.setdefault('history', [])
+
+    @property
+    def temp_history(self):
+        return self.user_data.setdefault('tmp_history', {})
+
+    @temp_history.setter
+    def temp_history(self, value: dict):
+        self.user_data['tmp_history'] = value
 
     @history.setter
     def history(self, value: list):
