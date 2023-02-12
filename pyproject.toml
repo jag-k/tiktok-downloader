@@ -10,11 +10,11 @@ python = "^3.10"
 python-telegram-bot = "^20.1"
 aiohttp = "^3.8.3"
 pytube = "^12.1.2"
-setuptools = "^65.5.0"
 python-dotenv = "^0.21.1"
+pytz = "^2022.7.1"
 
-[tool.poetry.dev-dependencies]
-Babel = "^2.11.0"
+[tool.poetry.group.dev.dependencies]
+babel = "^2.11.0"
 
 [build-system]
 requires = ["poetry-core"]

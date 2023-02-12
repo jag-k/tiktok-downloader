@@ -1,5 +1,6 @@
 FROM python:3.10-alpine
 
+# Setup environment variables:
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONHASHSEED=random \
@@ -11,9 +12,12 @@ ENV PYTHONFAULTHANDLER=1 \
   BASE_PATH=/
 
 # System deps:
-RUN apk add --update --no-cache --virtual .tmp-build-deps \
-    gcc libc-dev linux-headers postgresql-dev \
-    && apk add libffi-dev
+RUN apk add \
+  --update \
+  --no-cache \
+  --virtual .tmp-build-deps \
+  gcc libc-dev linux-headers libffi-dev
+
 RUN pip install "poetry==$POETRY_VERSION"
 
 # Copy only requirements to cache them in docker layer
@@ -22,8 +26,7 @@ COPY poetry.lock pyproject.toml /code/
 
 # Project initialization:
 RUN poetry config virtualenvs.create false \
-  && poetry install --no-dev --no-interaction --no-ansi
-RUN pip install setuptools
+  && poetry install --no-interaction --no-ansi --without dev
 
 # Creating folders, and files for a project:
 COPY . /code
