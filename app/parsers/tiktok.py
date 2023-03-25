@@ -1,14 +1,16 @@
+import asyncio
 import logging
 import re
 from random import randint
-from typing import Match, Literal
+from re import Match
+from typing import Literal
 
 import aiohttp
 from aiohttp import ClientSession
 
 from app import constants
-from app.parsers.base import Parser as BaseParser, ParserType, Video, Media, \
-    MediaGroup
+from app.parsers.base import Media, MediaGroup, ParserType, Video
+from app.parsers.base import Parser as BaseParser
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +22,7 @@ TT_USER_AGENT = (
 )
 
 DEVICE_ID_A = 10 * 10 * 10
-DEVICE_ID_B = 9 * 10 ** 10
+DEVICE_ID_B = 9 * 10**10
 
 
 def _device_id() -> int:
@@ -36,12 +38,11 @@ class Parser(BaseParser):
             r"(?:https?://)?"
             r"(?:(?P<domain>[a-z]{2})\.)?tiktok\.com/(?P<id>\w+)/?"
         ),
-
         # https://www.tiktok.com/@thejoyegg/video/7136001098841591041
         re.compile(
             r"(?:https?://)?"
             r"(?:www.)?tiktok\.com/@(?P<author>\w+)/video/(?P<video_id>\d+)/?"
-        )
+        ),
     ]
     CUSTOM_EMOJI_ID = 5465416081105493315  # 📹
 
@@ -51,27 +52,25 @@ class Parser(BaseParser):
 
     @classmethod
     async def _parse(
-        cls,
-        session: aiohttp.ClientSession,
-        match: Match
+        cls, session: aiohttp.ClientSession, match: Match
     ) -> list[Media]:
         m = match.groupdict({})
-        author = ''
+        author = ""
         try:
-            url_id = m.get('id')
+            url_id = m.get("id")
             if not url_id:
                 raise IndexError
-            domain = m.get('domain', 'vt')
+            domain = m.get("domain", "vt")
             original_url = f"https://{domain}.tiktok.com/{url_id}"
             logger.info("Get video id from: %s", original_url)
-            video_id: int = await cls._get_video_id(original_url)
+            video_id: int | None = await cls._get_video_id(original_url)
+            if video_id is None:
+                return []
 
         except IndexError:
-            author = m.get('author', '').lower()
-            video_id: int = int(m.get('video_id'))
-            original_url = (
-                f"https://www.tiktok.com/@{author}/video/{video_id}"
-            )
+            author = m.get("author", "").lower()
+            video_id: int = int(m.get("video_id"))
+            original_url = f"https://www.tiktok.com/@{author}/video/{video_id}"
 
         logger.info(
             "Getting video link from: %s (video_id=%d)",
@@ -84,57 +83,57 @@ class Parser(BaseParser):
 
         except Exception as e:
             logger.exception(
-                'Error while getting video data: %s', original_url,
+                "Error while getting video data: %s",
+                original_url,
                 exc_info=e,
             )
             return []
-        real_author = data.get('author', {}).get('unique_id', '').lower()
+        real_author = data.get("author", {}).get("unique_id", "").lower()
         if author and author != real_author:
             logger.info(
-                "Author mismatch: %s != %s", author, real_author,
+                "Author mismatch: %s != %s",
+                author,
+                real_author,
             )
             return []
 
-        media_type: Literal['video', 'image', None] = data.get('type', None)
-        logger.info('Media type: %s', media_type)
-        if media_type == 'video':
+        media_type: Literal["video", "image", None] = data.get("type", None)
+        logger.info("Media type: %s", media_type)
+        if media_type == "video":
             return cls._process_video(data, original_url)
-        elif media_type == 'image':
+        elif media_type == "image":
             return cls._process_image(data, original_url)
         return []
 
     @staticmethod
     def _process_video(data: dict, original_url: str) -> list[Video]:
-        max_quality_url = data.get('video_data', {}).get('nwm_video_url_HQ')
+        max_quality_url = data.get("video_data", {}).get("nwm_video_url_HQ")
         try:
             url: str | None = max(
                 filter(
-                    lambda x: x.get('data_size', 0) <= constants.TG_FILE_LIMIT,
-                    map(
-                        lambda x: x.get('play_addr', {}),
-                        data
-                        .get('video', {})
-                        .get('bit_rate', [])
+                    lambda x: x.get("data_size", 0) <= constants.TG_FILE_LIMIT,
+                    (
+                        x.get("play_addr", {})
+                        for x in data.get("video", {}).get("bit_rate", [])
                     ),
                 ),
-                key=lambda x: x.get('data_size', 0),
-            ).get('url_list', [None])[0]
+                key=lambda x: x.get("data_size", 0),
+            ).get("url_list", [None])[0]
         except ValueError:
             url = None
 
         if not url:
-            logger.info('No url in response')
+            logger.info("No url in response")
             return []
 
-        caption: str | None = data.get('desc', None)
+        caption: str | None = data.get("desc", None)
         thumbnail_url: str | None = (
-            data
-            .get('cover_data', {})
-            .get('origin_cover', {})
-            .get('url_list', [None])[0]
+            data.get("cover_data", {})
+            .get("origin_cover", {})
+            .get("url_list", [None])[0]
         )
-        nickname: str | None = data.get('author', {}).get('nickname', None)
-        language: str | None = data.get('region', None)
+        nickname: str | None = data.get("author", {}).get("nickname", None)
+        language: str | None = data.get("region", None)
 
         video = Video(
             url=url,
@@ -159,16 +158,15 @@ class Parser(BaseParser):
             async with session.get(url, allow_redirects=False) as resp:
                 if resp.status == 301:
                     return int(
-                        resp.headers['Location']
-                        .split('?', 1)[0]
-                        .rsplit('/', 1)[-1]
+                        resp.headers["Location"]
+                        .split("?", 1)[0]
+                        .rsplit("/", 1)[-1]
                     )
             async with session.get(url) as resp:
-                return int(
-                    resp.url
-                    .split('?', 1)[0]
-                    .rsplit('/', 1)[-1]
-                )
+                id_ = resp.url.path.rsplit("/", 1)[-1]
+                if not id_:
+                    return None
+                return int(id_)
 
     @staticmethod
     async def _get_video_data(video_id: int) -> dict:
@@ -188,56 +186,68 @@ class Parser(BaseParser):
             if not raw_data:
                 logger.error("Empty response with %r", resp.url)
                 return {}
-        if not raw_data.get('aweme_list', []):
-            logger.info('No aweme_list in response')
+        if not raw_data.get("aweme_list", []):
+            logger.info("No aweme_list in response")
             return {}
-        data = raw_data['aweme_list'][0]
-        url_type_code = data['aweme_type']
-        url_type = 'video' if url_type_code in (0, 4) else 'image'
+        data = raw_data["aweme_list"][0]
+        url_type_code = data["aweme_type"]
+        url_type = "video" if url_type_code in (0, 4, 66) else "image"
 
         api_data = {
-            'type': url_type,
-            'aweme_id': video_id,
-            'cover_data': {
-                'cover': data['video']['cover'],
-                'origin_cover': data['video']['origin_cover'],
-                'dynamic_cover': (
-                    data['video']['dynamic_cover']
-                    if url_type == 'video'
+            "type": url_type,
+            "aweme_id": video_id,
+            "cover_data": {
+                "cover": data["video"]["cover"],
+                "origin_cover": data["video"]["origin_cover"],
+                "dynamic_cover": (
+                    data["video"]["dynamic_cover"]
+                    if url_type == "video"
                     else None
-                )
+                ),
             },
-            'hashtags': data.pop('text_extra')
+            "hashtags": data.pop("text_extra"),
         }
 
-        if url_type == 'video':
-            wm_video = data['video']['download_addr']['url_list'][0]
-            api_data['video_data'] = {
-                'wm_video_url': wm_video,
-                'wm_video_url_HQ': wm_video,
-                'nwm_video_url': (
-                    data['video']['play_addr']['url_list'][0]
+        if url_type == "video":
+            wm_video = data["video"]["download_addr"]["url_list"][0]
+            api_data["video_data"] = {
+                "wm_video_url": wm_video,
+                "wm_video_url_HQ": wm_video,
+                "nwm_video_url": (data["video"]["play_addr"]["url_list"][0]),
+                "nwm_video_url_HQ": (
+                    data["video"]["bit_rate"][0]["play_addr"]["url_list"][0]
                 ),
-                'nwm_video_url_HQ': (
-                    data['video']['bit_rate'][0]['play_addr']['url_list'][0]
-                )
             }
 
-        elif url_type == 'image':
+        elif url_type == "image":
             no_watermark_image_list = []
             watermark_image_list = []
 
-            for i in data['image_post_info']['images']:
+            for i in data["image_post_info"]["images"]:
                 no_watermark_image_list.append(
-                    i['display_image']['url_list'][0]
+                    i["display_image"]["url_list"][0]
                 )
 
                 watermark_image_list.append(
-                    i['owner_watermark_image']['url_list'][0]
+                    i["owner_watermark_image"]["url_list"][0]
                 )
 
-            api_data['image_data'] = {
-                'no_watermark_image_list': no_watermark_image_list,
-                'watermark_image_list': watermark_image_list
+            api_data["image_data"] = {
+                "no_watermark_image_list": no_watermark_image_list,
+                "watermark_image_list": watermark_image_list,
             }
         return data | api_data
+
+
+async def main():
+    async with ClientSession() as session:
+        print(
+            await Parser.parse(
+                session,
+                "https://vm.tiktok.com/ZMYQFQBQ9/",
+            )
+        )
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

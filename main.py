@@ -1,31 +1,103 @@
 import logging
+import re
 import traceback
 import uuid
 
 import aiohttp as aiohttp
-from aiohttp import ClientSession
-from telegram import Update, InlineQueryResultVideo, InlineQueryResult
-from telegram.constants import MessageEntityType, ParseMode, ChatType
+from telegram import InlineQueryResult, InlineQueryResultVideo, Update
+from telegram.constants import ChatType, MessageEntityType, ParseMode
 from telegram.error import BadRequest
-from telegram.ext import Application, ContextTypes, \
-    MessageHandler, InlineQueryHandler, filters, Defaults, PicklePersistence, \
-    ChosenInlineResultHandler
+from telegram.ext import (
+    Application,
+    ChosenInlineResultHandler,
+    ContextTypes,
+    Defaults,
+    InlineQueryHandler,
+    MessageHandler,
+    PicklePersistence,
+    filters,
+)
 
-from app import commands, settings, constants
+from app import commands, constants, settings
 from app.constants import DATA_PATH
 from app.context import CallbackContext
-from app.parsers import Parser, Video, MediaGroup, Media
-from app.utils import translate_patch_app, a
-from app.utils.i18n import _n, _
+from app.parsers import Media, MediaGroup, Parser, Video
+from app.utils import a, make_caption, translate_patch_app
+from app.utils.i18n import _, _n
 
 logger = logging.getLogger(__name__)
 
 
-async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+async def _process_video(update: Update, ctx: CallbackContext, media: Video):
+    caption = make_caption(ctx, "")
+    extra_caption = ""
+    if media.max_quality_url and media.max_quality_url != media.url:
+        extra_caption = _(
+            "\n\n\n<i>Original video is larger than <b>20 MB</b>,"
+            " and bot can't send it.</i> "
+            '<a href="{url}">'
+            "This is original link</a>"
+        ).format(url=media.max_quality_url)
+
+    media_caption = (caption(media) + extra_caption).strip()
+
+    try:
+        res = await update.message.reply_video(
+            video=media.url,
+            caption=media_caption,
+            supports_streaming=True,
+        )
+        return await media.update(update, res, ctx)
+    except BadRequest as e:
+        try:
+            if e.message != "Failed to get http url content":
+                raise e
+            res = await update.message.reply_video(
+                video=await media.content,
+                caption=media_caption,
+                supports_streaming=True,
+            )
+            return await media.update(update, res, ctx)
+        except BadRequest as e:
+            logger.error(
+                "Error sending video: %s",
+                media.url,
+                exc_info=e,
+                stack_info=True,
+            )
+            if update.effective_chat.type == ChatType.PRIVATE:
+                logger.info("Sending video as link: %s", media)
+                await update.message.reply_text(
+                    _(
+                        "Error sending video: {title}\n"
+                        "\n\n"
+                        '<a href="{url}">Direct link to video</a>'
+                    ).format(
+                        title=a(media_caption, media.original_url),
+                        url=media.url,
+                    ),
+                )
+                logger.info("Send video as link: %s", media.url)
+
+
+async def _process_media_group(
+    update: Update, _: CallbackContext, media: MediaGroup
+):
+    i_medias = media.input_medias
+
+    for m in i_medias:
+        m.caption = media.caption
+
+    await update.message.reply_media_group(
+        media=i_medias,
+    )
+
+
+async def link_parser(update: Update, ctx: CallbackContext):
     """Parse link from the user message."""
     text = getattr(update.message, "text", "")
     message_links = [
-        text[entity.offset:entity.offset + entity.length]
+        text[entity.offset : entity.offset + entity.length]
         for entity in update.message.entities
         if entity.type == MessageEntityType.URL
     ]
@@ -36,105 +108,46 @@ async def link_parser(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     for media in medias:
         if isinstance(media, Video):
             _from_location = (
-                _(" from {flag}").format(flag=media.language_emoji)
-                if media.language_emoji
-                else ""
+                f" from {media.language_emoji}" if media.language_emoji else ""
             )
             logger.info("Sending video%s: %s", _from_location, media)
-            extra_caption = (
-                _(
-                    '\n\n\n<i>Original video is larger than <b>20 MB</b>,'
-                    ' and bot can\'t send it.</i> '
-                    '<a href="{url}">'
-                    'This is original link</a>'
-                ).format(url=media.max_quality_url)
-                if media.max_quality_url and media.max_quality_url != media.url
-                else ''
-            )
-            try:
-                try:
-                    # async with ClientSession() as session:
-                    #     async with session.get(media.url) as resp:
-                    #         video_content = await resp.content.read()
-                    res = await update.message.reply_video(
-                        video=media.url,
-                        # video=video_content,
-                        caption=media.caption + extra_caption,
-                        supports_streaming=True,
-                    )
-                    if media.update:
-                        return await media.update(update, res, ctx)
-                    return res
-                except BadRequest as e:
-                    if e.message == 'Failed to get http url content':
-                        async with ClientSession() as session:
-                            async with session.get(media.url) as resp:
-                                video_content = await resp.content.read()
-                        res = await update.message.reply_video(
-                            video=video_content,
-                            caption=media.caption + extra_caption,
-                            supports_streaming=True,
-                        )
-                        if media.update:
-                            return await media.update(update, res, ctx)
-                        return res
-                    raise e
-            except BadRequest as e:
-                logger.error(
-                    "Error sending video: %s",
-                    media.url,
-                    exc_info=e,
-                    stack_info=True
-                )
-                if update.effective_chat.type == ChatType.PRIVATE:
-                    logger.info("Sending video as link: %s", media)
-                    title = a(media.caption, media.original_url)
-                    await update.message.reply_text(
-                        _(
-                            'Error sending video: {title}\n'
-                            '\n\n'
-                            '<a href="{url}">Direct link to video</a>'
-                        ).format(title=title, url=media.url),
-                    )
-                    logger.info("Send video as link: %s", media.url)
-        elif isinstance(media, MediaGroup):
+            return await _process_video(update, ctx, media)
+
+        if isinstance(media, MediaGroup):
             logger.info("Sending medias from %s", media.original_url)
-            i_medias = media.input_medias
-
-            for m in i_medias:
-                m.caption = media.caption
-
-            await update.message.reply_media_group(
-                media=i_medias,
-            )
+            return await _process_media_group(update, ctx, media)
 
 
-def inline_query_description(video: Video):
-    resp = ''
+def inline_query_description(video: Video) -> str:
+    resp = ""
     if video.author:
         if video.extra_description:
             resp += video.extra_description
         else:
-            resp += _("by @{author} ").format(author=video.author)
+            resp += _("by <code>@{author}</code> ").format(author=video.author)
     resp += _("from {m_type}").format(m_type=video.type)
+    if video.language:
+        resp += f" {video.language_emoji}"
     return resp
 
 
 def inline_query_video_from_media(
-    medias: list[Media]
+    medias: list[Media], ctx: CallbackContext
 ) -> list[InlineQueryResultVideo]:
+    caption = make_caption(ctx)
+
     return [
         InlineQueryResultVideo(
             id=str(uuid.uuid4()),
-            video_url=video.url,
-            mime_type=video.mime_type,
-            thumb_url=video.thumbnail_url or video.url,
-            title=video.caption or "video",
-            caption=video.caption,
-            description=inline_query_description(video),
+            video_url=media.url,
+            mime_type=media.mime_type,
+            thumbnail_url=media.thumbnail_url or media.url,
+            title=media.caption or _("Video"),
+            caption=caption(media),
+            description=inline_query_description(media),
         )
-        for video in medias
-        if isinstance(video, Video)
+        for media in medias
+        if isinstance(media, Video)
     ]
 
 
@@ -151,44 +164,52 @@ async def chosen_inline_query(update: Update, ctx: CallbackContext):
 async def inline_query(update: Update, ctx: CallbackContext):
     """Handle the inline query."""
     logger.info("Checking inline query...")
-    query = (update.inline_query.query or '').strip()
+    query = (update.inline_query.query or "").strip()
 
     async def send_history():
         return await update.inline_query.answer(
-            inline_query_video_from_media(ctx.history[::-1]),
+            inline_query_video_from_media(ctx.history[::-1], ctx),
             is_personal=True,
-            switch_pm_text=_('Recently added').s,
-            switch_pm_parameter='help',
+            switch_pm_text=_("Recently added").s,
+            switch_pm_parameter="help",
             cache_time=1,
         )
 
     if not query:
         answer = await send_history()
-        logger.info('Send history from inline query: %s', answer)
+        logger.info("Send history from inline query: %s", answer)
         return answer
 
     logger.info("Inline query: %s", query)
 
-    not_found_text = _('No videos found').s
+    not_found_text = _(
+        "No videos found. You don't think it's correct? Press here!"
+    )
 
     async with aiohttp.ClientSession() as session:
         medias: list[Media] = await Parser.parse(session, query)
 
     logger.info("Medias: %s", medias)
     if not medias:
-        logger.info('No medias found')
+        m = re.match(r"https?://(?:www\.)?(.*)", query)
+        if m:
+            query = m.groups()[0]
+        r_query = query.replace("/", "__").replace(".", "--")
+        report = f"report_{r_query}"
+        logger.info("No medias found. Report: %s", report)
         return await update.inline_query.answer(
             [],
             is_personal=True,
-            switch_pm_text=not_found_text,
-            switch_pm_parameter='help',
+            switch_pm_text=not_found_text.s,
+            switch_pm_parameter=report,
             cache_time=1,
         )
 
-    results: list[InlineQueryResult] = inline_query_video_from_media(medias)
+    results: list[InlineQueryResult] = inline_query_video_from_media(
+        medias, ctx
+    )
     for video, iq_video in zip(
-        filter(lambda x: isinstance(x, Video), medias),
-        results
+        filter(lambda x: isinstance(x, Video), medias), results
     ):
         ctx.temp_history[iq_video.id] = video
 
@@ -196,10 +217,11 @@ async def inline_query(update: Update, ctx: CallbackContext):
         results,
         is_personal=True,
         switch_pm_text=(
-            _n('Found %d video', 'Found %d videos', len(results)) % len(results)
-            if results else not_found_text
+            _n("Found %d video", "Found %d videos", len(results)) % len(results)
+            if results
+            else not_found_text
         ),
-        switch_pm_parameter='help',
+        switch_pm_parameter="help",
         cache_time=1,
     )
 
@@ -224,8 +246,7 @@ def main() -> None:
         tzinfo=constants.TIME_ZONE,
     )
     application = (
-        Application
-        .builder()
+        Application.builder()
         .persistence(persistence)
         .defaults(defaults=defaults)
         .token(constants.TOKEN)

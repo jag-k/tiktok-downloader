@@ -5,12 +5,12 @@ def a(text: str, url: str = None) -> str:
 
 
 def b(text: str) -> str:
-    return f'<b>{text}</b>'
+    return f"<b>{text}</b>"
 
 
 def i(text: str) -> str:
-    return f'<i>{text}</i>'
+    return f"<i>{text}</i>"
 
 
 def u(text: str) -> str:
-    return f'<u>{text}</u>'
+    return f"<u>{text}</u>"

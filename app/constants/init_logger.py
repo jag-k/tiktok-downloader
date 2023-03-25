@@ -9,10 +9,9 @@ from app.constants.json_logger import JsonFormatter
 
 
 def init_logger_config(
-    log_path: Path,
-    time_zone: tzinfo = pytz.timezone('Europe/Moscow')
+    log_path: Path, time_zone: tzinfo = pytz.timezone("Europe/Moscow")
 ):
-    log_filename = datetime.now(time_zone).strftime('_%Y-%m-%d-%H-%M-%S.jsonl')
+    log_filename = datetime.now(time_zone).strftime("_%Y-%m-%d-%H-%M-%S.jsonl")
     config = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -31,7 +30,7 @@ def init_logger_config(
                     "message": "message",
                     "loggerName": "name",
                 },
-            }
+            },
         },
         "handlers": {
             "console": {
@@ -46,9 +45,8 @@ def init_logger_config(
                 "mode": "w",
                 "maxBytes": 10485760,
                 "backupCount": 40,
-                "encoding": "utf8"
+                "encoding": "utf8",
             },
-
             "error_file_handler": {
                 "class": "logging.handlers.RotatingFileHandler",
                 "level": "ERROR",
@@ -57,28 +55,28 @@ def init_logger_config(
                 "mode": "w",
                 "maxBytes": 10485760,
                 "backupCount": 40,
-                "encoding": "utf8"
-            }
+                "encoding": "utf8",
+            },
         },
         "loggers": {
             "": {
-                "level": logging.DEBUG if os.getenv('DEBUG') else logging.INFO,
+                "level": logging.DEBUG if os.getenv("DEBUG") else logging.INFO,
                 "handlers": ["console"],
             },
         },
         "root": {
             "level": "INFO",
-            "handlers": ["console", "info_file_handler", "error_file_handler"]
-        }
+            "handlers": ["console", "info_file_handler", "error_file_handler"],
+        },
     }
 
-    if os.getenv('DISABLE_LOG'):
+    if os.getenv("DISABLE_LOG"):
         logging.disable()
-    elif os.getenv('CLI_MODE'):
+    elif os.getenv("CLI_MODE"):
         logging.basicConfig(
             level=logging.DEBUG,
-            format='%(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S',
+            format="%(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
     else:
         logging.config.dictConfig(config)

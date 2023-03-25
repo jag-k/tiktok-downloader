@@ -21,8 +21,9 @@ class JsonFormatter(logging.Formatter):
         self,
         fmt_dict: dict = None,
         time_format: str = "%Y-%m-%dT%H:%M:%S",
-        msec_format: str = "%s.%03dZ"
+        msec_format: str = "%s.%03dZ",
     ):
+        super().__init__()
         self.fmt_dict = fmt_dict or {"message": "message"}
         self.default_time_format = time_format
         self.default_msec_format = msec_format
@@ -41,8 +42,10 @@ class JsonFormatter(logging.Formatter):
         instead of a string.
         KeyError is raised if an unknown attribute is provided in the fmt_dict.
         """
-        return {fmt_key: record.__dict__[fmt_val] for fmt_key, fmt_val in
-                self.fmt_dict.items()}
+        return {
+            fmt_key: record.__dict__[fmt_val]
+            for fmt_key, fmt_val in self.fmt_dict.items()
+        }
 
     def format(self, record) -> str:
         """
@@ -53,7 +56,7 @@ class JsonFormatter(logging.Formatter):
         record.message = record.getMessage()
 
         if self.usesTime():
-            setattr(record, 'asctime', self.formatTime(record, self.datefmt))
+            setattr(record, "asctime", self.formatTime(record, self.datefmt))
 
         message_dict = self.formatMessage(record)
 
@@ -72,15 +75,17 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(message_dict, default=str)
 
 
-json_handler = RotatingFileHandler("foo.json")
-json_formatter = JsonFormatter({
-    "level": "levelname",
-    "message": "message",
-    "loggerName": "name",
-    "processName": "processName",
-    "processID": "process",
-    "threadName": "threadName",
-    "threadID": "thread",
-    "timestamp": "asctime"
-})
+json_handler = RotatingFileHandler("tmp.json")
+json_formatter = JsonFormatter(
+    {
+        "level": "levelname",
+        "message": "message",
+        "loggerName": "name",
+        "processName": "processName",
+        "processID": "process",
+        "threadName": "threadName",
+        "threadID": "thread",
+        "timestamp": "asctime",
+    }
+)
 json_handler.setFormatter(json_formatter)

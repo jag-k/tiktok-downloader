@@ -1,29 +1,31 @@
+from collections.abc import Iterator
 from contextvars import ContextVar
-from gettext import translation, NullTranslations
-from typing import Iterator
+from gettext import NullTranslations, translation
+from typing import Union
 
 from app import constants
 
 __all__ = (
     "CURRENT_LANG",
     "ContextGetText",
+    "Str",
 )
 
-CURRENT_LANG = ContextVar('CURRENT_LANG', default=constants.DEFAULT_LOCALE)
+CURRENT_LANG = ContextVar("CURRENT_LANG", default=constants.DEFAULT_LOCALE)
 
 _translations: dict[str, NullTranslations] = {}
 
+Str = Union[str, "ContextGetText"]
+
 
 class ContextGetText:
-    def __init__(self, *args, type_: str = 'gettext'):
+    def __init__(self, *args, type_: str = "gettext"):
         self.args = args
         self.type = type_
 
     def __str__(self):
         lang = CURRENT_LANG.get()
-        path = (
-            constants.LOCALE_PATH
-        )
+        path = constants.LOCALE_PATH
         t = _translations.get(lang, None)
         if t is None:
             t = translation(
@@ -45,7 +47,7 @@ class ContextGetText:
         return str(self)
 
     def __repr__(self):
-        args = ', '.join(map(repr, self.args))
+        args = ", ".join(map(repr, self.args))
         return f"{self.__class__.__name__}.{self.type}({args})"
 
     def __getattr__(self, item):

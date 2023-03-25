@@ -4,3 +4,5 @@ data/
 config/
 .env.local
 .env
+.ruff_cache/
+**/tmp.json

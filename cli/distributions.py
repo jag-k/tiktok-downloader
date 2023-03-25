@@ -4,54 +4,52 @@ from distutils.dist import Distribution
 
 from app.constants import PROJECT_PATH
 
-__all__ = ['dist']
+__all__ = ["dist"]
 PROJECT_PATH.cwd()
 
 os.chdir(PROJECT_PATH)
 
 ext = {
-    'license': 'MIT',
+    "license": "MIT",
 }
-ignore_fields = ['readme', 'packages']
+ignore_fields = ["readme", "packages"]
 
 
 def author_extractor(field: list[str] = None) -> dict:
     if not field:
         return {}
     author = field[0]
-    if ' <' in author and author.endswith('>'):
-        name, email = author.split(' <')
+    if " <" in author and author.endswith(">"):
+        name, email = author.split(" <")
         email = email[:-1]
 
         return {
-            'author': name,
-            'maintainer': name,
-            'author_email': email,
-            'maintainer_email': email,
+            "author": name,
+            "maintainer": name,
+            "author_email": email,
+            "maintainer_email": email,
         }
-    return {'author': author, 'maintainer': author}
+    return {"author": author, "maintainer": author}
 
 
-extra_fields = {
-    'authors': author_extractor
-}
+extra_fields = {"authors": author_extractor}
 
-with (PROJECT_PATH / 'pyproject.toml').open('r') as pyproject:
+with (PROJECT_PATH / "pyproject.toml").open("r") as pyproject:
     parse = False
     while True:
         line = pyproject.readline().strip()
         if not line:
             break
 
-        if line == '[tool.poetry]':
+        if line == "[tool.poetry]":
             parse = True
             continue
 
         if parse:
-            if line.startswith('['):
+            if line.startswith("["):
                 parse = False
                 break
-            key, value = map(str.strip, line.split('=', 1))
+            key, value = map(str.strip, line.split("=", 1))
             if key in ignore_fields:
                 continue
             value = json.loads(value)
@@ -61,3 +59,8 @@ with (PROJECT_PATH / 'pyproject.toml').open('r') as pyproject:
                 ext[key] = value.strip('"')
 
 dist = Distribution(ext)
+
+if __name__ == "__main__":
+    print(dist)
+    print(dist.get_author_email())
+    print(dist.get_description())

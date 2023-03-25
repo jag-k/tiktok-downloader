@@ -1,6 +1,6 @@
 from babel.messages.frontend import compile_catalog
 
-from app.constants import LOCALE_PATH, DOMAIN
+from app.constants import DOMAIN, LOCALE_PATH
 from cli.distributions import dist
 
 
@@ -14,5 +14,5 @@ def main():
     obj.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

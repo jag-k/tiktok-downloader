@@ -1,27 +1,24 @@
+# flake8: noqa: E402
+
 import argparse
 import os
 
-os.putenv('CLI_MODE', '1')
+os.putenv("CLI_MODE", "1")
 
 from app.constants import DEFAULT_LOCALE
 from cli.compile import main as compile_locale
 from cli.extract import main as extract_locale
 from cli.update import main as update_locale
 
-parser = argparse.ArgumentParser(description='Manage translations')
+parser = argparse.ArgumentParser(description="Manage translations")
 
 parser.add_argument(
-    'command',
-    choices=[
-        'extract',
-        'compile',
-        'update',
-        'full_update'
-    ],
-    help='Command to run'
+    "command",
+    choices=["extract", "compile", "update", "full_update"],
+    help="Command to run",
 )
 
-parser.add_argument('-l', '--lang', default='ru')
+parser.add_argument("-l", "--lang", default="ru")
 
 
 def full_update_locale(lang: str = DEFAULT_LOCALE):
@@ -32,17 +29,17 @@ def full_update_locale(lang: str = DEFAULT_LOCALE):
 def main():
     n = parser.parse_args()
     match n.command:
-        case 'extract':
+        case "extract":
             extract_locale()
-        case 'compile':
+        case "compile":
             compile_locale()
-        case 'update':
+        case "update":
             update_locale(n.lang)
-        case 'full_update':
+        case "full_update":
             full_update_locale(n.lang)
         case _:
             return parser.print_help()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

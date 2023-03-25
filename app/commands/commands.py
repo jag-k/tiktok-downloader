@@ -1,3 +1,5 @@
+import logging
+
 from telegram import Update
 from telegram.helpers import create_deep_linked_url
 
@@ -5,10 +7,12 @@ from app import constants, settings
 from app.commands.registrator import CommandRegistrator
 from app.context import CallbackContext
 from app.parsers.base import Parser
-from app.utils import a, b
+from app.utils import a, async_add_report, b
 from app.utils.i18n import _
 
 commands = CommandRegistrator()
+
+logger = logging.getLogger(__name__)
 
 
 def start_text() -> str:
@@ -24,27 +28,39 @@ def start_text() -> str:
 
 @commands.add(description=_("Start using the bot"))
 async def start(update: Update, ctx: CallbackContext) -> None:
+    report = ctx.report_args
+    if report:
+        await async_add_report(update, report)
+        await update.message.reply_html(
+            _(
+                "Thank you for your report!\n"
+                "We will try to fix this issue as soon as possible."
+            ).s
+        )
+        logger.info("Report from %s: %s", update.message.from_user, report)
+        return
+
     await update.message.reply_html(
         _("{}\n\nUse /help to get more information.").format(start_text())
     )
 
 
-@commands.add('help', _("Get more information about the bot."))
+@commands.add("help", _("Get more information about the bot."))
 async def help_command(update: Update, ctx: CallbackContext) -> None:
-    link = create_deep_linked_url(ctx.bot.username, 'start', group=True)
+    link = create_deep_linked_url(ctx.bot.username, "start", group=True)
     cmds = commands.get_command_description()
-    supported_commands = '\n'.join(
+    supported_commands = "\n".join(
         f"- /{command} - {str(description)}"
         for command, description in cmds.items()
     )
-    contacts = ''
+    contacts = ""
     if constants.CONTACTS:
-        contacts_list = '\n'.join(
+        contacts_list = "\n".join(
             f'{c["type"]}: {a(c["text"], c.get("url"))}'
             for c in constants.CONTACTS
-            if all(map(c.get, ('type', 'text')))
+            if all(map(c.get, ("type", "text")))
         )
-        contacts = f"\n\nContacts:\n{contacts_list}" if contacts_list else ''
+        contacts = f"\n\nContacts:\n{contacts_list}" if contacts_list else ""
 
     await update.message.reply_text(
         _(

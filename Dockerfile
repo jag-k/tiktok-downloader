@@ -1,4 +1,4 @@
-FROM python:3.10-alpine
+FROM python:3.11-alpine
 
 # Setup environment variables:
 ENV PYTHONFAULTHANDLER=1 \
@@ -7,7 +7,7 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION=1.3.2 \
+  POETRY_VERSION=1.4.1 \
   RUNNING_IN_DOCKER=true \
   BASE_PATH=/
 
@@ -32,4 +32,3 @@ RUN poetry config virtualenvs.create false \
 COPY . /code
 
 CMD python main.py
-

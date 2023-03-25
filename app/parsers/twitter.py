@@ -1,11 +1,12 @@
 import logging
 import os
 import re
-from typing import Match
+from re import Match
 
 import aiohttp
 
-from app.parsers.base import Parser as BaseParser, ParserType, Video, Media
+from app.parsers.base import Media, ParserType, Video
+from app.parsers.base import Parser as BaseParser
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +23,7 @@ class Parser(BaseParser):
     REG_EXPS = [
         TWITTER_RE,
         # https://t.co/sOHvySZwUo
-        re.compile(
-            r"(?:https?://)?t\.co/(?P<tco_id>\w+)"
-        )
+        re.compile(r"(?:https?://)?t\.co/(?P<tco_id>\w+)"),
     ]
     CUSTOM_EMOJI_ID = 5465453979896913711  # 💬
 
@@ -34,15 +33,13 @@ class Parser(BaseParser):
 
     @classmethod
     async def _parse(
-            cls,
-            session: aiohttp.ClientSession,
-            match: Match
+        cls, session: aiohttp.ClientSession, match: Match
     ) -> list[Media]:
         try:
-            tweet_id = match.group('id')
+            tweet_id = match.group("id")
         except IndexError:
             try:
-                tco_id = match.group('tco_id')
+                tco_id = match.group("tco_id")
             except IndexError:
                 return []
             async with session.get(f"https://t.co/{tco_id}") as response:
@@ -51,27 +48,26 @@ class Parser(BaseParser):
 
         original_url = f"https://twitter.com/i/status/{tweet_id}"
 
-        logger.info(
-            "Getting video link from: %s",
-            original_url
-        )
+        logger.info("Getting video link from: %s", original_url)
 
         async with session.get(
-                f"https://api.twitter.com/2/tweets/{tweet_id}",
-                params={
-                    "media.fields": ','.join((
-                            "type",
-                            "variants",
-                    )),
-                    "expansions": ','.join((
-                            "attachments.media_keys",
-                            "author_id",
-                    )),
-                    "user.fields": ','.join((
-                            "username",
-                    )),
-                },
-                headers={"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"}
+            f"https://api.twitter.com/2/tweets/{tweet_id}",
+            params={
+                "media.fields": ",".join(
+                    (
+                        "type",
+                        "variants",
+                    )
+                ),
+                "expansions": ",".join(
+                    (
+                        "attachments.media_keys",
+                        "author_id",
+                    )
+                ),
+                "user.fields": ",".join(("username",)),
+            },
+            headers={"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"},
         ) as response:
             data: dict = await response.json()
 
@@ -83,13 +79,13 @@ class Parser(BaseParser):
 
         result = []
         for media in medias:
-            if media.get('type') == 'video':
-                thumbnail_url = media.get('preview_image_url')
+            if media.get("type") == "video":
+                thumbnail_url = media.get("preview_image_url")
                 result.append(
                     Video(
                         url=max(
-                            media.get('variants', []),
-                            key=lambda x: x.get("bit_rate", 0)
+                            media.get("variants", []),
+                            key=lambda x: x.get("bit_rate", 0),
                         ).get("url"),
                         caption=caption,
                         thumbnail_url=thumbnail_url,

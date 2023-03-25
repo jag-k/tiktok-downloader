@@ -1,43 +1,70 @@
+# Russian translations for video-downloader-bot.
+# Copyright (C) 2023 ORGANIZATION
+# This file is distributed under the same license as the video-downloader-bot
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
 msgid ""
 msgstr ""
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: POEditor.com\n"
 "Project-Id-Version: Video Downloader\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2023-03-26 03:52+0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
 
-#: app/commands/commands.py:16
+#: app/commands/commands.py:20
 msgid " or "
 msgstr " или "
 
-#: app/commands/commands.py:17
-msgid "Send me a link to a {} video and I'll send this video back to you.\n"
+#: app/commands/commands.py:21
+msgid ""
+"Send me a link to a {} video and I'll send this video back to you.\n"
 "\n"
-"Also, you can use me in groups. Just add me to the group and send a link to a video."
-msgstr "Отправьте мне ссылку на видео {} и я отправлю его вам.\n"
+"Also, you can use me in groups. Just add me to the group and send a link to a"
+" video."
+msgstr ""
+"Отправьте мне ссылку на видео {} и я отправлю его вам.\n"
 "\n"
-"Также вы можете использовать меня в группах. Просто добавьте меня в группу и отправьте ссылку на видео."
+"Также вы можете использовать меня в группах. Просто добавьте меня в группу и "
+"отправьте ссылку на видео."
 
-#: app/commands/commands.py:25
+#: app/commands/commands.py:29
 msgid "Start using the bot"
 msgstr "Начать использовать бота"
 
-#: app/commands/commands.py:28
-msgid "{}\n"
+#: app/commands/commands.py:35
+msgid ""
+"Thank you for your report!\n"
+"We will try to fix this issue as soon as possible."
+msgstr ""
+"Спасибо за ваш отчет!\n"
+"Мы постараемся исправить эту проблему как можно скорее."
+
+#: app/commands/commands.py:44
+msgid ""
+"{}\n"
 "\n"
 "Use /help to get more information."
-msgstr "{}\n"
+msgstr ""
+"{}\n"
 "\n"
 "Используйте /help, чтобы получить больше информации."
 
-#: app/commands/commands.py:32
+#: app/commands/commands.py:48
 msgid "Get more information about the bot."
 msgstr "Получить больше информации о боте."
 
-#: app/commands/commands.py:50
-msgid "{}\n"
+#: app/commands/commands.py:66
+msgid ""
+"{}\n"
 "\n"
 "Link to add in groups: {}\n"
 "\n"
@@ -46,10 +73,12 @@ msgid "{}\n"
 "\n"
 "Inline queries are supported.\n"
 "Use @{} in any chat to get started.\n"
-"To get history of your inline queries, set empty after mention bot (or add some spaces).\n"
+"To get history of your inline queries, set empty after mention bot (or add "
+"some spaces).\n"
 "To get video from inline query, add link to video after mention bot.\n"
 "{}"
-msgstr "{}\n"
+msgstr ""
+"{}\n"
 "\n"
 "Ссылка для добавления бота в группу: {}\n"
 "\n"
@@ -58,103 +87,284 @@ msgstr "{}\n"
 "\n"
 "Inline запросы поддерживаются.\n"
 "Напишите @{} в любом чате для начала работы с ними.\n"
-"Чтобы получить историю ваших встроенных запросов, установите пустое место после упоминания бота (или добавьте несколько пробелов).\n"
-"Чтобы получить видео из встроенного запроса, добавьте ссылку на видео после упоминания бота.\n"
+"Чтобы получить историю ваших встроенных запросов, установите пустое место "
+"после упоминания бота (или добавьте несколько пробелов).\n"
+"Чтобы получить видео из встроенного запроса, добавьте ссылку на видео после "
+"упоминания бота.\n"
 "{}"
 
-#: app/commands/commands.py:72
+#: app/commands/commands.py:88
 msgid "Clear your history from inline queries."
 msgstr "Отчистите Вашу историю из inline запросов."
 
-#: app/commands/commands.py:75
+#: app/commands/commands.py:91
 msgid "History cleared."
 msgstr "История очищена."
 
-#: app/commands/commands.py:78
+#: app/commands/commands.py:94
 msgid "Bot settings"
 msgstr "Настройки бота"
 
-#: app/settings/base.py:216 app/settings/base.py:376
+#: app/settings/base.py:129
+msgid "On"
+msgstr "Вкл"
+
+#: app/settings/base.py:133
+msgid "Off"
+msgstr "Выкл"
+
+#: app/settings/base.py:154
+msgid "⬅️ Back"
+msgstr "⬅️ Назад"
+
+#: app/settings/base.py:235 app/settings/base.py:404
 msgid "Not implemented yet"
 msgstr "Ещё не реализовано"
 
-#: app/settings/base.py:228
-msgid "Settings"
-msgstr "Настройки"
+#: app/settings/base.py:253
+msgid "Settings for user {mention}"
+msgstr "Настройки для пользователя {mention}"
 
-#: app/settings/base.py:294
+#: app/settings/base.py:256
+msgid "Settings for chat \"{title}\""
+msgstr "Настройки для чата \"{title}\""
+
+#: app/settings/base.py:333
 msgid "enabled ✅"
 msgstr "включено ✅"
 
-#: app/settings/base.py:294
+#: app/settings/base.py:333
 msgid "disabled ❌"
 msgstr "выключено ❌"
 
-#: app/settings/base.py:301
+#: app/settings/base.py:340
 msgid "✅ <b>Enabled</b>"
 msgstr "✅ <b>Включено</b>"
 
-#: app/settings/base.py:303
+#: app/settings/base.py:342
 msgid "❌ <b>Disabled</b>"
 msgstr "❌ <b>Выключено</b>"
 
-#: app/settings/user_settings.py:17
-msgid "🇪🇺 Change language"
-msgstr "🇪🇺 Изменить язык"
+#: app/settings/user_settings.py:21
+msgid "🌍 Change language"
+msgstr "🌍 Изменить язык"
 
-#: app/settings/user_settings.py:22
+#: app/settings/user_settings.py:27
 msgid "Language changed to {}!"
 msgstr "Сохранение истории изменено на {}!"
 
-#: app/settings/user_settings.py:31
+#: app/settings/user_settings.py:36
 msgid "Choose language"
 msgstr "Выберите язык"
 
-#: main.py:38
-msgid " from {flag}"
-msgstr " из {flag}"
+#: app/settings/user_settings.py:46
+msgid "👤 Add author in media"
+msgstr "👤 Добавить автора в медиа"
 
-#: main.py:44
-msgid "\n"
-"\n"
-"\n"
-"<i>Original video is larger than <b>20 MB</b>, and bot can't send it.</i> <a href=\"{url}\">This is original link</a>"
-msgstr "\n"
-"\n"
-"\n"
-"<i>Оригинальное видео больше, чем <b>20 МБ</b>, и бот не может его отправить.</i> <a href=\"{url}\">Это прямая ссылка на оригинальное видео</a>"
+#: app/settings/user_settings.py:47
+msgid "Add author in media are {}!"
+msgstr "Добавление автора в медиа теперь {}!"
 
-#: main.py:92
-msgid "Error sending video: {title}\n"
+#: app/settings/user_settings.py:48
+msgid ""
+"Add author in media (video/audio/images):\n"
+"\n"
+"{}\n"
+"\n"
+"Example: So funny video by <code>@username</code>"
+msgstr ""
+"Добавление автора в медиа (видео/аудио/изображения):\n"
+"\n"
+"{}\n"
+"\n"
+"Пример: Очень смешное видео от <code>@username</code> из TikTok"
+
+#: app/settings/user_settings.py:58
+msgid "🔗 Add original link in media"
+msgstr "🔗 Добавить оригинальную ссылку на медиа"
+
+#: app/settings/user_settings.py:59
+msgid "Add original link in media are {}!"
+msgstr "Добавление оригинальной ссылки на медиа теперь {}!"
+
+#: app/settings/user_settings.py:60
+msgid ""
+"Add original link in media:\n"
+"\n"
+"{}\n"
+"\n"
+"<i>️📝 NOTE!</i> Twitter always add original link in media."
+msgstr ""
+"Добавление оригинальной ссылки на медиа:\n"
+"\n"
+"{}\n"
+"\n"
+"<i>️📝 ВАЖНО!</i> Twitter всегда добавляет оригинальную ссылку на медиа."
+
+#: app/settings/user_settings.py:70
+msgid "🏳️ Add flag to TikTok videos/images"
+msgstr "🏳️ Добавить флаг TikTok видео/изображений"
+
+#: app/settings/user_settings.py:71
+msgid "Add flag to TikTok videos/images are {}!"
+msgstr "Добавление флага TikTok видео/изображений теперь {}!"
+
+#: app/settings/user_settings.py:72
+msgid ""
+"Adds the flag of the country from which the videos/images was uploaded "
+"(author's country):\n"
+"\n"
+"{}"
+msgstr ""
+"Добавляет флаг страны, из которой были загружены видео/изображения (страна "
+"автора):\n"
+"\n"
+"{}"
+
+#: app/settings/user_settings.py:81
+msgid "📃️ Add description to videos/images"
+msgstr "📃️ Добавить описание к видео/изображениям"
+
+#: app/settings/user_settings.py:82
+msgid "Add description to videos/images are {}!"
+msgstr "Добавление описания к видео/изображениям теперь {}!"
+
+#: app/settings/user_settings.py:83
+msgid ""
+"Adds the descriptions from the original source to the videos/images:\n"
+"\n"
+"{}"
+msgstr ""
+"Добавляет описания из исходного источника к видео/изображениям:\n"
+"\n"
+"{}"
+
+#: app/settings/user_settings.py:92
+msgid "📬 Add media source to videos/images"
+msgstr "📬️ Добавить источник медиа к видео/изображениям"
+
+#: app/settings/user_settings.py:93
+msgid "Add media source to videos/images are {}!"
+msgstr "Добавление источника медиа к видео/изображениям теперь {}!"
+
+#: app/settings/user_settings.py:94
+msgid ""
+"Add the social network where the videos/images were taken from:\n"
+"\n"
+"{}\n"
+"\n"
+"Example: So funny video from TikTok"
+msgstr ""
+"Добавление социальной сети, из которой были взяты видео/изображения:\n"
+"\n"
+"{}\n"
+"\n"
+"Пример: Очень смешное видео из TikTok"
+
+#: app/settings/user_settings.py:112 app/settings/user_settings.py:120
+msgid "📜 All"
+msgstr "📜 Все"
+
+#: app/settings/user_settings.py:113
+msgid "👥 Groups"
+msgstr "👥 Группы"
+
+#: app/settings/user_settings.py:114
+msgid "👤 Private"
+msgstr "👤 Приватные"
+
+#: app/settings/user_settings.py:115
+msgid "🔎 Inline"
+msgstr "🔎 Inline"
+
+#: app/settings/user_settings.py:116
+msgid "❌ Not save"
+msgstr "❌ Не сохранять"
+
+#: app/settings/user_settings.py:121
+msgid "👥 Groups, where bot are added"
+msgstr "👥 Группы, где бот добавлен"
+
+#: app/settings/user_settings.py:122
+msgid "👤 Private (in bot chat)"
+msgstr "👤 Приватные (в чате бота)"
+
+#: app/settings/user_settings.py:123
+msgid "🔎 Inline queries"
+msgstr "🔎 Inline запросы"
+
+#: app/settings/user_settings.py:124
+msgid "❌ Not saving history"
+msgstr "❌ Не сохранять историю"
+
+#: app/settings/user_settings.py:129
+msgid "📝 Saving History"
+msgstr "📝 Сохранение истории"
+
+#: app/settings/user_settings.py:139
+msgid "History saving changed to {}!"
+msgstr "Сохранение истории изменено на {}!"
+
+#: app/settings/user_settings.py:150
+msgid ""
+"Choose source to save in history. To see the history, use <i>Inline "
+"Query</i>.\n"
+"\n"
+"Current: <b>{}</b>"
+msgstr ""
+"Выберите источник для сохранения в истории. Чтобы посмотреть историю, "
+"используйте <i>Inline запросы</i>.\n"
+
+#: main.py:35
+msgid ""
+"\n"
+"\n"
+"\n"
+"<i>Original video is larger than <b>20 MB</b>, and bot can't send it.</i> <a "
+"href=\"{url}\">This is original link</a>"
+msgstr ""
+"\n"
+"\n"
+"\n"
+"<i>Оригинальное видео больше, чем <b>20 МБ</b>, и бот не может его "
+"отправить.</i> <a href=\"{url}\">Это прямая ссылка на оригинальное видео</a>"
+
+#: main.py:71
+msgid ""
+"Error sending video: {title}\n"
 "\n"
 "\n"
 "<a href=\"{url}\">Direct link to video</a>"
-msgstr "Ошибка отправки видео: {title}\n"
+msgstr ""
+"Ошибка отправки видео: {title}\n"
 "\n"
 "\n"
 "<a href=\"{url}\">Прямая ссылка на видео</a>"
 
-#: main.py:126
-msgid "by @{author} "
-msgstr "от @{author} "
+#: app/utils/caption.py:25 main.py:127
+msgid "by <code>@{author}</code> "
+msgstr "от <code>@{author}</code> "
 
-#: main.py:132
+#: main.py:128
 msgid "from {m_type}"
 msgstr "с {m_type}"
 
-#: main.py:148
+#: main.py:145
+msgid "Video"
+msgstr "Видео"
+
+#: main.py:173
 msgid "Recently added"
 msgstr "Недавно добавленные"
 
-#: main.py:179
+#: main.py:185
+msgid "No videos found. You don't think it's correct? Press here!"
+msgstr "Видео не найдены. Вы думаете, что это неправильно? Нажмите здесь!"
+
+#: main.py:220
+#, python-format
 msgid "Found %d video"
 msgid_plural "Found %d videos"
 msgstr[0] "Найдено %d видео"
 msgstr[1] "Найдено %d видео"
 msgstr[2] "Найдено %d видео"
-msgstr[3] "Найдено %d видео"
-
-#: main.py:181
-msgid "No videos found"
-msgstr "Видео не найдены"
-

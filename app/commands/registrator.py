@@ -1,16 +1,17 @@
 import functools
 import logging
-from typing import Callable
+from collections.abc import Callable
 
 from telegram import BotCommandScopeChat, Update
-from telegram.ext import CommandHandler, Application
+from telegram._utils.defaultvalue import DEFAULT_TRUE
+from telegram._utils.types import DVType
+from telegram.ext import Application, CommandHandler
+from telegram.ext.filters import BaseFilter
 
 from app.context import CallbackContext
-from app.utils.i18n.base import ContextGetText
+from app.utils import Str
 
 logger = logging.getLogger(__name__)
-
-Str = str | ContextGetText
 
 
 class CommandRegistrator:
@@ -24,18 +25,20 @@ class CommandRegistrator:
         return app
 
     def add(
-            self,
-            name: str = None,
-            description: Str = None,
-            auto_send_commands: bool = True,
-            **kwargs
+        self,
+        name: str = None,
+        description: Str = None,
+        auto_send_commands: bool = True,
+        filters: BaseFilter = None,
+        block: DVType[bool] = DEFAULT_TRUE,
     ) -> Callable[[Callable], Callable]:
         def decorator(func: Callable) -> Callable:
             self.add_handler(
                 CommandHandler(
                     name or func.__name__,
                     func,
-                    **kwargs
+                    filters=filters,
+                    block=block,
                 ),
                 description=description,
                 auto_send_commands=auto_send_commands,
@@ -45,22 +48,22 @@ class CommandRegistrator:
         return decorator
 
     def add_handler(
-            self,
-            handler: CommandHandler,
-            description: Str = None,
-            auto_send_commands: bool = True,
+        self,
+        handler: CommandHandler,
+        description: Str = None,
+        auto_send_commands: bool = True,
     ):
         if description is None:
             description = (
-                    handler.callback.__doc__ or ''
-            ).strip().split('\n')[0].strip()
+                (handler.callback.__doc__ or "").strip().split("\n")[0].strip()
+            )
 
         old_callback = handler.callback
         command = list(handler.commands)[0]
 
         @functools.wraps(old_callback)
         async def wrap(update: Update, context: CallbackContext):
-            logger.info('Command /%s called', command)
+            logger.info("Command /%s called", command)
 
             res = await old_callback(update, context)
 
@@ -89,7 +92,7 @@ class CommandRegistrator:
             language_code=update.effective_user.language_code,
         )
         logger.info(
-            'Commands are sended to Chat[%s]',
+            "Commands are sent to Chat[%s]",
             update.effective_chat.id,
         )
         return commands

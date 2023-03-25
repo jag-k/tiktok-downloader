@@ -1,28 +1,28 @@
 # Translations template for video-downloader-bot.
-# Copyright (C) 2022 ORGANIZATION
+# Copyright (C) 2023 ORGANIZATION
 # This file is distributed under the same license as the video-downloader-bot
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: video-downloader-bot 0.1.0\n"
 "Report-Msgid-Bugs-To: jag-k@users.noreply.github.com\n"
-"POT-Creation-Date: 2022-11-26 18:06+0400\n"
+"POT-Creation-Date: 2023-03-26 03:52+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
-#: app/commands/commands.py:16
+#: app/commands/commands.py:20
 msgid " or "
 msgstr ""
 
-#: app/commands/commands.py:17
+#: app/commands/commands.py:21
 msgid ""
 "Send me a link to a {} video and I'll send this video back to you.\n"
 "\n"
@@ -30,22 +30,28 @@ msgid ""
 " video."
 msgstr ""
 
-#: app/commands/commands.py:25
+#: app/commands/commands.py:29
 msgid "Start using the bot"
 msgstr ""
 
-#: app/commands/commands.py:28
+#: app/commands/commands.py:35
+msgid ""
+"Thank you for your report!\n"
+"We will try to fix this issue as soon as possible."
+msgstr ""
+
+#: app/commands/commands.py:44
 msgid ""
 "{}\n"
 "\n"
 "Use /help to get more information."
 msgstr ""
 
-#: app/commands/commands.py:32
+#: app/commands/commands.py:48
 msgid "Get more information about the bot."
 msgstr ""
 
-#: app/commands/commands.py:50
+#: app/commands/commands.py:66
 msgid ""
 "{}\n"
 "\n"
@@ -62,59 +68,205 @@ msgid ""
 "{}"
 msgstr ""
 
-#: app/commands/commands.py:72
+#: app/commands/commands.py:88
 msgid "Clear your history from inline queries."
 msgstr ""
 
-#: app/commands/commands.py:75
+#: app/commands/commands.py:91
 msgid "History cleared."
 msgstr ""
 
-#: app/commands/commands.py:78
+#: app/commands/commands.py:94
 msgid "Bot settings"
 msgstr ""
 
-#: app/settings/base.py:216 app/settings/base.py:376
+#: app/settings/base.py:129
+msgid "On"
+msgstr ""
+
+#: app/settings/base.py:133
+msgid "Off"
+msgstr ""
+
+#: app/settings/base.py:154
+msgid "⬅️ Back"
+msgstr ""
+
+#: app/settings/base.py:235 app/settings/base.py:404
 msgid "Not implemented yet"
 msgstr ""
 
-#: app/settings/base.py:228
-msgid "Settings"
+#: app/settings/base.py:253
+msgid "Settings for user {mention}"
 msgstr ""
 
-#: app/settings/base.py:294
+#: app/settings/base.py:256
+msgid "Settings for chat \"{title}\""
+msgstr ""
+
+#: app/settings/base.py:333
 msgid "enabled ✅"
 msgstr ""
 
-#: app/settings/base.py:294
+#: app/settings/base.py:333
 msgid "disabled ❌"
 msgstr ""
 
-#: app/settings/base.py:301
+#: app/settings/base.py:340
 msgid "✅ <b>Enabled</b>"
 msgstr ""
 
-#: app/settings/base.py:303
+#: app/settings/base.py:342
 msgid "❌ <b>Disabled</b>"
 msgstr ""
 
-#: app/settings/user_settings.py:17
-msgid "🇪🇺 Change language"
+#: app/settings/user_settings.py:21
+msgid "🌍 Change language"
 msgstr ""
 
-#: app/settings/user_settings.py:22
+#: app/settings/user_settings.py:27
 msgid "Language changed to {}!"
 msgstr ""
 
-#: app/settings/user_settings.py:31
+#: app/settings/user_settings.py:36
 msgid "Choose language"
 msgstr ""
 
-#: main.py:38
-msgid " from {flag}"
+#: app/settings/user_settings.py:46
+msgid "👤 Add author in media"
 msgstr ""
 
-#: main.py:44
+#: app/settings/user_settings.py:47
+msgid "Add author in media are {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:48
+msgid ""
+"Add author in media (video/audio/images):\n"
+"\n"
+"{}\n"
+"\n"
+"Example: So funny video by <code>@username</code>"
+msgstr ""
+
+#: app/settings/user_settings.py:58
+msgid "🔗 Add original link in media"
+msgstr ""
+
+#: app/settings/user_settings.py:59
+msgid "Add original link in media are {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:60
+msgid ""
+"Add original link in media:\n"
+"\n"
+"{}\n"
+"\n"
+"<i>️📝 NOTE!</i> Twitter always add original link in media."
+msgstr ""
+
+#: app/settings/user_settings.py:70
+msgid "🏳️ Add flag to TikTok videos/images"
+msgstr ""
+
+#: app/settings/user_settings.py:71
+msgid "Add flag to TikTok videos/images are {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:72
+msgid ""
+"Adds the flag of the country from which the videos/images was uploaded "
+"(author's country):\n"
+"\n"
+"{}"
+msgstr ""
+
+#: app/settings/user_settings.py:81
+msgid "📃️ Add description to videos/images"
+msgstr ""
+
+#: app/settings/user_settings.py:82
+msgid "Add description to videos/images are {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:83
+msgid ""
+"Adds the descriptions from the original source to the videos/images:\n"
+"\n"
+"{}"
+msgstr ""
+
+#: app/settings/user_settings.py:92
+msgid "📬 Add media source to videos/images"
+msgstr ""
+
+#: app/settings/user_settings.py:93
+msgid "Add media source to videos/images are {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:94
+msgid ""
+"Add the social network where the videos/images were taken from:\n"
+"\n"
+"{}\n"
+"\n"
+"Example: So funny video from TikTok"
+msgstr ""
+
+#: app/settings/user_settings.py:112 app/settings/user_settings.py:120
+msgid "📜 All"
+msgstr ""
+
+#: app/settings/user_settings.py:113
+msgid "👥 Groups"
+msgstr ""
+
+#: app/settings/user_settings.py:114
+msgid "👤 Private"
+msgstr ""
+
+#: app/settings/user_settings.py:115
+msgid "🔎 Inline"
+msgstr ""
+
+#: app/settings/user_settings.py:116
+msgid "❌ Not save"
+msgstr ""
+
+#: app/settings/user_settings.py:121
+msgid "👥 Groups, where bot are added"
+msgstr ""
+
+#: app/settings/user_settings.py:122
+msgid "👤 Private (in bot chat)"
+msgstr ""
+
+#: app/settings/user_settings.py:123
+msgid "🔎 Inline queries"
+msgstr ""
+
+#: app/settings/user_settings.py:124
+msgid "❌ Not saving history"
+msgstr ""
+
+#: app/settings/user_settings.py:129
+msgid "📝 Saving History"
+msgstr ""
+
+#: app/settings/user_settings.py:139
+msgid "History saving changed to {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:150
+msgid ""
+"Choose source to save in history. To see the history, use <i>Inline "
+"Query</i>.\n"
+"\n"
+"Current: <b>{}</b>"
+msgstr ""
+
+#: main.py:35
 msgid ""
 "\n"
 "\n"
@@ -123,7 +275,7 @@ msgid ""
 "href=\"{url}\">This is original link</a>"
 msgstr ""
 
-#: main.py:92
+#: main.py:71
 msgid ""
 "Error sending video: {title}\n"
 "\n"
@@ -131,26 +283,29 @@ msgid ""
 "<a href=\"{url}\">Direct link to video</a>"
 msgstr ""
 
-#: main.py:126
-msgid "by @{author} "
+#: app/utils/caption.py:25 main.py:127
+msgid "by <code>@{author}</code> "
 msgstr ""
 
-#: main.py:132
+#: main.py:128
 msgid "from {m_type}"
 msgstr ""
 
-#: main.py:148
+#: main.py:145
+msgid "Video"
+msgstr ""
+
+#: main.py:173
 msgid "Recently added"
 msgstr ""
 
-#: main.py:179
+#: main.py:185
+msgid "No videos found. You don't think it's correct? Press here!"
+msgstr ""
+
+#: main.py:220
 #, python-format
 msgid "Found %d video"
 msgid_plural "Found %d videos"
 msgstr[0] ""
 msgstr[1] ""
-
-#: main.py:181
-msgid "No videos found"
-msgstr ""
-

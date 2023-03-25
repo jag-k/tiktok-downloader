@@ -1,13 +1,14 @@
 import logging
 import re
-from typing import Match
+from re import Match
 
 import aiohttp
 import pytube as pytube
 from pytube.exceptions import PytubeError
 
 from app import constants
-from app.parsers.base import Parser as BaseParser, ParserType, Video, Media
+from app.parsers.base import Media, ParserType, Video
+from app.parsers.base import Parser as BaseParser
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ class Parser(BaseParser):
         # https://youtube.com/watch?v=hBOLCcvbGHM
         re.compile(
             r"(?:https?://)?(?:www\.)?youtube\.com/shorts/(?P<id>[\w-]+)"
-        )
+        ),
     ]
     CUSTOM_EMOJI_ID = 5463206079913533096  # 📹
 
@@ -38,12 +39,10 @@ class Parser(BaseParser):
 
     @classmethod
     async def _parse(
-        cls,
-        session: aiohttp.ClientSession,
-        match: Match
+        cls, session: aiohttp.ClientSession, match: Match
     ) -> list[Media]:
         try:
-            yt_id = match.group('id')
+            yt_id = match.group("id")
         except IndexError:
             return []
 
@@ -51,12 +50,10 @@ class Parser(BaseParser):
 
         logger.info("Getting video link from: %s", original_url)
         yt = pytube.YouTube(original_url)
-        streams = (
-            yt.streams
-            .filter(type="video", progressive=True, file_extension="mp4")
-            .order_by("resolution")
-        )
-        logger.info('Found %s streams', len(streams))
+        streams = yt.streams.filter(
+            type="video", progressive=True, file_extension="mp4"
+        ).order_by("resolution")
+        logger.info("Found %s streams", len(streams))
         stream = yt.streams.get_highest_resolution()
         max_quality_url = stream.url
         max_fs = 0
@@ -83,9 +80,7 @@ class Parser(BaseParser):
             )
         except PytubeError as err:
             logger.error(
-                "Failed to get video %r with error: %s",
-                original_url,
-                err
+                "Failed to get video %r with error: %s", original_url, err
             )
             return []
         return [video]
