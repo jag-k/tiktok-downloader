@@ -1,4 +1,4 @@
-from app.utils.i18n.base import ContextGetText
+from app.utils.i18n.base import ContextGetText, Str
 
 __all__ = (
     "gettext",
@@ -12,33 +12,33 @@ __all__ = (
 )
 
 
-def gettext(message: str) -> ContextGetText:
+def gettext(message: str) -> Str:
     return ContextGetText(message, type_="gettext")
 
 
-def ngettext(msgid1: str, msgid2: str, n: int) -> ContextGetText:
+def ngettext(msgid1: str, msgid2: str, n: int) -> Str:
     return ContextGetText(msgid1, msgid2, n, type_="ngettext")
 
 
-def pgettext(context: str, message: str) -> ContextGetText:
+def pgettext(context: str, message: str) -> Str:
     return ContextGetText(context, message, type_="pgettext")
 
 
-def npgettext(context: str, msgid1: str, msgid2: str, n: int) -> ContextGetText:
+def npgettext(context: str, msgid1: str, msgid2: str, n: int) -> Str:
     return ContextGetText(context, msgid1, msgid2, n, type_="npgettext")
 
 
-def _(message: str) -> ContextGetText:
+def _(message: str) -> Str:
     return gettext(message)
 
 
-def _n(msgid1: str, msgid2: str, n: int) -> ContextGetText:
+def _n(msgid1: str, msgid2: str, n: int) -> Str:
     return ngettext(msgid1, msgid2, n)
 
 
-def _p(context: str, message: str) -> ContextGetText:
+def _p(context: str, message: str) -> Str:
     return pgettext(context, message)
 
 
-def _np(context: str, msgid1: str, msgid2: str, n: int) -> ContextGetText:
+def _np(context: str, msgid1: str, msgid2: str, n: int) -> Str:
     return npgettext(context, msgid1, msgid2, n)

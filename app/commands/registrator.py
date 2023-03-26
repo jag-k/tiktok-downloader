@@ -85,7 +85,7 @@ class CommandRegistrator:
         commands = self.get_command_description()
         await context.bot.set_my_commands(
             commands=[
-                (cmd_name, str(desc))
+                (cmd_name, desc)
                 for cmd_name, desc in self.get_command_description().items()
             ],
             scope=BotCommandScopeChat(update.effective_chat.id),

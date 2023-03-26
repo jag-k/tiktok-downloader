@@ -1,7 +1,11 @@
+import json
 from collections.abc import Iterator
 from contextvars import ContextVar
 from gettext import NullTranslations, translation
 from typing import Union
+
+# noinspection PyProtectedMember
+from telegram.request._requestparameter import RequestParameter
 
 from app import constants
 
@@ -59,6 +63,9 @@ class ContextGetText:
     def __add__(self, __other: str) -> str:
         return str(self).__add__(__other)
 
+    def __radd__(self, __other: str) -> str:
+        return __other.__add__(str(self))
+
     def __mul__(self, __n: int) -> str:
         return str(self).__mul__(__n)
 
@@ -91,3 +98,27 @@ class ContextGetText:
 
     def __sizeof__(self) -> int:
         return str(self).__sizeof__()
+
+
+# Patch TelegramObject.to_json
+def convert(obj):
+    if isinstance(obj, ContextGetText):
+        return str(obj)
+    return obj
+
+
+@property
+def json_value(self: RequestParameter) -> str | None:
+    """The JSON dumped :attr:`value` or :obj:`None` if :attr:`value` is :obj:`None`.
+    The latter can currently only happen if :attr:`input_files` has exactly one element that
+    must not be uploaded via an attach:// URI.
+    """
+    if isinstance(self.value, str):
+        return self.value
+    if self.value is None:
+        return None
+    return json.dumps(self.value, default=convert, ensure_ascii=False)
+
+
+# noinspection PyPropertyAccess
+RequestParameter.json_value = json_value

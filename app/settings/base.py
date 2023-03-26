@@ -105,7 +105,9 @@ class Settings:
             msg = self.update.callback_query.message
 
             if msg.text_html != text:
-                return await msg.edit_text(text=text, reply_markup=reply_markup)
+                return await msg.edit_text(
+                    text=str(text), reply_markup=reply_markup
+                )
             if msg.reply_markup != reply_markup:
                 return await msg.edit_reply_markup(reply_markup=reply_markup)
             return msg
@@ -151,7 +153,7 @@ class Settings:
         @property
         def back_button(self):
             return InlineKeyboardButton(
-                text=_("⬅️ Back").s, callback_data=self.back
+                text=_("⬅️ Back"), callback_data=self.back
             )
 
         def __str__(self):
@@ -330,17 +332,15 @@ class Settings:
                 ctx.data = ctx.result == "on"
                 return await ctx.query_answer(
                     template_str_answer.format(
-                        str(_("enabled ✅") if ctx.data else _("disabled ❌"))
+                        _("enabled ✅") if ctx.data else _("disabled ❌")
                     )
                 )
 
             await ctx.update_message_with_boolean_btn(
                 template_str_menu.format(
-                    str(
-                        _("✅ <b>Enabled</b>")
-                        if ctx.data
-                        else _("❌ <b>Disabled</b>")
-                    )
+                    _("✅ <b>Enabled</b>")
+                    if ctx.data
+                    else _("❌ <b>Disabled</b>")
                 )
             )
 
@@ -392,8 +392,8 @@ class Settings:
             title = await title(update, context)
 
         return await send_text(
-            str(title),
-            reply_markup=InlineKeyboardMarkup([[b] for b in buttons]),
+            title,
+            reply_markup=InlineKeyboardMarkup.from_column(buttons),
         )
 
     async def callback(self, update: Update, context: CallbackContext):
@@ -401,7 +401,7 @@ class Settings:
         func = self._settings.get(data)
         if callable(func):
             return await func(update, context)
-        return await update.callback_query.answer(_("Not implemented yet").s)
+        return await update.callback_query.answer(_("Not implemented yet"))
 
     def command_handler(self, command: str = BASE_SETTINGS_ID):
         return CommandHandler(command, self._base_settings)

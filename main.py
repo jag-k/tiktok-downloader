@@ -19,10 +19,11 @@ from telegram.ext import (
 )
 
 from app import commands, constants, settings
-from app.constants import DATA_PATH
 from app.context import CallbackContext
 from app.parsers import Media, MediaGroup, Parser, Video
 from app.utils import a, make_caption, translate_patch_app
+
+# noinspection PyProtectedMember
 from app.utils.i18n import _, _n
 
 logger = logging.getLogger(__name__)
@@ -142,7 +143,7 @@ def inline_query_video_from_media(
             video_url=media.url,
             mime_type=media.mime_type,
             thumbnail_url=media.thumbnail_url or media.url,
-            title=media.caption or _("Video").s,
+            title=media.caption or _("Video"),
             caption=caption(media),
             description=inline_query_description(media),
         )
@@ -170,7 +171,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
         return await update.inline_query.answer(
             inline_query_video_from_media(ctx.history[::-1], ctx),
             is_personal=True,
-            switch_pm_text=_("Recently added").s,
+            switch_pm_text=_("Recently added"),
             switch_pm_parameter="help",
             cache_time=1,
         )
@@ -200,7 +201,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
         return await update.inline_query.answer(
             [],
             is_personal=True,
-            switch_pm_text=not_found_text.s,
+            switch_pm_text=not_found_text,
             switch_pm_parameter=report,
             cache_time=1,
         )
@@ -240,7 +241,9 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main() -> None:
     """Start the bot."""
     logger.debug("Token: %r", constants.TOKEN)
-    persistence = PicklePersistence(filepath=DATA_PATH / "persistence.pickle")
+    persistence = PicklePersistence(
+        filepath=constants.DATA_PATH / "persistence.pickle"
+    )
     defaults = Defaults(
         parse_mode=ParseMode.HTML,
         tzinfo=constants.TIME_ZONE,

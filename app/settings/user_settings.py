@@ -33,7 +33,7 @@ async def change_language(ctx: Settings.Context[str]):
         return ""
 
     await ctx.update_message(
-        text=_("Choose language").s,
+        text=_("Choose language"),
         buttons=[
             ctx.btn(text=f"{lang_name}{check(lang_code)}", result=lang_code)
             for lang_code, lang_name in LANGUAGES.items()

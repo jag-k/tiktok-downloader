@@ -24,17 +24,10 @@ class ContextSettings:
         return self.ctx.chat_data
 
     def get(self, key: Keys, default: Any = None) -> Any:
-        ud = self.ctx.user_data or {}
-        cd = self.ctx.chat_data or {}
-
         if default is None:
             default = self.DEFAULTS.get(key, None)
 
-        # noinspection PyProtectedMember
-        first, second = (
-            (ud, cd) if self.ctx._chat_type == ChatType.PRIVATE else (cd, ud)
-        )
-        return first.get(key.value, second.get(key.value, default))
+        return self._data.get(key.value, default)
 
     def set(self, key: Keys, value: Any) -> None:
         self._data[key.value] = value
@@ -43,7 +36,7 @@ class ContextSettings:
         return self._data.setdefault(key.value, value)
 
     def __getitem__(self, key: Keys) -> Any:
-        return self.get(key, self.DEFAULTS.get(key, None))
+        return self.get(key)
 
     def __setitem__(self, key: Keys, value: Any) -> None:
         self.set(key, value)

@@ -10,7 +10,6 @@ from telegram import (
     Update,
 )
 from telegram.constants import ChatType
-from telegram.helpers import create_deep_linked_url
 
 from app import constants, settings
 from app.commands.registrator import CommandRegistrator
@@ -23,6 +22,8 @@ from app.utils.i18n import _
 commands = CommandRegistrator()
 
 logger = logging.getLogger(__name__)
+
+HELP_COMMAND_NAME = "help"
 
 
 def start_text() -> str:
@@ -45,25 +46,26 @@ async def start(update: Update, ctx: CallbackContext) -> None:
             _(
                 "Thank you for your report!\n"
                 "We will try to fix this issue as soon as possible."
-            ).s
+            )
         )
         logger.info("Report from %s: %s", update.message.from_user, report)
         return
 
     await update.message.reply_html(
-        _("{}\n\nUse /help to get more information.").format(start_text())
+        _("{}\n\nUse /{} to get more information.").format(
+            start_text(), HELP_COMMAND_NAME
+        )
     )
 
 
-@commands.add("help", _("Get more information about the bot."))
+@commands.add(HELP_COMMAND_NAME, _("Get more information about the bot."))
 async def help_command(update: Update, ctx: CallbackContext) -> None:
-    link = create_deep_linked_url(ctx.bot.username, "start", group=True)
+    is_private = update.message.chat.type == ChatType.PRIVATE
     cmds = commands.get_command_description()
     supported_commands = "\n".join(
-        f"- /{command} - {str(description)}"
-        for command, description in cmds.items()
+        f"- /{command} - {description}" for command, description in cmds.items()
     )
-    contacts = ""
+    add_to_group_text = _("Add to group")
 
     def get_by_lang(obj: dict[str, str]) -> Callable[[str], str]:
         def get(key: str) -> str:
@@ -77,9 +79,10 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
 
         return get
 
+    contacts = ""
     if constants.CONTACTS:
         contacts_list = "\n".join(
-            f'{g("type")}: {a(g("text"), c.get("url"))}'
+            f'- {g("type")}: {a(g("text"), c.get("url"))}'
             for c in constants.CONTACTS
             if all(map(c.get, ("type", "text")))
             if (g := get_by_lang(c))
@@ -102,10 +105,11 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
         can_post_messages=True,
         can_edit_messages=True,
     )
-    if update.message.chat.type == ChatType.PRIVATE:
+
+    if is_private:
         reply_markup = ReplyKeyboardMarkup.from_button(
             button=KeyboardButton(
-                text=_("Add to group").s,
+                text=add_to_group_text,
                 request_chat=KeyboardButtonRequestChat(
                     request_id=random.randint(0, 100000),
                     chat_is_channel=False,
@@ -117,11 +121,17 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
             resize_keyboard=True,
             one_time_keyboard=True,
         )
+    add_to_group_help = ""
+    if is_private:
+        add_to_group_help = _(
+            'For add in group press keyboard button "{}" and select chat.\n'
+            "If you can't add bot to chat, check are you admin.\n"
+            "If button didn't show, send /{} to this chat again.\n\n"
+        ).format(add_to_group_text, HELP_COMMAND_NAME)
 
     await update.message.reply_text(
         _(
-            "{}\n\n"
-            "Link to add in groups: {}\n\n"
+            "{}\n\n{}"
             "Supported Commands:\n"
             "{}\n\n"
             "Inline queries are supported.\n"
@@ -131,13 +141,15 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
             "To get video from inline query, "
             "add link to video after mention bot.\n"
             "{}"
-        ).format(
+        )
+        .format(
             start_text(),
-            link,
+            add_to_group_help,
             supported_commands,
             ctx.bot.username,
             contacts,
-        ),
+        )
+        .strip(),
         reply_markup=reply_markup,
     )
 
@@ -145,7 +157,7 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
 @commands.add(description=_("Clear your history from inline queries."))
 async def clear_history(update: Update, ctx: CallbackContext) -> None:
     ctx.history = []
-    await update.message.reply_text(_("History cleared.").s)
+    await update.message.reply_text(_("History cleared."))
 
 
 commands.add_handler(settings.command_handler(), _("Bot settings"))

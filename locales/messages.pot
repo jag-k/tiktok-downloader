@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: video-downloader-bot 0.1.0\n"
 "Report-Msgid-Bugs-To: jag-k@users.noreply.github.com\n"
-"POT-Creation-Date: 2023-03-26 14:22+0400\n"
+"POT-Creation-Date: 2023-03-26 16:27+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: app/commands/commands.py:30
+#: app/commands/commands.py:31
 msgid " or "
 msgstr ""
 
-#: app/commands/commands.py:31
+#: app/commands/commands.py:32
 msgid ""
 "Send me a link to a {} video and I'll send this video back to you.\n"
 "\n"
@@ -30,28 +30,32 @@ msgid ""
 " video."
 msgstr ""
 
-#: app/commands/commands.py:39
+#: app/commands/commands.py:40
 msgid "Start using the bot"
 msgstr ""
 
-#: app/commands/commands.py:45
+#: app/commands/commands.py:46
 msgid ""
 "Thank you for your report!\n"
 "We will try to fix this issue as soon as possible."
 msgstr ""
 
-#: app/commands/commands.py:54
+#: app/commands/commands.py:55
 msgid ""
 "{}\n"
 "\n"
-"Use /help to get more information."
+"Use /{} to get more information."
 msgstr ""
 
-#: app/commands/commands.py:58
+#: app/commands/commands.py:61
 msgid "Get more information about the bot."
 msgstr ""
 
-#: app/commands/commands.py:88
+#: app/commands/commands.py:68
+msgid "Add to group"
+msgstr ""
+
+#: app/commands/commands.py:91
 msgid ""
 "\n"
 "\n"
@@ -59,17 +63,19 @@ msgid ""
 "{contacts_list}"
 msgstr ""
 
-#: app/commands/commands.py:108
-msgid "Add to group"
+#: app/commands/commands.py:126
+msgid ""
+"For add in group press keyboard button \"{}\" and select chat.\n"
+"If you can't add bot to chat, check are you admin.\n"
+"If button didn't show, send /{} to this chat again.\n"
+"\n"
 msgstr ""
 
-#: app/commands/commands.py:122
+#: app/commands/commands.py:133
 msgid ""
 "{}\n"
 "\n"
-"Link to add in groups: {}\n"
-"\n"
-"Supported Commands:\n"
+"{}Supported Commands:\n"
 "{}\n"
 "\n"
 "Inline queries are supported.\n"
@@ -80,15 +86,15 @@ msgid ""
 "{}"
 msgstr ""
 
-#: app/commands/commands.py:145
+#: app/commands/commands.py:157
 msgid "Clear your history from inline queries."
 msgstr ""
 
-#: app/commands/commands.py:148
+#: app/commands/commands.py:160
 msgid "History cleared."
 msgstr ""
 
-#: app/commands/commands.py:151
+#: app/commands/commands.py:163
 msgid "Bot settings"
 msgstr ""
 
@@ -104,7 +110,7 @@ msgstr ""
 msgid "⬅️ Back"
 msgstr ""
 
-#: app/settings/base.py:235 app/settings/base.py:404
+#: app/settings/base.py:235 app/settings/base.py:402
 msgid "Not implemented yet"
 msgstr ""
 
@@ -124,11 +130,11 @@ msgstr ""
 msgid "disabled ❌"
 msgstr ""
 
-#: app/settings/base.py:340
+#: app/settings/base.py:339
 msgid "✅ <b>Enabled</b>"
 msgstr ""
 
-#: app/settings/base.py:342
+#: app/settings/base.py:341
 msgid "❌ <b>Disabled</b>"
 msgstr ""
 
@@ -282,7 +288,7 @@ msgstr ""
 msgid " by <code>@{author}</code> "
 msgstr ""
 
-#: main.py:35
+#: main.py:36
 msgid ""
 "\n"
 "\n"
@@ -291,7 +297,7 @@ msgid ""
 "href=\"{url}\">This is original link</a>"
 msgstr ""
 
-#: main.py:71
+#: main.py:72
 msgid ""
 "Error sending video: {title}\n"
 "\n"
@@ -299,27 +305,27 @@ msgid ""
 "<a href=\"{url}\">Direct link to video</a>"
 msgstr ""
 
-#: main.py:127
+#: main.py:128
 msgid "by @{author} "
 msgstr ""
 
-#: main.py:128
+#: main.py:129
 msgid "from {m_type}"
 msgstr ""
 
-#: main.py:145
+#: main.py:146
 msgid "Video"
 msgstr ""
 
-#: main.py:173
+#: main.py:174
 msgid "Recently added"
 msgstr ""
 
-#: main.py:185
+#: main.py:186
 msgid "No videos found. You don't think it's correct? Press here!"
 msgstr ""
 
-#: main.py:220
+#: main.py:221
 #, python-format
 msgid "Found %d video"
 msgid_plural "Found %d videos"
