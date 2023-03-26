@@ -128,11 +128,11 @@ class Settings:
                 text=text,
                 buttons=[
                     self.btn(
-                        text=add_check(self.data) + _("On").s,
+                        text=add_check(self.data) + _("On"),
                         result="on",
                     ),
                     self.btn(
-                        text=add_check(not self.data) + _("Off").s,
+                        text=add_check(not self.data) + _("Off"),
                         result="off",
                     ),
                 ],
