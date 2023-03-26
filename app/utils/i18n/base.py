@@ -4,6 +4,8 @@ from contextvars import ContextVar
 from gettext import NullTranslations, translation
 from typing import Union
 
+from telegram import TelegramObject
+
 # noinspection PyProtectedMember
 from telegram.request._requestparameter import RequestParameter
 
@@ -100,11 +102,26 @@ class ContextGetText:
         return str(self).__sizeof__()
 
 
-# Patch TelegramObject.to_json
+# Patch json dumps in python-telegram-bot
 def convert(obj):
     if isinstance(obj, ContextGetText):
         return str(obj)
     return obj
+
+
+def to_json(self: TelegramObject) -> str:
+    """Gives a JSON representation of object.
+
+    .. versionchanged:: 20.0
+        Now includes all entries of :attr:`api_kwargs`.
+
+    Returns:
+        :obj:`str`
+    """
+    return json.dumps(self.to_dict(), default=convert, ensure_ascii=False)
+
+
+TelegramObject.to_json = to_json
 
 
 @property
