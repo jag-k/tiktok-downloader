@@ -22,14 +22,13 @@ def make_caption(
         if add_caption:
             media_caption += media.caption
         if add_autor:
-            media_caption += _("by <code>@{author}</code> ").format(
+            media_caption += _(" by <code>@{author}</code> ").format(
                 author=media.author
             )
         if add_flag:
             media_caption += f" {media.language_emoji}"
         if add_link and media.type != ParserType.TWITTER:
             media_caption += f"\n\n{media.original_url}"
-        print(media_caption)
         return media_caption.strip() or default
 
     return caption

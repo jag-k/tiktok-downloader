@@ -124,7 +124,7 @@ def inline_query_description(video: Video) -> str:
         if video.extra_description:
             resp += video.extra_description
         else:
-            resp += _("by <code>@{author}</code> ").format(author=video.author)
+            resp += _("by @{author} ").format(author=video.author)
     resp += _("from {m_type}").format(m_type=video.type)
     if video.language:
         resp += f" {video.language_emoji}"
@@ -142,7 +142,7 @@ def inline_query_video_from_media(
             video_url=media.url,
             mime_type=media.mime_type,
             thumbnail_url=media.thumbnail_url or media.url,
-            title=media.caption or _("Video"),
+            title=media.caption or _("Video").s,
             caption=caption(media),
             description=inline_query_description(media),
         )

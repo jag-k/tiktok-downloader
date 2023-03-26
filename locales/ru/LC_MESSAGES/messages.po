@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Video Downloader\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-03-26 03:52+0400\n"
+"POT-Creation-Date: 2023-03-26 14:22+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -20,11 +20,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: app/commands/commands.py:20
+#: app/commands/commands.py:30
 msgid " or "
 msgstr " или "
 
-#: app/commands/commands.py:21
+#: app/commands/commands.py:31
 msgid ""
 "Send me a link to a {} video and I'll send this video back to you.\n"
 "\n"
@@ -36,11 +36,11 @@ msgstr ""
 "Также вы можете использовать меня в группах. Просто добавьте меня в группу и "
 "отправьте ссылку на видео."
 
-#: app/commands/commands.py:29
+#: app/commands/commands.py:39
 msgid "Start using the bot"
 msgstr "Начать использовать бота"
 
-#: app/commands/commands.py:35
+#: app/commands/commands.py:45
 msgid ""
 "Thank you for your report!\n"
 "We will try to fix this issue as soon as possible."
@@ -48,7 +48,7 @@ msgstr ""
 "Спасибо за ваш отчет!\n"
 "Мы постараемся исправить эту проблему как можно скорее."
 
-#: app/commands/commands.py:44
+#: app/commands/commands.py:54
 msgid ""
 "{}\n"
 "\n"
@@ -58,11 +58,27 @@ msgstr ""
 "\n"
 "Используйте /help, чтобы получить больше информации."
 
-#: app/commands/commands.py:48
+#: app/commands/commands.py:58
 msgid "Get more information about the bot."
 msgstr "Получить больше информации о боте."
 
-#: app/commands/commands.py:66
+#: app/commands/commands.py:88
+msgid ""
+"\n"
+"\n"
+"Contacts:\n"
+"{contacts_list}"
+msgstr ""
+"\n"
+"\n"
+"Контакты:\n"
+"{contacts_list}"
+
+#: app/commands/commands.py:108
+msgid "Add to group"
+msgstr "Добавить в группу"
+
+#: app/commands/commands.py:122
 msgid ""
 "{}\n"
 "\n"
@@ -93,15 +109,15 @@ msgstr ""
 "упоминания бота.\n"
 "{}"
 
-#: app/commands/commands.py:88
+#: app/commands/commands.py:145
 msgid "Clear your history from inline queries."
 msgstr "Отчистите Вашу историю из inline запросов."
 
-#: app/commands/commands.py:91
+#: app/commands/commands.py:148
 msgid "History cleared."
 msgstr "История очищена."
 
-#: app/commands/commands.py:94
+#: app/commands/commands.py:151
 msgid "Bot settings"
 msgstr "Настройки бота"
 
@@ -315,6 +331,10 @@ msgstr ""
 "Выберите источник для сохранения в истории. Чтобы посмотреть историю, "
 "используйте <i>Inline запросы</i>.\n"
 
+#: app/utils/caption.py:25
+msgid " by <code>@{author}</code> "
+msgstr " от <code>@{author}</code> "
+
 #: main.py:35
 msgid ""
 "\n"
@@ -341,9 +361,9 @@ msgstr ""
 "\n"
 "<a href=\"{url}\">Прямая ссылка на видео</a>"
 
-#: app/utils/caption.py:25 main.py:127
-msgid "by <code>@{author}</code> "
-msgstr "от <code>@{author}</code> "
+#: main.py:127
+msgid "by @{author} "
+msgstr "от @{author} "
 
 #: main.py:128
 msgid "from {m_type}"

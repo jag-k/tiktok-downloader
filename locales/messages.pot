@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: video-downloader-bot 0.1.0\n"
 "Report-Msgid-Bugs-To: jag-k@users.noreply.github.com\n"
-"POT-Creation-Date: 2023-03-26 03:52+0400\n"
+"POT-Creation-Date: 2023-03-26 14:22+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: app/commands/commands.py:20
+#: app/commands/commands.py:30
 msgid " or "
 msgstr ""
 
-#: app/commands/commands.py:21
+#: app/commands/commands.py:31
 msgid ""
 "Send me a link to a {} video and I'll send this video back to you.\n"
 "\n"
@@ -30,28 +30,40 @@ msgid ""
 " video."
 msgstr ""
 
-#: app/commands/commands.py:29
+#: app/commands/commands.py:39
 msgid "Start using the bot"
 msgstr ""
 
-#: app/commands/commands.py:35
+#: app/commands/commands.py:45
 msgid ""
 "Thank you for your report!\n"
 "We will try to fix this issue as soon as possible."
 msgstr ""
 
-#: app/commands/commands.py:44
+#: app/commands/commands.py:54
 msgid ""
 "{}\n"
 "\n"
 "Use /help to get more information."
 msgstr ""
 
-#: app/commands/commands.py:48
+#: app/commands/commands.py:58
 msgid "Get more information about the bot."
 msgstr ""
 
-#: app/commands/commands.py:66
+#: app/commands/commands.py:88
+msgid ""
+"\n"
+"\n"
+"Contacts:\n"
+"{contacts_list}"
+msgstr ""
+
+#: app/commands/commands.py:108
+msgid "Add to group"
+msgstr ""
+
+#: app/commands/commands.py:122
 msgid ""
 "{}\n"
 "\n"
@@ -68,15 +80,15 @@ msgid ""
 "{}"
 msgstr ""
 
-#: app/commands/commands.py:88
+#: app/commands/commands.py:145
 msgid "Clear your history from inline queries."
 msgstr ""
 
-#: app/commands/commands.py:91
+#: app/commands/commands.py:148
 msgid "History cleared."
 msgstr ""
 
-#: app/commands/commands.py:94
+#: app/commands/commands.py:151
 msgid "Bot settings"
 msgstr ""
 
@@ -266,6 +278,10 @@ msgid ""
 "Current: <b>{}</b>"
 msgstr ""
 
+#: app/utils/caption.py:25
+msgid " by <code>@{author}</code> "
+msgstr ""
+
 #: main.py:35
 msgid ""
 "\n"
@@ -283,8 +299,8 @@ msgid ""
 "<a href=\"{url}\">Direct link to video</a>"
 msgstr ""
 
-#: app/utils/caption.py:25 main.py:127
-msgid "by <code>@{author}</code> "
+#: main.py:127
+msgid "by @{author} "
 msgstr ""
 
 #: main.py:128

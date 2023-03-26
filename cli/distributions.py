@@ -59,8 +59,3 @@ with (PROJECT_PATH / "pyproject.toml").open("r") as pyproject:
                 ext[key] = value.strip('"')
 
 dist = Distribution(ext)
-
-if __name__ == "__main__":
-    print(dist)
-    print(dist.get_author_email())
-    print(dist.get_description())
