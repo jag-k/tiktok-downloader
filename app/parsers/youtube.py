@@ -4,11 +4,13 @@ from re import Match
 
 import aiohttp
 import pytube as pytube
+from pytube import StreamQuery
 from pytube.exceptions import PytubeError
 
 from app import constants
 from app.parsers.base import Media, ParserType, Video
 from app.parsers.base import Parser as BaseParser
+from app.utils.time_it import timeit
 
 logger = logging.getLogger(__name__)
 
@@ -50,11 +52,18 @@ class Parser(BaseParser):
 
         logger.info("Getting video link from: %s", original_url)
         yt = pytube.YouTube(original_url)
-        streams = yt.streams.filter(
+        with timeit("Getting streams", logger):
+            streams_obj = StreamQuery(yt.fmt_streams)
+
+        streams = streams_obj.filter(
             type="video", progressive=True, file_extension="mp4"
         ).order_by("resolution")
         logger.info("Found %s streams", len(streams))
-        stream = yt.streams.get_highest_resolution()
+        stream = streams.last()
+        if not stream:
+            logger.info("No suitable streams found")
+            return []
+
         max_quality_url = stream.url
         max_fs = 0
 
@@ -66,6 +75,8 @@ class Parser(BaseParser):
                 logger.info("Found suitable stream with filesize %s", file_size)
                 max_fs = file_size
                 stream = st
+
+        logger.info("Selected stream: %s", stream)
 
         try:
             video = Video(
