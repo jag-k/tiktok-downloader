@@ -69,7 +69,10 @@ class Parser(BaseParser):
 
         for st in streams:
             logger.info("Stream: %s", st)
-            file_size = st.filesize
+            async with session.head(st.url) as resp:
+                file_size = int(
+                    resp.headers.get(aiohttp.hdrs.CONTENT_LENGTH, "0")
+                )
             logger.info("Stream file size: %s", file_size)
             if constants.TG_FILE_LIMIT >= file_size > max_fs:
                 logger.info("Found suitable stream with filesize %s", file_size)
