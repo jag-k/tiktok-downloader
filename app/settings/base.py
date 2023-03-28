@@ -105,9 +105,7 @@ class Settings:
             msg = self.update.callback_query.message
 
             if msg.text_html != text:
-                return await msg.edit_text(
-                    text=str(text), reply_markup=reply_markup
-                )
+                return await msg.edit_text(text=text, reply_markup=reply_markup)
             if msg.reply_markup != reply_markup:
                 return await msg.edit_reply_markup(reply_markup=reply_markup)
             return msg

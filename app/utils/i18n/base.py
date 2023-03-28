@@ -105,7 +105,7 @@ class ContextGetText:
 # Patch json dumps in python-telegram-bot
 def convert(obj):
     if isinstance(obj, ContextGetText):
-        return str(obj)
+        return obj.s
     return obj
 
 
@@ -130,6 +130,8 @@ def json_value(self: RequestParameter) -> str | None:
     The latter can currently only happen if :attr:`input_files` has exactly one element that
     must not be uploaded via an attach:// URI.
     """
+    if isinstance(self.value, ContextGetText):
+        return self.value.s
     if isinstance(self.value, str):
         return self.value
     if self.value is None:

@@ -191,7 +191,15 @@ class Parser(BaseParser):
             return {}
         data = raw_data["aweme_list"][0]
         url_type_code = data["aweme_type"]
-        url_type = "video" if url_type_code in (0, 4, 66) else "image"
+        url_type_code_dict = {
+            0: "video",
+            51: "video",
+            55: "video",
+            58: "video",
+            61: "video",
+            150: "image",
+        }
+        url_type = url_type_code_dict.get(url_type_code, "video")
 
         api_data = {
             "type": url_type,
