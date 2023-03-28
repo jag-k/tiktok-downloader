@@ -380,8 +380,8 @@ msgid "from {m_type}"
 msgstr "с {m_type}"
 
 #: main.py:146
-msgid "Video"
-msgstr "Видео"
+msgid "{m_type} video"
+msgstr "{m_type} видео"
 
 #: main.py:174
 msgid "Recently added"

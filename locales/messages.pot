@@ -314,7 +314,7 @@ msgid "from {m_type}"
 msgstr ""
 
 #: main.py:146
-msgid "Video"
+msgid "{m_type} video"
 msgstr ""
 
 #: main.py:174

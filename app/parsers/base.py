@@ -33,6 +33,7 @@ class ParserType(StringEnum):
     TWITTER = "Twitter"
     YOUTUBE = "YouTube"
     REDDIT = "Reddit"
+    INSTAGRAM = "Instagram"
 
 
 async def _fake_update(
@@ -159,7 +160,9 @@ class Parser(ABC):
             for parser in cls._parsers:
                 for reg_exp in parser.REG_EXPS:
                     for match in reg_exp.finditer(string):
-                        logger.info("Found match for %r: %s", parser, match)
+                        logger.info(
+                            "Found match for %s: %r", parser.TYPE, match.string
+                        )
                         medias = await parser._parse(session, match)
                         result.extend(medias)
         return result

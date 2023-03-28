@@ -143,7 +143,8 @@ def inline_query_video_from_media(
             video_url=media.url,
             mime_type=media.mime_type,
             thumbnail_url=media.thumbnail_url or media.url,
-            title=media.caption or _("Video"),
+            title=media.caption
+            or _("{m_type} video").format(m_type=media.type.value),
             caption=caption(media),
             description=inline_query_description(media),
         )
@@ -195,7 +196,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
         m = re.match(r"https?://(?:www\.)?(.*)", query)
         if m:
             query = m.groups()[0]
-        r_query = query.replace("/", "__").replace(".", "--")
+        r_query = query.replace("/", "__").replace(".", "--").split("?", 1)[0]
         report = f"report_{r_query}"
         logger.info("No medias found. Report: %s", report)
         return await update.inline_query.answer(

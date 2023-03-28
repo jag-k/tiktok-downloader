@@ -20,7 +20,7 @@ def make_caption(
     def caption(media: Media) -> str | MAKE_CAPTION_DEFAULT:
         media_caption = ""
         if add_caption:
-            media_caption += media.caption
+            media_caption += media.caption or ""
         if add_autor:
             media_caption += _(" by <code>@{author}</code> ").format(
                 author=media.author
