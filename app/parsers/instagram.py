@@ -47,8 +47,8 @@ class Parser(BaseParser):
             },
         ) as response:
             data: dict = await response.json()
-        logger.debug("Got data: %s", data)
-        shortcode_media = data.get("data", {}).get("shortcode_media", {})
+        logger.info("Got data: %s", data)
+        shortcode_media = data.get("data", {}).get("shortcode_media") or {}
 
         if not shortcode_media.get("is_video", False):
             logger.info("%s is not a video", original_url)
