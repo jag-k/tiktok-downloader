@@ -13,7 +13,6 @@ from app.constants.types import *
 # region Base paths
 APP_PATH = Path(__file__).resolve().parent.parent
 PROJECT_PATH = APP_PATH.parent
-print(PROJECT_PATH)
 BASE_PATH = Path(os.getenv("BASE_PATH", PROJECT_PATH))
 
 CONFIG_PATH = BASE_PATH / "config"
@@ -41,6 +40,7 @@ TIME_ZONE = pytz.timezone(os.getenv("TZ", "Europe/Moscow"))
 # Contacts for help command
 CONTACTS_PATH = Path(os.getenv("CONTACTS_PATH", CONFIG_PATH / "contacts.json"))
 REPORT_PATH = Path(os.getenv("REPORT_PATH", CONFIG_PATH / "report.json"))
+NOTIFY_PATH = Path(os.getenv("NOTIFY_PATH", CONFIG_PATH / "notify.json"))
 
 if not REPORT_PATH.parent.exists():
     REPORT_PATH.parent.mkdir(parents=True)

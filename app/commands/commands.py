@@ -16,7 +16,7 @@ from app.commands.registrator import CommandRegistrator
 from app.constants import DEFAULT_LOCALE
 from app.context import CallbackContext
 from app.parsers.base import Parser
-from app.utils import a, async_add_report, b
+from app.utils import a, b, notify
 from app.utils.i18n import _
 
 commands = CommandRegistrator()
@@ -41,7 +41,13 @@ def start_text() -> str:
 async def start(update: Update, ctx: CallbackContext) -> None:
     report = ctx.report_args
     if report:
-        await async_add_report(update, report)
+        await notify.send_message(
+            message_type=notify.MessageType.REPORT,
+            text="Report with urls:\n" + "\n".join(report),
+            update=update,
+            ctx=ctx,
+            extras={"report_args": report},
+        )
         await update.message.reply_html(
             _(
                 "Thank you for your report!\n"

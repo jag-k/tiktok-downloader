@@ -21,7 +21,7 @@ from telegram.ext import (
 from app import commands, constants, settings
 from app.context import CallbackContext
 from app.parsers import Media, MediaGroup, Parser, Video
-from app.utils import a, make_caption, translate_patch_app
+from app.utils import a, make_caption, notify, translate_patch_app
 
 # noinspection PyProtectedMember
 from app.utils.i18n import _, _n
@@ -230,13 +230,16 @@ async def inline_query(update: Update, ctx: CallbackContext):
 
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Log Errors caused by Updates."""
-    logger.warning(
-        '%s: %s. Update: "%s"',
-        type(context.error).__name__,
-        context.error,
-        update,
-    )
+    exc = context.error
+    logger.warning('%s: %s. Update: "%s"', type(exc).__name__, exc, update)
     traceback.print_tb(context.error.__traceback__)
+    await notify.send_message(
+        message_type=notify.MessageType.EXCEPTION,
+        text=f'{type(exc).__name__}: {exc}. Update: "{update}"',
+        update=update,
+        ctx=context,
+        extras={"exception": exc},
+    )
 
 
 def main() -> None:
@@ -259,11 +262,13 @@ def main() -> None:
     )
 
     commands.connect_commands(application)
-    application.add_handler(settings.callback_handler())
-    application.add_handler(ChosenInlineResultHandler(chosen_inline_query))
-    application.add_handler(InlineQueryHandler(inline_query))
-    application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, link_parser)
+    application.add_handlers(
+        [
+            settings.callback_handler(),
+            ChosenInlineResultHandler(chosen_inline_query),
+            InlineQueryHandler(inline_query),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, link_parser),
+        ]
     )
     translate_patch_app(application)
 

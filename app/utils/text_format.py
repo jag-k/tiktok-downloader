@@ -14,3 +14,12 @@ def i(text: str) -> str:
 
 def u(text: str) -> str:
     return f"<u>{text}</u>"
+
+
+def camel_to_snake(s: str) -> str:
+    """
+    Convert CamelCase string `s` to snake_case.
+    """
+    return "".join(["_" + c.lower() if c.isupper() else c for c in s]).lstrip(
+        "_"
+    )
