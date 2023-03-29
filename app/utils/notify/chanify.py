@@ -2,12 +2,12 @@ import logging
 import traceback
 from datetime import datetime
 from enum import Enum
-from http import HTTPStatus
 from typing import TypedDict
 
 import httpx
 from telegram import Update, User
 
+from app.constants import CONTEXT_VARS
 from app.context import CallbackContext
 from app.utils.minmax import minmax
 from app.utils.notify.base import MessageType, Notify
@@ -249,7 +249,6 @@ class Chanify(Notify):
 
         actions: list[Action] = []
         text = "".join(traceback.format_exception(exc))
-        copy = text
         user_copy = ""
         if user:
             title += f" from {user.name}"
@@ -260,30 +259,17 @@ class Chanify(Notify):
                     url=user.link,
                 )
             )
-
-        c = "\n\n".join((copy, user_copy)).strip()
-        res = await self.client.send_text(
-            title=f"{title}!",
-            text=text,
-            copy=c,
-            sound=True,
+        context_vars = "\n".join(
+            f"{var.name}: {var.get()}" for var in CONTEXT_VARS
         )
-        if res.status_code != HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
-            return res
-
         res = await self.client.send_text(
             title=f"{title}!",
-            text='Press "Copy" to copy traceback',
-            auto_copy=True,
-            copy=c,
-            sound=True,
-        )
-        if res.status_code != HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
-            return res
-
-        res = await self.client.send_text(
-            title=f"{title}!",
-            text=f"Traceback in next message file\n\n{user_copy}",
+            text=(
+                f"Traceback in next message file.\n"
+                f"Context Vars:\n"
+                f"{context_vars}\n\n"
+                f"{user_copy}"
+            ),
             copy=user_copy,
             sound=True,
             actions=actions,

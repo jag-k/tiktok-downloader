@@ -1,6 +1,20 @@
 import json
 import logging.config
-from logging.handlers import RotatingFileHandler
+from contextvars import ContextVar
+
+USER_ID = ContextVar("USER_ID", default=0)
+USERNAME = ContextVar("USERNAME", default="")
+QUERY = ContextVar("QUERY", default="")
+DATA_TYPE: ContextVar[str] = ContextVar("DATA_TYPE", default="")
+
+CONTEXT_VARS = [
+    USER_ID,
+    USERNAME,
+    QUERY,
+    DATA_TYPE,
+]
+
+logger = logging.getLogger(__name__)
 
 
 class JsonFormatter(logging.Formatter):
@@ -72,20 +86,7 @@ class JsonFormatter(logging.Formatter):
         if record.stack_info:
             message_dict["stack_info"] = self.formatStack(record.stack_info)
 
+        for context_var in CONTEXT_VARS:
+            message_dict[context_var.name.lower()] = context_var.get() or None
+
         return json.dumps(message_dict, default=str)
-
-
-json_handler = RotatingFileHandler("tmp.json")
-json_formatter = JsonFormatter(
-    {
-        "level": "levelname",
-        "message": "message",
-        "loggerName": "name",
-        "processName": "processName",
-        "processID": "process",
-        "threadName": "threadName",
-        "threadID": "thread",
-        "timestamp": "asctime",
-    }
-)
-json_handler.setFormatter(json_formatter)

@@ -7,6 +7,7 @@ from pathlib import Path
 import pytz
 
 from app.constants.init_logger import init_logger_config
+from app.constants.json_logger import CONTEXT_VARS
 from app.constants.load_envs import load_envs
 from app.constants.types import *
 

@@ -21,7 +21,7 @@ from telegram.ext import (
 from app import commands, constants, settings
 from app.context import CallbackContext
 from app.parsers import Media, MediaGroup, Parser, Video
-from app.utils import a, make_caption, notify, translate_patch_app
+from app.utils import a, make_caption, notify, patch
 
 # noinspection PyProtectedMember
 from app.utils.i18n import _, _n
@@ -270,7 +270,7 @@ def main() -> None:
             MessageHandler(filters.TEXT & ~filters.COMMAND, link_parser),
         ]
     )
-    translate_patch_app(application)
+    patch(application)
 
     # Run the bot until the user presses Ctrl-C
     # log all errors

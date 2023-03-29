@@ -21,7 +21,8 @@ class CommandRegistrator:
     def connect_commands(self, app: Application) -> Application:
         for handler in self._command_descriptions:
             app.add_handler(handler)
-            logger.info("Added commands %s to %s", handler.commands, app)
+            cmds = ", ".join(f"/{x}" for x in handler.commands)
+            logger.info("Added commands %s to %s", cmds, app)
         return app
 
     def add(
