@@ -14,14 +14,77 @@ Telegram bot for downloading videos from social networks.
   - [x] Video
   - [ ] Music from video
   - [ ] Images
-- [x] YouTube  (only "short" videos, Telegram doesn't support big files from bots)
+- [x] YouTube
+  - [x] Shorts
+  - [x] Videos[^1]
 - [x] Reddit
   - [x] Video without audio
   - [ ] Video with audio
 - [x] Twitter
   - [x] Video
   - [ ] Images
-- [ ] Instagram
+- [x] Instagram
+  - [x] Reels
+  - [ ] Photo
+  - [ ] Photo carousel
+
+[^1]: Some videos can't be sent. Telegram have file limit (20 MB) for bots.
+
+## 🔊 Notification service
+
+### Supported services
+
+| Support | Service      | Code Name       | Description                               | Events catching now   |
+|---------|--------------|-----------------|-------------------------------------------|-----------------------|
+| ✅       | Save to file | `file_reporter` | Saving data to JSON file                  | `REPORT`              |
+| ✅       | Chanify      | `chanify`       | [Chanify.net](https://chanify.net)        | `REPORT`, `EXCEPTION` |
+| ❌       | Email        | `email`         | Email notification                        |                       |
+| ❌       | PushBullet   | `pushbullet`    | [PushBullet.com](https://pushbullet.com/) |                       |
+
+
+### Supported event
+
+- [x] `REPORT` -- The user submits an error while parsing from inline
+- [x] `EXCEPTION` -- Bbot catch exception on top level
+- [ ] `START` -- Bot started
+- [ ] `STOP` -- Bot stopped
+
+### How to use?
+
+Set env `NOTIFY_PATH` with path to config. Default: `CONFIG_PATH/notify.json`
+
+Example of `notify.json`:
+
+```json
+[
+  {
+    "service": "file_reporter"
+  },
+  {
+    "service": "file_reporter",
+    "config": {
+      "file_path": "/path/to/reporter/file.json"
+    }
+  },
+  {
+    "service": "chanify",
+    "types": ["report"],
+    "config": {
+      "url": "https://api.chanify.net",
+      "token": "123"
+    }
+  },
+  {
+    "service": "chanify",
+    "types": ["exeption"],
+    "config": {
+      "url": "https://api.example.com",
+      "token": "456"
+    }
+  }
+]
+
+```
 
 ## Development
 
