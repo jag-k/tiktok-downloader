@@ -80,6 +80,7 @@ class ChanifyApi:
         priority: int = 10,
         interruption_level: InterruptionLevel = InterruptionLevel.active,
         actions: list[Action] = None,
+        **kwargs,
     ) -> httpx.Response:
         if not actions:
             actions = []
@@ -92,6 +93,7 @@ class ChanifyApi:
             "priority": minmax(5, priority, 10),
             "interruption-level": interruption_level.value,
             "actions": [f"{a['name']}|{a['url']}" for a in actions[:4]],
+            **kwargs,
         }
         async with self:
             return await self._session_enter.post(self.url, json=clear(d))
