@@ -1,4 +1,6 @@
+import io
 import logging
+import mimetypes
 import traceback
 from datetime import datetime
 from enum import Enum
@@ -99,57 +101,69 @@ class ChanifyApi:
         link: str,
         sound: bool | str = False,
         priority: int = 10,
+        **kwargs,
     ) -> httpx.Response:
         d = {
             "link": link,
             "sound": sound if isinstance(sound, str) else int(sound),
             "priority": minmax(5, priority, 10),
+            **kwargs,
         }
         async with self:
             return await self._session_enter.post(self.url, json=clear(d))
 
-    async def send_image(
+    async def _send_file(
         self,
-        image: bytes,
+        file: bytes | io.FileIO,
+        text: str = None,
+        file_name: str = "file.txt",
+        **kwargs,
     ) -> httpx.Response:
-        async with self:
-            return await self._session_enter.post(
-                self.url,
-                data={
-                    "text": "asdasd",
-                },
-                files={
-                    "images": image,
-                },
-            )
+        data = {**kwargs}
+        mime_type, _ = mimetypes.guess_type(file_name)
+        if file_name:
+            data["filename"] = file_name
+        if text:
+            data["text"] = text
 
-    async def send_audio(
-        self,
-        audio: bytes,
-    ) -> httpx.Response:
         async with self:
-            return await self._session_enter.post(
+            res = await self._session_enter.post(
                 self.url,
+                data=data,
                 files={
-                    "audio": audio,
+                    "file": (file_name, file, mime_type),
                 },
             )
+            if res.status_code == 400:
+                logger.warning("Chanify not support file upload!")
+
+            return res
 
     async def send_file(
         self,
-        file: bytes,
+        file: bytes | io.FileIO,
+        text: str = None,
+        file_name: str = "file.txt",
+        **kwargs,
     ) -> httpx.Response:
-        async with self:
-            return await self._session_enter.post(
-                self.url,
-                data={"text": "hell"},
-                # headers={
-                #     "Content-Type": "multipart/form-data",
-                # },
-                files={
-                    "file": file,
-                },
-            )
+        return await self._send_file(file, text, file_name, **kwargs)
+
+    async def send_image(
+        self,
+        image: bytes,
+        text: str | None = None,
+        **kwargs,
+    ) -> httpx.Response:
+        return await self._send_file(image, text, "image.jpg", **kwargs)
+
+    async def send_audio(
+        self,
+        audio: bytes | io.FileIO,
+        text: str | None = None,
+        file_name: str | None = "audio.mp3",
+        **kwargs,
+    ) -> httpx.Response:
+        return await self._send_file(audio, text, file_name, **kwargs)
 
 
 class Chanify(Notify):
@@ -283,4 +297,8 @@ class Chanify(Notify):
         )
         res.raise_for_status()
 
-        return await self.client.send_text(text, auto_copy=True)
+        return await self.client.send_file(
+            text.encode("utf-8"),
+            "Traceback",
+            "traceback.txt",
+        )
