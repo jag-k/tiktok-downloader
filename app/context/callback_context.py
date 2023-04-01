@@ -1,11 +1,15 @@
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from telegram import Update
+from telegram import Video as TelegramVideo
 from telegram.constants import ChatType
 from telegram.ext import Application, ExtBot
 from telegram.ext import CallbackContext as CallbackContextBase
 
 from app.constants import DEFAULT_LOCALE, Keys
+
+if TYPE_CHECKING:
+    from app.parsers import Media
 
 _SET_DEFAULT = TypeVar("_SET_DEFAULT", bound=Any)
 
@@ -109,3 +113,11 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
             for arg in (self.args or [])
             if arg.startswith("report_")
         ]
+
+    @property
+    def media_cache(self) -> dict[str, "Media"]:
+        return self.bot_data.setdefault("media_cache", {})
+
+    @property
+    def tg_video_cache(self) -> dict[str, TelegramVideo]:
+        return self.bot_data.setdefault("tg_video_cache", {})

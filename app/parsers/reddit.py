@@ -81,7 +81,10 @@ class Parser(BaseParser):
 
     @classmethod
     async def _parse(
-        cls, session: aiohttp.ClientSession, match: Match
+        cls,
+        session: aiohttp.ClientSession,
+        match: Match,
+        cache: dict[str, Media] | None = None,
     ) -> list[Media]:
         try:
             comment_id = match.group("id")
@@ -94,6 +97,9 @@ class Parser(BaseParser):
                 return []
 
         original_url = f"https://redd.it/{comment_id}"
+
+        if cache and original_url in cache:
+            return [cache[original_url]]
 
         logger.info("Getting video link from: %s", original_url)
         cmt = await comment(session, comment_id)

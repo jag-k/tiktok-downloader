@@ -4,7 +4,11 @@ import traceback
 import uuid
 
 import aiohttp as aiohttp
-from telegram import InlineQueryResult, InlineQueryResultVideo, Update
+from telegram import (
+    InlineQueryResult,
+    InlineQueryResultVideo,
+    Update,
+)
 from telegram.constants import ChatType, MessageEntityType, ParseMode
 from telegram.error import BadRequest
 from telegram.ext import (
@@ -42,43 +46,51 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video):
 
     media_caption = (caption(media) + extra_caption).strip()
 
+    # try:
+    #     res = await update.message.reply_video(
+    #         video=media.url,
+    #         caption=media_caption,
+    #         supports_streaming=True,
+    #     )
+    #     return await media.update(update, res, ctx)
+    # except BadRequest as e:
     try:
+        # if e.message != "Failed to get http url content":
+        #     raise e
         res = await update.message.reply_video(
-            video=media.url,
+            video=(
+                ctx.tg_video_cache.get(media.original_url)
+                or media.file_input
+                or media.url
+            ),
             caption=media_caption,
             supports_streaming=True,
+            width=media.video_width,
+            height=media.video_height,
+            duration=media.video_duration,
         )
+        ctx.tg_video_cache[media.original_url] = res.video
         return await media.update(update, res, ctx)
     except BadRequest as e:
-        try:
-            if e.message != "Failed to get http url content":
-                raise e
-            res = await update.message.reply_video(
-                video=await media.content,
-                caption=media_caption,
-                supports_streaming=True,
+        logger.error(
+            "Error sending video: %s",
+            media.url,
+            exc_info=e,
+            stack_info=True,
+        )
+        if update.effective_chat.type == ChatType.PRIVATE:
+            logger.info("Sending video as link: %s", media)
+            await update.message.reply_text(
+                _(
+                    "Error sending video: {title}\n"
+                    "\n\n"
+                    '<a href="{url}">Direct link to video</a>'
+                ).format(
+                    title=a(media_caption, media.original_url),
+                    url=media.url,
+                ),
             )
-            return await media.update(update, res, ctx)
-        except BadRequest as e:
-            logger.error(
-                "Error sending video: %s",
-                media.url,
-                exc_info=e,
-                stack_info=True,
-            )
-            if update.effective_chat.type == ChatType.PRIVATE:
-                logger.info("Sending video as link: %s", media)
-                await update.message.reply_text(
-                    _(
-                        "Error sending video: {title}\n"
-                        "\n\n"
-                        '<a href="{url}">Direct link to video</a>'
-                    ).format(
-                        title=a(media_caption, media.original_url),
-                        url=media.url,
-                    ),
-                )
-                logger.info("Send video as link: %s", media.url)
+            logger.info("Send video as link: %s", media.url)
 
 
 async def _process_media_group(
@@ -104,7 +116,9 @@ async def link_parser(update: Update, ctx: CallbackContext):
     ]
 
     async with aiohttp.ClientSession() as session:
-        medias: list[Media] = await Parser.parse(session, *message_links)
+        medias: list[Media] = await Parser.parse(
+            session, *message_links, cache=ctx.media_cache
+        )
 
     for media in medias:
         if isinstance(media, Video):
@@ -132,25 +146,34 @@ def inline_query_description(video: Video) -> str:
     return resp
 
 
-def inline_query_video_from_media(
-    medias: list[Media], ctx: CallbackContext
+async def inline_query_video_from_media(
+    medias: list[Media],
+    ctx: CallbackContext,
 ) -> list[InlineQueryResultVideo]:
     caption = make_caption(ctx)
 
-    return [
-        InlineQueryResultVideo(
+    def content(media: Video) -> InlineQueryResultVideo:
+        c = media.caption
+        if media.video_content:
+            ctx.media_cache[media.original_url] = media
+
+        if not c:
+            c = _("{m_type} video").format(m_type=media.type.value)
+
+        return InlineQueryResultVideo(
             id=str(uuid.uuid4()),
             video_url=media.url,
             mime_type=media.mime_type,
             thumbnail_url=media.thumbnail_url or media.url,
-            title=media.caption
-            or _("{m_type} video").format(m_type=media.type.value),
+            title=c,
             caption=caption(media),
             description=inline_query_description(media),
+            video_width=media.video_width,
+            video_height=media.video_height,
+            video_duration=media.video_duration,
         )
-        for media in medias
-        if isinstance(media, Video)
-    ]
+
+    return [content(media) for media in medias if isinstance(media, Video)]
 
 
 async def chosen_inline_query(update: Update, ctx: CallbackContext):
@@ -170,7 +193,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
 
     async def send_history():
         return await update.inline_query.answer(
-            inline_query_video_from_media(ctx.history[::-1], ctx),
+            await inline_query_video_from_media(ctx.history[::-1], ctx),
             is_personal=True,
             switch_pm_text=_("Recently added"),
             switch_pm_parameter="help",
@@ -189,7 +212,9 @@ async def inline_query(update: Update, ctx: CallbackContext):
     )
 
     async with aiohttp.ClientSession() as session:
-        medias: list[Media] = await Parser.parse(session, query)
+        medias: list[Media] = await Parser.parse(
+            session, query, cache=ctx.media_cache
+        )
 
     logger.info("Medias: %s", medias)
     if not medias:
@@ -207,7 +232,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
             cache_time=1,
         )
 
-    results: list[InlineQueryResult] = inline_query_video_from_media(
+    results: list[InlineQueryResult] = await inline_query_video_from_media(
         medias, ctx
     )
     for video, iq_video in zip(
@@ -228,7 +253,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
     )
 
 
-async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def error(update: Update, context: CallbackContext):
     """Log Errors caused by Updates."""
     exc = context.error
     logger.warning('%s: %s. Update: "%s"', type(exc).__name__, exc, update)
@@ -261,15 +286,15 @@ def main() -> None:
         .build()
     )
 
-    commands.connect_commands(application)
     application.add_handlers(
         [
-            settings.callback_handler(),
             ChosenInlineResultHandler(chosen_inline_query),
+            settings.callback_handler(),
             InlineQueryHandler(inline_query),
             MessageHandler(filters.TEXT & ~filters.COMMAND, link_parser),
         ]
     )
+    commands.connect_commands(application)
     patch(application)
 
     # Run the bot until the user presses Ctrl-C

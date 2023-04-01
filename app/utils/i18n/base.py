@@ -136,7 +136,7 @@ def json_value(self: RequestParameter) -> str | None:
         return self.value
     if self.value is None:
         return None
-    return json.dumps(self.value, default=convert, ensure_ascii=False)
+    return json.dumps(self.value)
 
 
 # noinspection PyPropertyAccess

@@ -54,6 +54,10 @@ if CONTACTS_PATH.exists():
 
 # Telegram file limit
 TG_FILE_LIMIT = 20 * 1024 * 1024  # 20 MB
+
+# Video proxy
+VIDEO_PROXY_URL = os.getenv("VIDEO_PROXY_URL", None)
+VIDEO_PROXY_TOKEN = os.getenv("VIDEO_PROXY_TOKEN", None)
 # endregion
 
 # Load custom logger config

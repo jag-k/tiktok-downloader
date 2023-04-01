@@ -52,7 +52,10 @@ class Parser(BaseParser):
 
     @classmethod
     async def _parse(
-        cls, session: aiohttp.ClientSession, match: Match
+        cls,
+        session: aiohttp.ClientSession,
+        match: Match,
+        cache: dict[str, Media] | None = None,
     ) -> list[Media]:
         m = match.groupdict({})
         author = ""
@@ -77,6 +80,8 @@ class Parser(BaseParser):
             original_url,
             video_id,
         )
+        if cache and original_url in cache:
+            return [cache[original_url]]
 
         try:
             data: dict = await cls._get_video_data(video_id)

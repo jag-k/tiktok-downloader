@@ -115,6 +115,9 @@ class ChanifyApi:
         async with self:
             return await self._session_enter.post(
                 self.url,
+                data={
+                    "text": "asdasd",
+                },
                 files={
                     "images": image,
                 },
@@ -139,6 +142,10 @@ class ChanifyApi:
         async with self:
             return await self._session_enter.post(
                 self.url,
+                data={"text": "hell"},
+                # headers={
+                #     "Content-Type": "multipart/form-data",
+                # },
                 files={
                     "file": file,
                 },
@@ -276,4 +283,4 @@ class Chanify(Notify):
         )
         res.raise_for_status()
 
-        return await self.client.send_file(text.encode("utf-8"))
+        return await self.client.send_text(text, auto_copy=True)

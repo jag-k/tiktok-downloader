@@ -9,6 +9,7 @@ from string import ascii_uppercase
 import aiohttp
 import telegram
 from aiohttp import ClientSession
+from telegram import InputFile
 from telegram._utils.enum import StringEnum  # noqa
 from telegram.ext import ContextTypes
 
@@ -90,19 +91,40 @@ class Video(Media):
     audio_url: str | None = None
     mime_type: str = "video/mp4"
     video_content: bytes | None = None
+    video_height: int | None = None
+    video_width: int | None = None
+    video_duration: int | None = None
 
     def __bool__(self):
         return bool(self.url)
 
-    @property
-    async def content(self) -> bytes:
+    async def content(
+        self,
+        user_agent: str | None = None,
+    ) -> bytes:
         if self.video_content:
             return self.video_content
 
-        async with ClientSession() as session:
+        headers = {}
+        if user_agent is not None:
+            headers["User-Agent"] = user_agent
+
+        async with ClientSession(headers=headers) as session:
             async with session.get(self.url) as resp:
                 self.video_content = await resp.content.read()
         return self.video_content
+
+    @property
+    def file_input(self) -> InputFile | None:
+        if not self.video_content:
+            return None
+        return InputFile(self.video_content, filename=self.original_url)
+
+    def __repr__(self):
+        return (
+            f"Video(url={self.url}, max_quality_url={self.max_quality_url}, "
+            f"audio_url={self.audio_url}, mime_type={self.mime_type})"
+        )
 
 
 @dataclass(kw_only=True)
@@ -145,7 +167,10 @@ class Parser(ABC):
     @classmethod
     @abstractmethod
     async def _parse(
-        cls, session: aiohttp.ClientSession, match: Match
+        cls,
+        session: aiohttp.ClientSession,
+        match: Match,
+        cache: dict[str, Media] | None = None,
     ) -> list[Media]:
         raise NotImplementedError
 
@@ -154,6 +179,7 @@ class Parser(ABC):
         cls,
         session: aiohttp.ClientSession,
         *strings: str,
+        cache: dict[str, Media] | None = None,
     ) -> list[Media]:
         result: list[Media] = []
         for string in strings:
@@ -163,7 +189,9 @@ class Parser(ABC):
                         logger.info(
                             "Found match for %s: %r", parser.TYPE, match.string
                         )
-                        medias = await parser._parse(session, match)
+                        medias = await parser._parse(
+                            session, match, cache=cache
+                        )
                         result.extend(medias)
         return result
 

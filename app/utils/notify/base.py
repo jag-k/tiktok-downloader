@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from enum import Enum
 from typing import Any, Self, TypedDict, final
 
@@ -41,7 +41,22 @@ class MessageType(str, Enum):
         }
 
 
-class Notify(ABC):
+class NotifyMeta(ABCMeta):
+    def __repr__(cls):
+        name = getattr(cls, "service_name", cls.__name__)
+        return f"Notify[{name!r}]"
+
+    @property
+    def service_name(cls):
+        return getattr(cls, "SERVICE_NAME", None) or camel_to_snake(
+            cls.__name__
+        )
+
+    def __getitem__(cls, item):
+        return getattr(cls, "_SERVICE_REGISTRY", {})[item]
+
+
+class Notify(ABC, metaclass=NotifyMeta):
     SERVICE_NAME: str | None = None
     SUPPORTED_TYPES: set[MessageType] = set()
     _SERVICES: list[Self] = []
@@ -113,18 +128,12 @@ class Notify(ABC):
         return result
 
     def __init_subclass__(cls, **kwargs):
-        # super().__init_subclass__(cls, **kwargs)
         logger.info(
-            "Registering Notify[%r]: %s",
-            cls.service_name(),
+            "Registering %r: %s",
+            cls,
             cls.SUPPORTED_TYPES,
         )
-        Notify._SERVICE_REGISTRY[cls.service_name()] = cls
-
-    @classmethod
-    @final
-    def service_name(cls):
-        return cls.SERVICE_NAME or camel_to_snake(cls.__name__)
+        Notify._SERVICE_REGISTRY[cls.service_name] = cls
 
     @classmethod
     @final
@@ -187,6 +196,9 @@ class Notify(ABC):
             "username": user.username if user.username else None,
             "user_link": user.link if user else None,
         }
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}({', '.join(self.types)})>"
 
 
 if __name__ == "__main__":

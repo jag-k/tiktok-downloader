@@ -33,7 +33,10 @@ class Parser(BaseParser):
 
     @classmethod
     async def _parse(
-        cls, session: aiohttp.ClientSession, match: Match
+        cls,
+        session: aiohttp.ClientSession,
+        match: Match,
+        cache: dict[str, Media] | None = None,
     ) -> list[Media]:
         try:
             tweet_id = match.group("id")

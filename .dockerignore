@@ -11,3 +11,4 @@ README.md
 docker-compose.yml
 **/tmp.json
 .ruff_cache/
+public/

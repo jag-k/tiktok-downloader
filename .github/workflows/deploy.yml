@@ -34,6 +34,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get version from pyproject.toml
+        id: get_version
+        run: |
+          echo "version=$(grep -E '^\[tool\.poetry\]$' -A 4 pyproject.toml | grep -E '^version' | sed 's/version = "//;s/"$//')" >> $GITHUB_OUTPUT
+
+      - name: Get short SHA
+        id: slug
+        run: echo "sha=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
@@ -41,7 +50,8 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.slug.outputs.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get_version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -50,8 +60,8 @@ jobs:
     needs: build
 
     environment:
-        name: production
-        url: https://t.me/tt_dwnldr_bot
+      name: production
+      url: https://t.me/tt_dwnldr_bot
 
     permissions:
       contents: none

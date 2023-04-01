@@ -14,6 +14,11 @@ INSTAGRAM_RE = re.compile(
     r"(?:https?://)?(?:www\.)?instagram\.com/(?P<type>\w+)/(?P<id>\w+)"
 )
 
+USER_AGENT = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/91.0.4472.114 Safari/537.36"
+)
+
 
 class Parser(BaseParser):
     TYPE = ParserType.INSTAGRAM
@@ -30,20 +35,33 @@ class Parser(BaseParser):
 
     @classmethod
     async def _parse(
-        cls, session: aiohttp.ClientSession, match: Match
+        cls,
+        session: aiohttp.ClientSession,
+        match: Match,
+        cache: dict[str, Media] | None = None,
     ) -> list[Media]:
         post_id = match.group("id")
         post_type = match.group("type")
 
         original_url = f"https://www.instagram.com/{post_type}/{post_id}"
 
+        if cache and (v := cache.get(original_url)):
+            return [v]
+
         logger.info("Getting video link from: %s", original_url)
 
+        variables = {
+            "shortcode": post_id,
+            "child_comment_count": 3,
+            "fetch_comment_count": 40,
+            "parent_comment_count": 24,
+            "has_threaded_comments": False,
+        }
         async with session.get(
             "https://www.instagram.com/graphql/query/",
             params={
-                "query_hash": "b3055c01b4b222b8a47dc12b090e4e64",
-                "variables": json.dumps({"shortcode": post_id}),
+                "query_hash": "477b65a610463740ccdb83135b2014db",
+                "variables": json.dumps(variables, separators=(",", ":")),
             },
         ) as response:
             data: dict = await response.json()
@@ -63,14 +81,44 @@ class Parser(BaseParser):
                     ).get("edges", [])
                 ]
             ).strip()
+        url = shortcode_media.get("video_url", None)
+        if not url:
+            return []
 
-        return [
-            Video(
-                caption=caption or None,
-                type=cls.TYPE,
-                original_url=original_url,
-                thumbnail_url=shortcode_media.get("display_url", None),
-                author=shortcode_media.get("owner", {}).get("username", None),
-                url=shortcode_media.get("video_url", ""),
+        thumbnail_url = shortcode_media.get("display_url", None)
+
+        video = Video(
+            caption=caption or None,
+            type=cls.TYPE,
+            original_url=original_url,
+            thumbnail_url=thumbnail_url,
+            author=shortcode_media.get("owner", {}).get("username", None),
+            url=url,
+            mime_type="video/mp4",
+            video_width=shortcode_media.get("dimensions", {}).get(
+                "width", None
+            ),
+            video_height=shortcode_media.get("dimensions", {}).get(
+                "height", None
+            ),
+            video_duration=int(shortcode_media.get("video_duration", "0"))
+            or None,
+        )
+        if cache is not None:
+            cache[video.original_url] = video
+        return [video]
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    async def main():
+        async with aiohttp.ClientSession() as session:
+            print(
+                await Parser.parse(
+                    session,
+                    "https://www.instagram.com/reel/CqYq8vroPH2",
+                )
             )
-        ]
+
+    asyncio.run(main())
