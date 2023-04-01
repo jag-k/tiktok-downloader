@@ -123,6 +123,7 @@ class ChanifyApi:
     ) -> httpx.Response:
         data = {**kwargs}
         mime_type, _ = mimetypes.guess_type(file_name)
+        print(mime_type)
         if file_name:
             data["filename"] = file_name
         if text:
@@ -302,5 +303,5 @@ class Chanify(Notify):
         return await self.client.send_file(
             text.encode("utf-8"),
             "Traceback",
-            "traceback.txt",
+            "traceback.log",
         )
