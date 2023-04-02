@@ -12,18 +12,18 @@ def env_wrapper(callback: HandlerCallback) -> HandlerCallback:
     @functools.wraps(callback)
     async def wrapper(update: Update, context: CallbackContext):
         tokens: dict[ContextVar, Token] = {}
+        if update:
+            if update.effective_user:
+                tokens[USER_ID] = USER_ID.set(update.effective_user.id)
+                tokens[USERNAME] = USERNAME.set(update.effective_user.username)
 
-        if update.effective_user:
-            tokens[USER_ID] = USER_ID.set(update.effective_user.id)
-            tokens[USERNAME] = USERNAME.set(update.effective_user.username)
+            if update.effective_message:
+                tokens[QUERY] = QUERY.set(update.effective_message.text)
+                tokens[DATA_TYPE] = DATA_TYPE.set("message")
 
-        if update.effective_message:
-            tokens[QUERY] = QUERY.set(update.effective_message.text)
-            tokens[DATA_TYPE] = DATA_TYPE.set("message")
-
-        elif update.inline_query:
-            tokens[QUERY] = QUERY.set(update.inline_query.query)
-            tokens[DATA_TYPE] = DATA_TYPE.set("inline_query")
+            elif update.inline_query:
+                tokens[QUERY] = QUERY.set(update.inline_query.query)
+                tokens[DATA_TYPE] = DATA_TYPE.set("inline_query")
 
         try:
             return await callback(update, context)
