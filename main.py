@@ -1,3 +1,4 @@
+import datetime
 import logging
 import re
 import traceback
@@ -25,7 +26,8 @@ from telegram.ext import (
 from app import commands, constants, settings
 from app.context import CallbackContext
 from app.parsers import Media, MediaGroup, Parser, Video
-from app.utils import a, make_caption, notify, patch
+from app.utils import a, notify, patch
+from app.utils.app_patchers.json_logger import env_wrapper
 
 # noinspection PyProtectedMember
 from app.utils.i18n import _, _n
@@ -34,7 +36,6 @@ logger = logging.getLogger(__name__)
 
 
 async def _process_video(update: Update, ctx: CallbackContext, media: Video):
-    caption = make_caption(ctx, "")
     extra_caption = ""
     if media.max_quality_url and media.max_quality_url != media.url:
         extra_caption = _(
@@ -44,7 +45,7 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video):
             "This is original link</a>"
         ).format(url=media.max_quality_url)
 
-    media_caption = (caption(media) + extra_caption).strip()
+    media_caption = (media.real_caption(ctx, "") + extra_caption).strip()
 
     # try:
     #     res = await update.message.reply_video(
@@ -57,6 +58,12 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video):
     try:
         # if e.message != "Failed to get http url content":
         #     raise e
+        print(
+            ctx.tg_video_cache.get(media.original_url)
+            or media.file_input
+            or media.url
+        )
+        tg_video = ctx.tg_video_cache.get(media.original_url)
         res = await update.message.reply_video(
             video=(
                 ctx.tg_video_cache.get(media.original_url)
@@ -70,7 +77,16 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video):
             duration=media.video_duration,
         )
         ctx.tg_video_cache[media.original_url] = res.video
-        return await media.update(update, res, ctx)
+        if not tg_video:
+
+            async def _cb(context: CallbackContext):
+                await media.update(update, context, res)
+
+            ctx.job_queue.run_once(
+                _cb,
+                when=datetime.datetime.now(),
+                chat_id=update.effective_chat.id,
+            )
     except BadRequest as e:
         logger.error(
             "Error sending video: %s",
@@ -91,6 +107,7 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video):
                 ),
             )
             logger.info("Send video as link: %s", media.url)
+        raise e
 
 
 async def _process_media_group(
@@ -150,8 +167,6 @@ async def inline_query_video_from_media(
     medias: list[Media],
     ctx: CallbackContext,
 ) -> list[InlineQueryResultVideo]:
-    caption = make_caption(ctx)
-
     def content(media: Video) -> InlineQueryResultVideo:
         c = media.caption
         if media.video_content:
@@ -166,7 +181,7 @@ async def inline_query_video_from_media(
             mime_type=media.mime_type,
             thumbnail_url=media.thumbnail_url or media.url,
             title=c,
-            caption=caption(media),
+            caption=media.real_caption(ctx),
             description=inline_query_description(media),
             video_width=media.video_width,
             video_height=media.video_height,
@@ -253,6 +268,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
     )
 
 
+@env_wrapper
 async def error(update: Update, context: CallbackContext):
     """Log Errors caused by Updates."""
     exc = context.error

@@ -118,7 +118,7 @@ def to_json(self: TelegramObject) -> str:
     Returns:
         :obj:`str`
     """
-    return json.dumps(self.to_dict(), default=convert, ensure_ascii=False)
+    return json.dumps(self.to_dict(), default=convert)
 
 
 TelegramObject.to_json = to_json
@@ -136,7 +136,7 @@ def json_value(self: RequestParameter) -> str | None:
         return self.value
     if self.value is None:
         return None
-    return json.dumps(self.value)
+    return json.dumps(self.value, default=convert)
 
 
 # noinspection PyPropertyAccess

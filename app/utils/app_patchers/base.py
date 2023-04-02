@@ -1,16 +1,18 @@
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Awaitable, Callable
 from typing import final
 
 from telegram import Update
 from telegram.ext import Application, BaseHandler
 
+# noinspection PyProtectedMember
+from telegram.ext._handler import RT, HandlerCallback
+
 from app.context import CallbackContext
 
 logger = logging.getLogger(__name__)
 
-HandlerCallback = Callable[[Update, CallbackContext], Awaitable]
+HandlerCallback = HandlerCallback[Update, CallbackContext, RT]
 Handler = BaseHandler[Update, CallbackContext]
 
 
@@ -46,8 +48,8 @@ class Patcher(ABC):
     @classmethod
     @final
     def _patch_app(cls, application: Application) -> Application:
-        old_dict = list(application.handlers.items())
-        for key, handlers in old_dict:
+        old_handlers = list(application.handlers.items())
+        for key, handlers in old_handlers:
             application.handlers[key] = [
                 cls._patch_handler(handler) for handler in handlers
             ]

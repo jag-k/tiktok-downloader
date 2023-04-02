@@ -162,11 +162,14 @@ class Parser(BaseParser):
         async with ClientSession() as session:
             async with session.get(url, allow_redirects=False) as resp:
                 if resp.status == 301:
-                    return int(
+                    base = (
                         resp.headers["Location"]
                         .split("?", 1)[0]
                         .rsplit("/", 1)[-1]
                     )
+                    if not base or not base.isdigit():
+                        return None
+                    return int(base)
             async with session.get(url) as resp:
                 id_ = resp.url.path.rsplit("/", 1)[-1]
                 if not id_:
