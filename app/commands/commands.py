@@ -88,9 +88,9 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
     contacts = ""
     if constants.CONTACTS:
         contacts_list = "\n".join(
-            f'- {g("type")}: {a(g("text"), c.get("url"))}'
+            f'- {g("type")}: {a(g("text"), g("url"))}'
             for c in constants.CONTACTS
-            if all(map(c.get, ("type", "text")))
+            if all(map(c.get, ("type", "text", "url")))
             if (g := get_by_lang(c))
         )
         if contacts_list:
