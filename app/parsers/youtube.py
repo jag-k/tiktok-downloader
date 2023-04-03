@@ -56,7 +56,11 @@ class Parser(BaseParser):
         logger.info("Getting video link from: %s", original_url)
         yt = pytube.YouTube(original_url)
         with timeit("Getting streams", logger):
-            streams_obj = StreamQuery(yt.fmt_streams)
+            try:
+                streams_obj = StreamQuery(yt.fmt_streams)
+            except KeyError:
+                logger.info('No "fmt_streams" found for %r', original_url)
+                return []
 
         streams = streams_obj.filter(
             type="video", progressive=True, file_extension="mp4"
