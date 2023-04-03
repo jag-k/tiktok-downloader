@@ -1,4 +1,3 @@
-import datetime
 import logging
 import re
 import traceback
@@ -82,11 +81,11 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video):
             async def _cb(context: CallbackContext):
                 await media.update(update, context, res)
 
-            ctx.job_queue.run_once(
-                _cb,
-                when=datetime.datetime.now(),
-                chat_id=update.effective_chat.id,
-            )
+            # ctx.job_queue.run_once(
+            #     _cb,
+            #     when=datetime.datetime.now(),
+            #     chat_id=update.effective_chat.id,
+            # )
     except BadRequest as e:
         logger.error(
             "Error sending video: %s",
