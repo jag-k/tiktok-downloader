@@ -238,14 +238,17 @@ class Parser(ABC):
         for string in strings:
             for parser in cls._parsers:
                 for reg_exp in parser.REG_EXPS:
-                    for match in reg_exp.finditer(string):
-                        logger.info(
-                            "Found match for %s: %r", parser.TYPE, match.string
-                        )
-                        medias = await parser._parse(
-                            session, match, cache=cache
-                        )
-                        result.extend(medias)
+                    match = reg_exp.fullmatch(string)
+                    if not match:
+                        continue
+                    logger.info(
+                        "Found match for %s: %r", parser.TYPE, match.string
+                    )
+                    medias = await parser._parse(
+                        session, match, cache=MediaCache(cache)
+                    )
+                    result.extend(medias)
+                    break
         return result
 
     def __init_subclass__(cls, **kwargs):
