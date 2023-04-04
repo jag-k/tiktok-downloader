@@ -244,9 +244,7 @@ class Parser(ABC):
                     logger.info(
                         "Found match for %s: %r", parser.TYPE, match.string
                     )
-                    medias = await parser._parse(
-                        session, match, cache=MediaCache(cache)
-                    )
+                    medias = await parser._parse(session, match, cache=cache)
                     result.extend(medias)
                     break
         return result
