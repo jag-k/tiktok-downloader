@@ -32,6 +32,11 @@ def _device_id() -> int:
 class Parser(BaseParser):
     TYPE = ParserType.TIKTOK
     REG_EXPS = [
+        # https://www.tiktok.com/t/ZS8s7cPmd/
+        re.compile(
+            r"(?:https?://)?"
+            r"(?:www\.)?tiktok\.com/(?P<short_suffix>\w+)/(?P<id>\w+)/?"
+        ),
         # https://vt.tiktok.com/ZSRq1jcrg/
         # https://vm.tiktok.com/ZSRq1jcrg/
         re.compile(
@@ -58,19 +63,30 @@ class Parser(BaseParser):
         cache: dict[str, Media] | None = None,
     ) -> list[Media]:
         m = match.groupdict({})
-        author = ""
-        try:
+        author: str
+        print(m)
+        if "short_suffix" in m:
+            print("short_suffix")
+            suffix = m["short_suffix"]
+            url_id = m["id"]
+            original_url = f"https://www.tiktok.com/{suffix}/{url_id}"
+            logger.info("Get video id from: %s", original_url)
+            video_location = await cls._get_video_id(original_url)
+            if video_location is None:
+                return []
+            author, video_id = video_location
+
+        elif "id" in m:
             url_id = m.get("id")
-            if not url_id:
-                raise IndexError
             domain = m.get("domain", "vt")
             original_url = f"https://{domain}.tiktok.com/{url_id}"
             logger.info("Get video id from: %s", original_url)
-            video_id: int | None = await cls._get_video_id(original_url)
-            if video_id is None:
+            video_location = await cls._get_video_id(original_url)
+            if video_location is None:
                 return []
+            author, video_id = video_location
 
-        except IndexError:
+        else:
             author = m.get("author", "").lower()
             video_id: int = int(m.get("video_id"))
             original_url = f"https://www.tiktok.com/@{author}/video/{video_id}"
@@ -80,8 +96,6 @@ class Parser(BaseParser):
             original_url,
             video_id,
         )
-        if cache and original_url in cache:
-            return [cache[original_url]]
 
         try:
             data: dict = await cls._get_video_data(video_id)
@@ -158,23 +172,22 @@ class Parser(BaseParser):
         return []
 
     @classmethod
-    async def _get_video_id(cls, url: str) -> int | None:
+    async def _get_video_id(cls, url: str) -> tuple[str, int] | None:
         async with ClientSession() as session:
             async with session.get(url, allow_redirects=False) as resp:
                 if resp.status == 301:
-                    base = (
-                        resp.headers["Location"]
-                        .split("?", 1)[0]
-                        .rsplit("/", 1)[-1]
-                    )
-                    if not base or not base.isdigit():
-                        return None
-                    return int(base)
-            async with session.get(url) as resp:
-                id_ = resp.url.path.rsplit("/", 1)[-1]
-                if not id_:
-                    return None
-                return int(id_)
+                    location = resp.headers.get("Location", "").split("?", 1)[0]
+                else:
+                    async with session.get(url) as resp:
+                        location = resp.url.path.rsplit("?", 1)[0]
+
+        base = location.rsplit("/", 1)[-1]
+        author = location.split("@", 1)[-1].split("/", 1)[0]
+        print(f"{location=}")
+        print(f"{base=}")
+        if not base or not base.isdigit():
+            return None
+        return author, int(base)
 
     @staticmethod
     async def _get_video_data(video_id: int) -> dict:
