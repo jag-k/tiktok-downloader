@@ -124,12 +124,17 @@ async def _process_media_group(
 
 async def link_parser(update: Update, ctx: CallbackContext):
     """Parse link from the user message."""
-    text = getattr(update.message, "text", "")
-    message_links = [
-        text[entity.offset : entity.offset + entity.length]
-        for entity in update.message.entities
-        if entity.type == MessageEntityType.URL
-    ]
+    m = update.effective_message
+    text = getattr(m, "text", "")
+    if m is not None:
+        message_links = [
+            text[entity.offset : entity.offset + entity.length]
+            for entity in m.entities
+            if entity.type
+            in (MessageEntityType.URL, MessageEntityType.TEXT_LINK)
+        ]
+    else:
+        message_links = []
 
     async with aiohttp.ClientSession() as session:
         medias: list[Media] = await Parser.parse(

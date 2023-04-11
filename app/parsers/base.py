@@ -238,7 +238,7 @@ class Parser(ABC):
         for string in strings:
             for parser in cls._parsers:
                 for reg_exp in parser.REG_EXPS:
-                    match = reg_exp.fullmatch(string)
+                    match = reg_exp.match(string)
                     if not match:
                         continue
                     logger.info(
