@@ -15,46 +15,13 @@
                             "chanify",
                             "file_reporter"
                         ]
-                    },
-                    "types": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "if": {
-                                "properties": {
-                                    "service": {
-                                        "const": "chanify"
-                                    }
-                                }
-                            },
-                            "then": {
-                                "enum": [
-                                    "exception",
-                                    "report",
-                                    "shutdown",
-                                    "start",
-                                    "stop"
-                                ]
-                            },
-                            "else": {
-                                "if": {
-                                    "properties": {
-                                        "service": {
-                                            "const": "file_reporter"
-                                        }
-                                    }
-                                },
-                                "then": {
-                                    "enum": [
-                                        "report"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "config": {
-                        "type": "object",
-                        "additionalProperties": false,
+                    }
+                },
+                "required": [
+                    "service"
+                ],
+                "allOf": [
+                    {
                         "if": {
                             "properties": {
                                 "service": {
@@ -64,39 +31,69 @@
                         },
                         "then": {
                             "properties": {
-                                "token": {
-                                    "type": "string"
-                                },
-                                "url": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "token"
-                            ]
-                        },
-                        "else": {
-                            "if": {
-                                "properties": {
-                                    "service": {
-                                        "const": "file_reporter"
+                                "types": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "enum": [
+                                            "exception",
+                                            "report",
+                                            "shutdown",
+                                            "start",
+                                            "stop"
+                                        ]
                                     }
+                                },
+                                "config": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "url": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "token"
+                                    ]
                                 }
-                            },
-                            "then": {
-                                "properties": {
-                                    "file_path": {
-                                        "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "service": {
+                                    "const": "file_reporter"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "types": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "enum": [
+                                            "report"
+                                        ]
+                                    }
+                                },
+                                "config": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "file_path": {
+                                            "type": "string"
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                },
-                "required": [
-                    "service"
-                ],
-                "additionalProperties": false
+                ]
             }
         }
     }
