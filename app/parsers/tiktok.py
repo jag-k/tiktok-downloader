@@ -174,17 +174,11 @@ class Parser(BaseParser):
     @classmethod
     async def _get_video_id(cls, url: str) -> tuple[str, int] | None:
         async with ClientSession() as session:
-            async with session.get(url, allow_redirects=False) as resp:
-                if resp.status == 301:
-                    location = resp.headers.get("Location", "").split("?", 1)[0]
-                else:
-                    async with session.get(url) as resp:
-                        location = resp.url.path.rsplit("?", 1)[0]
+            async with session.get(url) as resp:
+                location = resp.url.path.rsplit("?", 1)[0]
 
         base = location.rsplit("/", 1)[-1]
         author = location.split("@", 1)[-1].split("/", 1)[0]
-        print(f"{location=}")
-        print(f"{base=}")
         if not base or not base.isdigit():
             return None
         return author, int(base)
