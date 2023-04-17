@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "video-downloader-bot"
-version = "0.1.0"
+version = "0.2.0"
 description = "Telegram bot for downloading videos from social networks"
 authors = ["Jag_k <jag-k@users.noreply.github.com>"]
 readme = "README.md"
@@ -13,6 +13,9 @@ pytube = "^12.1.2"
 python-dotenv = "^1.0.0"
 pytz = "^2023.2"
 aiofiles = "^23.1.0"
+pydantic = "^1.10.7"
+motor = "^3.1.2"
+mongopersistence = "^0.3.0"
 
 [tool.poetry.group.dev.dependencies]
 babel = "^2.11.0"
@@ -53,3 +56,8 @@ select = [
     "PT022", # No teardown in fixture {name}, use return instead of yield
 ]
 ignore = ["E501"]
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["E402", "F401", "F403", "F405", "F811"]
+"__main__.py" = ["E402", "F401", "F403", "F405", "F811"]
+
+

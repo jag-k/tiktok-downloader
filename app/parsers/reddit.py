@@ -7,7 +7,8 @@ from urllib.parse import urlparse
 import aiohttp
 from aiohttp import InvalidURL
 
-from app.parsers.base import Media, ParserType, Video
+from app.models.medias import Media, ParserType, Video
+from app.parsers.base import MediaCache
 from app.parsers.base import Parser as BaseParser
 
 logger = logging.getLogger(__name__)
@@ -84,7 +85,7 @@ class Parser(BaseParser):
         cls,
         session: aiohttp.ClientSession,
         match: Match,
-        cache: dict[str, Media] | None = None,
+        cache: MediaCache,
     ) -> list[Media]:
         try:
             comment_id = match.group("id")
@@ -98,8 +99,7 @@ class Parser(BaseParser):
 
         original_url = f"https://redd.it/{comment_id}"
 
-        if cache and original_url in cache:
-            return [cache[original_url]]
+        await cache.find_by_original_url(original_url)
 
         logger.info("Getting video link from: %s", original_url)
         cmt = await comment(session, comment_id)
@@ -126,14 +126,16 @@ class Parser(BaseParser):
             thumbnail = cmt["preview"]["images"][0]["source"]["url"]
 
         # TODO: Get video with audio
-        return [
-            Video(
-                original_url=original_url,
-                author=author,
-                caption=title,
-                thumbnail_url=thumbnail,
-                type=ParserType.REDDIT,
-                extra_description=f"by u/{author} in r/{subreddit}",
-                url=video_url,
-            )
-        ]
+        return await cache.save_group(
+            [
+                Video(
+                    original_url=original_url,
+                    author=author,
+                    caption=title,
+                    thumbnail_url=thumbnail,
+                    type=ParserType.REDDIT,
+                    extra_description=f"by u/{author} in r/{subreddit}",
+                    url=video_url,
+                )
+            ]
+        )

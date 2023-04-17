@@ -1,7 +1,6 @@
-# flake8: noqa: F401
-
 import json
 import os
+import sys
 from pathlib import Path
 
 import pytz
@@ -53,11 +52,22 @@ if CONTACTS_PATH.exists():
         CONTACTS = json.load(f)
 
 # Telegram file limit
-TG_FILE_LIMIT = 20 * 1024 * 1024  # 20 MB
+TG_FILE_LIMIT = 50 * 1024 * 1024  # 20 MB
 
-# Video proxy
-VIDEO_PROXY_URL = os.getenv("VIDEO_PROXY_URL", None)
-VIDEO_PROXY_TOKEN = os.getenv("VIDEO_PROXY_TOKEN", None)
+# region MongoDB support
+# mongodb://user:password@localhost:27017/database
+# mongodb://user:password@localhost:27017/
+MONGO_URL = os.getenv("MONGO_URL", None)
+MONGO_DB = os.getenv("MONGO_DB", None)
+
+ENABLE_MONGO = MONGO_URL and MONGO_DB
+if not ENABLE_MONGO:
+    print(
+        "Bot requires MongoDB to work.\n"
+        "Please, set MONGO_URL and MONGO_DB envs.",
+        file=sys.stderr,
+    )
+    exit(1)
 # endregion
 
 # Load custom logger config

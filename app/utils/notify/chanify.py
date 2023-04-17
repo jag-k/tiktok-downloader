@@ -2,15 +2,17 @@ import io
 import logging
 import mimetypes
 import traceback
+from collections.abc import Coroutine
 from datetime import datetime
 from enum import Enum
-from typing import TypedDict
+from typing import Any, TypedDict
 
 import httpx
 from telegram import Update, User
 
 from app.constants import CONTEXT_VARS
 from app.context import CallbackContext
+from app.models.report import Report
 from app.utils.minmax import minmax
 from app.utils.notify.base import MessageType, Notify
 
@@ -169,7 +171,15 @@ class ChanifyApi:
 
 
 class Chanify(Notify):
-    SUPPORTED_TYPES = {MessageType.REPORT, MessageType.EXCEPTION}
+    """
+    A wrapper for [Chanify](https://chanify.net) Notifications
+
+    :param token: Chanify token
+    :param url: Chanify server url
+    :default url: https://api.chanify.net
+    """
+
+    SUPPORTED_TYPES = set(MessageType)
 
     def __init__(
         self,
@@ -189,32 +199,41 @@ class Chanify(Notify):
         self,
         message_type: MessageType,
         text: str,
-        update: Update,
-        extras: dict,
-        ctx: CallbackContext = None,
+        update: Update | None = None,
+        ctx: CallbackContext | None = None,
+        extras: dict | None = None,
     ) -> bool:
+        func: Coroutine[Any, Any, httpx.Response]
+
+        match message_type:
+            case MessageType.REPORT:
+                report: Report = extras.get("report", None)
+                if not report:
+                    return False
+                date = None
+                if update and update.effective_message:
+                    date = update.effective_message.date
+                func = self._send_message_report(
+                    user=update.effective_user,
+                    date=date,
+                    report=report,
+                )
+            case MessageType.EXCEPTION:
+                if not ctx.error:
+                    return False
+                func = self._send_message_exception(
+                    user=getattr(update, "effective_user", None),
+                    exc=ctx.error,
+                )
+            case _:
+                func = self.client.send_text(
+                    title=text,
+                    text=f"Message type: {message_type.value}",
+                    copy=text,
+                )
+
         try:
-            match message_type:
-                case MessageType.REPORT:
-                    report_args = extras.get("report_args", [])
-                    if not report_args:
-                        return False
-                    date = None
-                    if update.effective_message:
-                        date = update.effective_message.date
-                    res = await self._send_message_report(
-                        user=update.effective_user,
-                        date=date,
-                        reports=report_args,
-                    )
-                case MessageType.EXCEPTION:
-                    if not ctx.error:
-                        return False
-                    res = await self._send_message_exception(
-                        user=update.effective_user, exc=ctx.error
-                    )
-                case _:
-                    res = await self.client.send_text(text=text)
+            res = await func
             res.raise_for_status()
             return True
         except httpx.HTTPStatusError as exc:
@@ -224,25 +243,22 @@ class Chanify(Notify):
                 exc.response.json(),
                 exc_info=exc,
             )
-        except Exception as exc:
-            logger.error("Failed to send Chanify message", exc_info=exc)
         return False
 
     async def _send_message_report(
         self,
-        reports: list[str],
+        report: Report,
         user: User | None,
         date: datetime = None,
     ) -> httpx.Response:
         if not date:
             date = datetime.now()
 
-        title = f"Found {len(reports)} report(s)"
+        title = "Found report"
         actions: list[Action] = [
-            Action(name=f"Open {i} link", url=r)
-            for i, r in enumerate(reports, 1)
+            Action(name="Open link", url=report.message),
         ]
-        copy: str = "\n".join(reports)
+        copy: str = report.message
 
         if user:
             title += f" from {user.name}"
@@ -253,11 +269,14 @@ class Chanify(Notify):
                     url=user.link,
                 )
             )
-
         return await self.client.send_text(
             title=f"{title}!",
-            text="\n".join(reports)
-            + f"\n\nat {date.isoformat(' ', 'seconds')}",
+            text=(
+                f"Message: {report.message!r}\n"
+                f"Report place: {report.report_place.value!r}\n"
+                f"Report Type: {report.report_type.value!r}\n\n"
+                f"at {date.isoformat(' ', 'seconds')}"
+            ),
             copy=copy,
             sound=True,
             actions=actions,

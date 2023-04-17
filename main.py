@@ -1,14 +1,13 @@
 import logging
-import re
 import traceback
 import uuid
+from collections.abc import Callable, Coroutine
+from typing import Any
 
 import aiohttp as aiohttp
-from telegram import (
-    InlineQueryResult,
-    InlineQueryResultVideo,
-    Update,
-)
+from mongopersistence import MongoPersistence
+from telegram import InlineQueryResult, InlineQueryResultVideo, Update
+from telegram import Video as TelegramVideo
 from telegram.constants import ChatType, MessageEntityType, ParseMode
 from telegram.error import BadRequest
 from telegram.ext import (
@@ -18,13 +17,16 @@ from telegram.ext import (
     Defaults,
     InlineQueryHandler,
     MessageHandler,
-    PicklePersistence,
     filters,
 )
 
 from app import commands, constants, settings
 from app.context import CallbackContext
-from app.parsers import Media, MediaGroup, Parser, Video
+from app.database import Reporter
+from app.database.connector import MongoDatabase
+from app.models.medias import Media, MediaGroup, Video
+from app.models.report import Report, ReportPlace, ReportType
+from app.parsers import Parser
 from app.utils import a, notify, patch
 from app.utils.app_patchers.json_logger import env_wrapper
 
@@ -46,46 +48,20 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video):
 
     media_caption = (media.real_caption(ctx, "") + extra_caption).strip()
 
-    # try:
-    #     res = await update.message.reply_video(
-    #         video=media.url,
-    #         caption=media_caption,
-    #         supports_streaming=True,
-    #     )
-    #     return await media.update(update, res, ctx)
-    # except BadRequest as e:
     try:
-        # if e.message != "Failed to get http url content":
-        #     raise e
-        print(
-            ctx.tg_video_cache.get(media.original_url)
-            or media.file_input
-            or media.url
-        )
         tg_video = ctx.tg_video_cache.get(media.original_url)
-        res = await update.message.reply_video(
-            video=(
-                ctx.tg_video_cache.get(media.original_url)
-                or media.file_input
-                or media.url
-            ),
+        if tg_video:
+            tg_video = TelegramVideo.de_json(tg_video, ctx.bot)
+
+        res = await update.effective_message.reply_video(
+            video=(tg_video or media.file_input or media.url),
             caption=media_caption,
             supports_streaming=True,
             width=media.video_width,
             height=media.video_height,
             duration=media.video_duration,
         )
-        ctx.tg_video_cache[media.original_url] = res.video
-        if not tg_video:
-
-            async def _cb(context: CallbackContext):
-                await media.update(update, context, res)
-
-            # ctx.job_queue.run_once(
-            #     _cb,
-            #     when=datetime.datetime.now(),
-            #     chat_id=update.effective_chat.id,
-            # )
+        ctx.tg_video_cache[media.original_url] = res.video.to_dict()
     except BadRequest as e:
         logger.error(
             "Error sending video: %s",
@@ -95,7 +71,7 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video):
         )
         if update.effective_chat.type == ChatType.PRIVATE:
             logger.info("Sending video as link: %s", media)
-            await update.message.reply_text(
+            await update.effective_message.reply_text(
                 _(
                     "Error sending video: {title}\n"
                     "\n\n"
@@ -137,9 +113,7 @@ async def link_parser(update: Update, ctx: CallbackContext):
         message_links = []
 
     async with aiohttp.ClientSession() as session:
-        medias: list[Media] = await Parser.parse(
-            session, *message_links, cache=ctx.media_cache
-        )
+        medias: list[Media] = await Parser.parse(session, *message_links)
 
     for media in medias:
         if isinstance(media, Video):
@@ -173,8 +147,6 @@ async def inline_query_video_from_media(
 ) -> list[InlineQueryResultVideo]:
     def content(media: Video) -> InlineQueryResultVideo:
         c = media.caption
-        if media.video_content:
-            ctx.media_cache[media.original_url] = media
 
         if not c:
             c = _("{m_type} video").format(m_type=media.type.value)
@@ -200,7 +172,10 @@ async def chosen_inline_query(update: Update, ctx: CallbackContext):
     logger.info("Chosen video: %s", video)
     ctx.temp_history.clear()
 
-    if video and video not in ctx.history:
+    if not video or not ctx.settings.is_history_enabled(update):
+        return
+
+    if video not in ctx.history:
         logger.info("Add %s video to history", video)
         ctx.history.append(video)
 
@@ -231,43 +206,53 @@ async def inline_query(update: Update, ctx: CallbackContext):
     )
 
     async with aiohttp.ClientSession() as session:
-        medias: list[Media] = await Parser.parse(
-            session, query, cache=ctx.media_cache
-        )
+        medias: list[Media] = await Parser.parse(session, query)
 
     logger.info("Medias: %s", medias)
     if not medias:
-        m = re.match(r"https?://(?:www\.)?(.*)", query)
-        if m:
-            query = m.groups()[0]
-        r_query = query.replace("/", "__").replace(".", "--").split("?", 1)[0]
-        report = f"report_{r_query}"
-        logger.info("No medias found. Report: %s", report)
+        r = Report(
+            report_type=ReportType.MEDIA_NOT_FOUND,
+            message=query,
+            report_place=ReportPlace.INLINE,
+            extra_data=None,
+        )
+        report_uid = await Reporter.save_report(r)
+        logger.info("No medias found. Report: %s", r)
         return await update.inline_query.answer(
             [],
             is_personal=True,
             switch_pm_text=not_found_text,
-            switch_pm_parameter=report,
+            switch_pm_parameter=f"report_{report_uid}",
             cache_time=1,
         )
 
     results: list[InlineQueryResult] = await inline_query_video_from_media(
         medias, ctx
     )
-    for video, iq_video in zip(
-        filter(lambda x: isinstance(x, Video), medias), results
-    ):
-        ctx.temp_history[iq_video.id] = video
 
-    await update.inline_query.answer(
+    if ctx.settings.is_history_enabled(update):
+        for video, iq_video in zip(
+            filter(lambda x: isinstance(x, Video), medias), results
+        ):
+            ctx.temp_history[iq_video.id] = video.to_dict()
+    r = Report(
+        report_type=ReportType.WRONG_MEDIA,
+        message=query,
+        report_place=ReportPlace.INLINE,
+        extra_data=None,
+    )
+    report_uid = await Reporter.save_report(r)
+    logger.info("Report for wrong media: %r", r)
+    return await update.inline_query.answer(
         results,
         is_personal=True,
         switch_pm_text=(
             _n("Found %d video", "Found %d videos", len(results)) % len(results)
+            + _(". Is it correct media? Press here if not!")
             if results
             else not_found_text
         ),
-        switch_pm_parameter="help",
+        switch_pm_parameter=f"report_{report_uid}",
         cache_time=1,
     )
 
@@ -287,11 +272,43 @@ async def error(update: Update, context: CallbackContext):
     )
 
 
+def post_something(
+    message_type: notify.MessageType,
+) -> Callable[[Application], Coroutine[Any, Any, None]]:
+    async def wrap(app: Application):
+        await notify.send_message(
+            message_type=message_type,
+            text=f"Application is {message_type.value}",
+            extras={"app": app},
+        )
+
+    return wrap
+
+
+async def post_init(app: Application):
+    MongoDatabase.init()
+    await post_something(notify.MessageType.START)(app)
+
+
+async def post_shutdown(app: Application):
+    MongoDatabase.close()
+    await post_something(notify.MessageType.SHUTDOWN)(app)
+
+
 def main() -> None:
     """Start the bot."""
     logger.debug("Token: %r", constants.TOKEN)
-    persistence = PicklePersistence(
-        filepath=constants.DATA_PATH / "persistence.pickle"
+
+    persistence: MongoPersistence[dict, dict, dict] = MongoPersistence(
+        mongo_url=constants.MONGO_URL,
+        db_name=constants.MONGO_DB,
+        name_col_user_data="user-data",
+        name_col_chat_data="chat-data",
+        name_col_bot_data="bot-data",
+        name_col_conversations_data="conversations-data",
+        create_col_if_not_exist=True,
+        load_on_flush=False,
+        update_interval=30,
     )
     defaults = Defaults(
         parse_mode=ParseMode.HTML,
@@ -303,6 +320,9 @@ def main() -> None:
         .defaults(defaults=defaults)
         .token(constants.TOKEN)
         .context_types(ContextTypes(context=CallbackContext))
+        .post_init(post_init)
+        .post_stop(post_something(notify.MessageType.STOP))
+        .post_shutdown(post_shutdown)
         .build()
     )
 

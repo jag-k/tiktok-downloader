@@ -25,6 +25,7 @@ class UserData(TypedDict, total=False):
 class MessageType(str, Enum):
     START = "start"
     STOP = "stop"
+    SHUTDOWN = "shutdown"
     REPORT = "report"
     EXCEPTION = "exception"
 
@@ -60,7 +61,7 @@ class Notify(ABC, metaclass=NotifyMeta):
     SERVICE_NAME: str | None = None
     SUPPORTED_TYPES: set[MessageType] = set()
     _SERVICES: list[Self] = []
-    _SERVICE_REGISTRY: dict[str, type[Self]] = {}
+    _SERVICE_REGISTRY: dict[str, type["Notify"]] = {}
 
     def __init__(self, *, types: set[MessageType] = None, **_):
         if types is None:
@@ -77,9 +78,9 @@ class Notify(ABC, metaclass=NotifyMeta):
         self,
         message_type: MessageType,
         text: str,
-        update: Update,
-        extras: dict,
+        update: Update | None = None,
         ctx: CallbackContext = None,
+        extras: dict | None = None,
     ) -> bool:
         raise NotImplementedError()
 
@@ -89,20 +90,19 @@ class Notify(ABC, metaclass=NotifyMeta):
         cls,
         message_type: MessageType,
         text: str,
-        update: Update,
-        ctx: CallbackContext,
-        extras: dict,
+        update: Update | None = None,
+        ctx: CallbackContext | None = None,
+        extras: dict = None,
     ):
         async def error_catcher(service: Notify) -> bool:
             try:
-                res = await service._send_message(
+                return await service._send_message(
                     message_type=message_type,
                     text=text,
                     update=update,
                     ctx=ctx,
                     extras=extras,
                 )
-                return res
             except Exception as err:
                 logger.error(
                     "Error while sending notification on %r",
@@ -139,7 +139,7 @@ class Notify(ABC, metaclass=NotifyMeta):
     @final
     def load_from_json(cls) -> Self:
         with NOTIFY_PATH.open("r") as file:
-            data: list[dict] = json.load(file)
+            data: list[dict] = (json.load(file) or {}).get("services", [])
         services: list[Notify] = []
         for s in data:
             service_name: str = s.get("service", None)
@@ -164,6 +164,14 @@ class Notify(ABC, metaclass=NotifyMeta):
 
             try:
                 service = service_type(types=types, **config)
+            except TypeError as err:
+                logger.error(
+                    "Failed load service %r with config %r",
+                    service_name,
+                    config,
+                    exc_info=err,
+                )
+                continue
             except Exception as err:
                 logger.error(
                     "Failed load service %r", service_name, exc_info=err

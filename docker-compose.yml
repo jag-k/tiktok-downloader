@@ -11,3 +11,18 @@ services:
     volumes:
       - ./config:/config
       - ./data:/data
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      - MONGO_INITDB_DATABASE=video-downloader # database name you want to make
+      - MONGO_INITDB_ROOT_USERNAME=root # set your container root username
+      - MONGO_INITDB_ROOT_PASSWORD=root # set vour container root password
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./config/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./data/mongo:/data/db
+    tty: true
+    stdin_open: true

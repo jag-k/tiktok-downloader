@@ -10,6 +10,8 @@ __all__ = ("timeit",)
 @contextmanager
 def timeit(name: str = "Timeit", log: logging.Logger = logger):
     start = time.time()
-    yield
-    end = time.time()
-    log.info("%s: %ds.", name, end - start)
+    try:
+        yield
+    finally:
+        end = time.time()
+        log.info("%s: %.4fs.", name, end - start)

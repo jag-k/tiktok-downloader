@@ -8,10 +8,18 @@ from telegram import Update
 
 from app.constants import REPORT_PATH
 from app.context import CallbackContext
+from app.models.report import Report
 from app.utils.notify.base import MessageType, Notify
 
 
 class FileReporter(Notify):
+    """
+    Reporter that writes reports to a file.
+
+    :param file_path: Path to report file
+    :default file_path: $REPORT_PATH
+    """
+
     SUPPORTED_TYPES = {MessageType.REPORT}
 
     def __init__(
@@ -23,7 +31,8 @@ class FileReporter(Notify):
         super().__init__(types=types)
         p = Path(file_path)
         if not p.exists():
-            raise FileNotFoundError(p)
+            with p.open("w") as f:
+                f.write("[]")
         self.path = file_path
 
     @property
@@ -34,32 +43,37 @@ class FileReporter(Notify):
         self,
         message_type: MessageType,
         text: str,
-        update: Update,
-        extras: dict,
-        ctx: CallbackContext = None,
+        update: Update | None = None,
+        ctx: CallbackContext | None = None,
+        extras: dict | None = None,
     ) -> bool:
-        report_args = extras.get("report_args", [])
-        if not report_args:
+        report: Report | None = extras.get("report", None)
+        if not report:
             return False
 
         date = datetime.now()
-        if update.effective_message and update.effective_message.date:
+        if (
+            update
+            and update.effective_message
+            and update.effective_message.date
+        ):
             date = update.effective_message.date
 
         async with aiofiles.open(self.path, "r") as f:
             report_old = await f.read()
-        report = json.loads(report_old)
+        reports = json.loads(report_old)
+        report_data = report.to_dict()
+        report_data.pop("@type", None)
 
-        for i in report_args:
-            report.append(
-                {
-                    "report": i,
-                    "date": date.isoformat(),
-                    **self._user_data_from_update(update),
-                }
-            )
+        reports.append(
+            {
+                "date": date.isoformat(),
+                **self._user_data_from_update(update),
+                **report_data,
+            }
+        )
 
-        resp = json.dumps(report, indent=4, ensure_ascii=False)
+        resp = json.dumps(reports, indent=4, ensure_ascii=False)
         async with aiofiles.open(self.path, "w") as f:
             await f.write(resp)
         return True

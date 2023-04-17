@@ -1,17 +1,8 @@
-# flake8: noqa: F401
+import app.parsers.instagram as _
+import app.parsers.reddit as _
+import app.parsers.tiktok as _
+import app.parsers.twitter as _
+import app.parsers.youtube as _
+from app.parsers.base import Parser
 
-from app.parsers.base import *
-from app.parsers.reddit import Parser as _  # noqa
-from app.parsers.tiktok import Parser as _  # noqa
-from app.parsers.twitter import Parser as _  # noqa
-from app.parsers.youtube import Parser as _  # noqa
-from app.parsers.instagram import Parser as _  # noqa
-
-__all__ = (
-    "Parser",
-    "ParserType",
-    "Video",
-    "Audio",
-    "MediaGroup",
-    "Media",
-)
+__all__ = ("Parser",)

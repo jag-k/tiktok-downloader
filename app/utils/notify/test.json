@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "service": {
+        "type": "string",
+        "enum": [
+          "file_reporter",
+          "chanify"
+        ]
+      },
+      "types": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "if": {
+            "properties": {
+              "service": {
+                "const": "file_reporter"
+              }
+            }
+          },
+          "then": {
+            "enum": [
+              "error",
+              "warning",
+              "info",
+              "debug"
+            ]
+          }
+        }
+      },
+      "config": {
+        "type": "object",
+        "if": {
+          "properties": {
+            "service": {
+              "const": "file_reporter"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "else": {
+          "if": {
+            "properties": {
+              "service": {
+                "const": "chanify"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "token": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url",
+              "token"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "required": [
+      "service"
+    ],
+    "additionalProperties": false
+  }
+}

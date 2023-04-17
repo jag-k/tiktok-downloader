@@ -8,7 +8,8 @@ from pytube import StreamQuery
 from pytube.exceptions import PytubeError
 
 from app import constants
-from app.parsers.base import Media, ParserType, Video
+from app.models.medias import Media, ParserType, Video
+from app.parsers.base import MediaCache
 from app.parsers.base import Parser as BaseParser
 from app.utils.time_it import timeit
 
@@ -44,7 +45,7 @@ class Parser(BaseParser):
         cls,
         session: aiohttp.ClientSession,
         match: Match,
-        cache: dict[str, Media] | None = None,
+        cache: MediaCache,
     ) -> list[Media]:
         try:
             yt_id = match.group("id")
@@ -52,6 +53,7 @@ class Parser(BaseParser):
             return []
 
         original_url = f"https://youtube.com/watch?v={yt_id}"
+        await cache.find_by_original_url(original_url)
 
         logger.info("Getting video link from: %s", original_url)
         yt = pytube.YouTube(original_url)
@@ -104,4 +106,4 @@ class Parser(BaseParser):
                 "Failed to get video %r with error: %s", original_url, err
             )
             return []
-        return [video]
+        return await cache.save_group([video])

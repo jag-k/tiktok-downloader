@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: video-downloader-bot 0.1.0\n"
 "Report-Msgid-Bugs-To: jag-k@users.noreply.github.com\n"
-"POT-Creation-Date: 2023-03-26 16:27+0400\n"
+"POT-Creation-Date: 2023-04-15 04:14+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: app/commands/commands.py:31
+#: app/commands/commands.py:33
 msgid " or "
 msgstr ""
 
-#: app/commands/commands.py:32
+#: app/commands/commands.py:34
 msgid ""
 "Send me a link to a {} video and I'll send this video back to you.\n"
 "\n"
@@ -30,32 +30,35 @@ msgid ""
 " video."
 msgstr ""
 
-#: app/commands/commands.py:40
+#: app/commands/commands.py:42
 msgid "Start using the bot"
 msgstr ""
 
-#: app/commands/commands.py:46
+#: app/commands/commands.py:61
 msgid ""
 "Thank you for your report!\n"
-"We will try to fix this issue as soon as possible."
+"We will try to fix this issue as soon as possible.\n"
+"\n"
+"Your report:\n"
+"<code>{report}</code>"
 msgstr ""
 
-#: app/commands/commands.py:55
+#: app/commands/commands.py:71
 msgid ""
 "{}\n"
 "\n"
 "Use /{} to get more information."
 msgstr ""
 
-#: app/commands/commands.py:61
+#: app/commands/commands.py:77
 msgid "Get more information about the bot."
 msgstr ""
 
-#: app/commands/commands.py:68
+#: app/commands/commands.py:84
 msgid "Add to group"
 msgstr ""
 
-#: app/commands/commands.py:91
+#: app/commands/commands.py:107
 msgid ""
 "\n"
 "\n"
@@ -63,7 +66,7 @@ msgid ""
 "{contacts_list}"
 msgstr ""
 
-#: app/commands/commands.py:126
+#: app/commands/commands.py:142
 msgid ""
 "For add in group press keyboard button \"{}\" and select chat.\n"
 "If you can't add bot to chat, check are you admin.\n"
@@ -71,7 +74,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: app/commands/commands.py:133
+#: app/commands/commands.py:149
 msgid ""
 "{}\n"
 "\n"
@@ -86,16 +89,20 @@ msgid ""
 "{}"
 msgstr ""
 
-#: app/commands/commands.py:157
+#: app/commands/commands.py:173
 msgid "Clear your history from inline queries."
 msgstr ""
 
-#: app/commands/commands.py:160
+#: app/commands/commands.py:176
 msgid "History cleared."
 msgstr ""
 
-#: app/commands/commands.py:163
+#: app/commands/commands.py:179
 msgid "Bot settings"
+msgstr ""
+
+#: app/models/medias.py:91
+msgid " by <code>@{author}</code> "
 msgstr ""
 
 #: app/settings/base.py:129
@@ -200,30 +207,52 @@ msgid ""
 "{}"
 msgstr ""
 
-#: app/settings/user_settings.py:81
-msgid "📃️ Add description to videos/images"
+#: app/settings/user_settings.py:87 app/settings/user_settings.py:93
+#: app/settings/user_settings.py:158 app/settings/user_settings.py:166
+msgid "📜 All"
 msgstr ""
 
-#: app/settings/user_settings.py:82
-msgid "Add description to videos/images are {}!"
+#: app/settings/user_settings.py:88
+msgid "👤 Hash-less"
 msgstr ""
 
-#: app/settings/user_settings.py:83
-msgid ""
-"Adds the descriptions from the original source to the videos/images:\n"
-"\n"
-"{}"
-msgstr ""
-
-#: app/settings/user_settings.py:92
-msgid "📬 Add media source to videos/images"
-msgstr ""
-
-#: app/settings/user_settings.py:93
-msgid "Add media source to videos/images are {}!"
+#: app/settings/user_settings.py:89
+msgid "❌ None"
 msgstr ""
 
 #: app/settings/user_settings.py:94
+msgid "👤 Without hashtags"
+msgstr ""
+
+#: app/settings/user_settings.py:95
+msgid "❌ Without description"
+msgstr ""
+
+#: app/settings/user_settings.py:100
+msgid "📃️ Add description to videos/images"
+msgstr ""
+
+#: app/settings/user_settings.py:109
+msgid "Adding description changed to {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:120
+msgid ""
+"Choose type of adding the descriptions from the original source to the "
+"videos/images:\n"
+"\n"
+"Current: <b>{}</b>"
+msgstr ""
+
+#: app/settings/user_settings.py:138
+msgid "📬 Add media source to videos/images"
+msgstr ""
+
+#: app/settings/user_settings.py:139
+msgid "Add media source to videos/images are {}!"
+msgstr ""
+
+#: app/settings/user_settings.py:140
 msgid ""
 "Add the social network where the videos/images were taken from:\n"
 "\n"
@@ -232,51 +261,47 @@ msgid ""
 "Example: So funny video from TikTok"
 msgstr ""
 
-#: app/settings/user_settings.py:112 app/settings/user_settings.py:120
-msgid "📜 All"
-msgstr ""
-
-#: app/settings/user_settings.py:113
+#: app/settings/user_settings.py:159
 msgid "👥 Groups"
 msgstr ""
 
-#: app/settings/user_settings.py:114
+#: app/settings/user_settings.py:160
 msgid "👤 Private"
 msgstr ""
 
-#: app/settings/user_settings.py:115
+#: app/settings/user_settings.py:161
 msgid "🔎 Inline"
 msgstr ""
 
-#: app/settings/user_settings.py:116
+#: app/settings/user_settings.py:162
 msgid "❌ Not save"
 msgstr ""
 
-#: app/settings/user_settings.py:121
+#: app/settings/user_settings.py:167
 msgid "👥 Groups, where bot are added"
 msgstr ""
 
-#: app/settings/user_settings.py:122
+#: app/settings/user_settings.py:168
 msgid "👤 Private (in bot chat)"
 msgstr ""
 
-#: app/settings/user_settings.py:123
+#: app/settings/user_settings.py:169
 msgid "🔎 Inline queries"
 msgstr ""
 
-#: app/settings/user_settings.py:124
+#: app/settings/user_settings.py:170
 msgid "❌ Not saving history"
 msgstr ""
 
-#: app/settings/user_settings.py:129
+#: app/settings/user_settings.py:175
 msgid "📝 Saving History"
 msgstr ""
 
-#: app/settings/user_settings.py:139
+#: app/settings/user_settings.py:185
 msgid "History saving changed to {}!"
 msgstr ""
 
-#: app/settings/user_settings.py:150
+#: app/settings/user_settings.py:196
 msgid ""
 "Choose source to save in history. To see the history, use <i>Inline "
 "Query</i>.\n"
@@ -284,11 +309,7 @@ msgid ""
 "Current: <b>{}</b>"
 msgstr ""
 
-#: app/utils/caption.py:25
-msgid " by <code>@{author}</code> "
-msgstr ""
-
-#: main.py:36
+#: main.py:47
 msgid ""
 "\n"
 "\n"
@@ -297,7 +318,7 @@ msgid ""
 "href=\"{url}\">This is original link</a>"
 msgstr ""
 
-#: main.py:72
+#: main.py:89
 msgid ""
 "Error sending video: {title}\n"
 "\n"
@@ -305,29 +326,33 @@ msgid ""
 "<a href=\"{url}\">Direct link to video</a>"
 msgstr ""
 
-#: main.py:128
+#: main.py:151
 msgid "by @{author} "
 msgstr ""
 
-#: main.py:129
+#: main.py:152
 msgid "from {m_type}"
 msgstr ""
 
-#: main.py:146
+#: main.py:166
 msgid "{m_type} video"
 msgstr ""
 
-#: main.py:174
+#: main.py:203
 msgid "Recently added"
 msgstr ""
 
-#: main.py:186
+#: main.py:215
 msgid "No videos found. You don't think it's correct? Press here!"
 msgstr ""
 
-#: main.py:221
+#: main.py:259
 #, python-format
 msgid "Found %d video"
 msgid_plural "Found %d videos"
 msgstr[0] ""
 msgstr[1] ""
+
+#: main.py:260
+msgid ". Is it correct media? Press here if not!"
+msgstr ""

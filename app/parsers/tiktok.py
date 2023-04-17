@@ -9,8 +9,10 @@ import aiohttp
 from aiohttp import ClientSession
 
 from app import constants
-from app.parsers.base import Media, MediaGroup, ParserType, Video
+from app.models.medias import Media, MediaGroup, ParserType, Video
+from app.parsers.base import MediaCache
 from app.parsers.base import Parser as BaseParser
+from app.utils import timeit
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +48,7 @@ class Parser(BaseParser):
         # https://www.tiktok.com/@thejoyegg/video/7136001098841591041
         re.compile(
             r"(?:https?://)?"
-            r"(?:www.)?tiktok\.com/@(?P<author>\w+)/video/(?P<video_id>\d+)/?"
+            r"(?:www\.)?tiktok\.com/@(?P<author>\w+)/video/(?P<video_id>\d+)/?"
         ),
     ]
     CUSTOM_EMOJI_ID = 5465416081105493315  # 📹
@@ -60,18 +62,17 @@ class Parser(BaseParser):
         cls,
         session: aiohttp.ClientSession,
         match: Match,
-        cache: dict[str, Media] | None = None,
+        cache: MediaCache,
     ) -> list[Media]:
         m = match.groupdict({})
         author: str
-        print(m)
         if "short_suffix" in m:
-            print("short_suffix")
             suffix = m["short_suffix"]
             url_id = m["id"]
             original_url = f"https://www.tiktok.com/{suffix}/{url_id}"
             logger.info("Get video id from: %s", original_url)
             video_location = await cls._get_video_id(original_url)
+            print(video_location)
             if video_location is None:
                 return []
             author, video_id = video_location
@@ -90,6 +91,9 @@ class Parser(BaseParser):
             author = m.get("author", "").lower()
             video_id: int = int(m.get("video_id"))
             original_url = f"https://www.tiktok.com/@{author}/video/{video_id}"
+
+        with timeit("cache.find_by_original_url", logger):
+            await cache.find_by_original_url(original_url)
 
         logger.info(
             "Getting video link from: %s (video_id=%d)",
@@ -119,9 +123,13 @@ class Parser(BaseParser):
         media_type: Literal["video", "image", None] = data.get("type", None)
         logger.info("Media type: %s", media_type)
         if media_type == "video":
-            return cls._process_video(data, original_url)
+            return await cache.save_group(
+                cls._process_video(data, original_url)
+            )
         elif media_type == "image":
-            return cls._process_image(data, original_url)
+            return await cache.save_group(
+                cls._process_image(data, original_url)
+            )
         return []
 
     @staticmethod
@@ -166,6 +174,7 @@ class Parser(BaseParser):
         )
         if video:
             return [video]
+        return []
 
     @staticmethod
     def _process_image(data: dict, original_url: str) -> list[MediaGroup]:

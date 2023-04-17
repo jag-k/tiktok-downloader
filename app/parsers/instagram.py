@@ -5,13 +5,14 @@ from re import Match
 
 import aiohttp
 
-from app.parsers.base import Media, ParserType, Video
+from app.models.medias import Media, ParserType, Video
+from app.parsers.base import MediaCache
 from app.parsers.base import Parser as BaseParser
 
 logger = logging.getLogger(__name__)
 
 INSTAGRAM_RE = re.compile(
-    r"(?:https?://)?(?:www\.)?instagram\.com/(?P<type>\w+)/(?P<id>\w+)"
+    r"(?:https?://)?(?:www\.)?instagram\.com/(?P<type>\w+)/(?P<id>[\w-]+)"
 )
 
 USER_AGENT = (
@@ -25,6 +26,7 @@ class Parser(BaseParser):
     REG_EXPS = [
         # https://www.instagram.com/p/CTQZ5Y8J8ZU/
         # https://www.instagram.com/reel/CTQZ5Y8J8ZU/
+        # https://instagram.com/reel/CqQGB-1ISIw/
         INSTAGRAM_RE,
     ]
     CUSTOM_EMOJI_ID = 5465453979896913711  # 💬
@@ -38,15 +40,14 @@ class Parser(BaseParser):
         cls,
         session: aiohttp.ClientSession,
         match: Match,
-        cache: dict[str, Media] | None = None,
+        cache: MediaCache,
     ) -> list[Media]:
         post_id = match.group("id")
         post_type = match.group("type")
 
         original_url = f"https://www.instagram.com/{post_type}/{post_id}"
 
-        if cache and (v := cache.get(original_url)):
-            return [v]
+        await cache.find_by_original_url(original_url)
 
         logger.info("Getting video link from: %s", original_url)
 
@@ -104,9 +105,7 @@ class Parser(BaseParser):
             video_duration=int(shortcode_media.get("video_duration", "0"))
             or None,
         )
-        if cache is not None:
-            cache[video.original_url] = video
-        return [video]
+        return await cache.save_group([video])
 
 
 if __name__ == "__main__":
@@ -117,7 +116,7 @@ if __name__ == "__main__":
             print(
                 await Parser.parse(
                     session,
-                    "https://www.instagram.com/reel/CqYq8vroPH2",
+                    "https://instagram.com/reel/CqQGB-1ISIw/",
                 )
             )
 

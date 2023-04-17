@@ -5,7 +5,8 @@ from re import Match
 
 import aiohttp
 
-from app.parsers.base import Media, ParserType, Video
+from app.models.medias import Media, ParserType, Video
+from app.parsers.base import MediaCache
 from app.parsers.base import Parser as BaseParser
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ class Parser(BaseParser):
         cls,
         session: aiohttp.ClientSession,
         match: Match,
-        cache: dict[str, Media] | None = None,
+        cache: MediaCache,
     ) -> list[Media]:
         try:
             tweet_id = match.group("id")
@@ -47,9 +48,11 @@ class Parser(BaseParser):
                 return []
             async with session.get(f"https://t.co/{tco_id}") as response:
                 new_match = TWITTER_RE.match(str(response.real_url))
-            return await cls._parse(session, new_match)
+            return await cls._parse(session, new_match, cache)
 
         original_url = f"https://twitter.com/i/status/{tweet_id}"
+
+        await cache.find_by_original_url(original_url)
 
         logger.info("Getting video link from: %s", original_url)
 
@@ -97,4 +100,4 @@ class Parser(BaseParser):
                         original_url=original_url,
                     )
                 )
-        return result
+        return await cache.save_group(result)

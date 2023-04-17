@@ -76,16 +76,62 @@ tiktok_flag = s.bool_settings_template(
     settings_data_default=False,
 )
 
-description_flag = s.bool_settings_template(
-    id_=Keys.DESCRIPTION_FLAG,
-    display_name=_("📃️ Add description to videos/images"),
-    template_str_answer=_("Add description to videos/images are {}!"),
-    template_str_menu=_(
-        "Adds the descriptions from the original source to the videos/images:"
-        "\n\n{}"
-    ),
-    settings_data_default=False,
+
+class DescriptionTypes(str, Enum):
+    FULL = "full"
+    WITHOUT_HASHTAGS = "without_hashtags"
+    NONE = "none"
+
+
+DESCRIPTION_SHORT = {
+    DescriptionTypes.FULL: _("📜 All"),
+    DescriptionTypes.WITHOUT_HASHTAGS: _("👤 Hash-less"),
+    DescriptionTypes.NONE: _("❌ None"),
+}
+
+DESCRIPTION_DISPLAY = {
+    DescriptionTypes.FULL: _("📜 All"),
+    DescriptionTypes.WITHOUT_HASHTAGS: _("👤 Without hashtags"),
+    DescriptionTypes.NONE: _("❌ Without description"),
+}
+
+
+@s.add_settings(
+    _("📃️ Add description to videos/images"),
+    Keys.ADD_DESCRIPTION,
+    DescriptionTypes.NONE.value,
+    DESCRIPTION_SHORT,
 )
+async def add_description(ctx: Settings.Context[str]):
+    if ctx.result:
+        ctx.data = ctx.result
+        return await ctx.query_answer(
+            _("Adding description changed to {}!").format(
+                DESCRIPTION_DISPLAY[DescriptionTypes(ctx.data)]
+            )
+        )
+
+    def check(d: str):
+        if ctx.data == d:
+            return " ✅"
+        return ""
+
+    await ctx.update_message(
+        text=_(
+            "Choose type of adding the descriptions from the original source "
+            "to the videos/images:\n\n"
+            "Current: <b>{}</b>"
+        ).format(DESCRIPTION_DISPLAY[DescriptionTypes(ctx.data)]),
+        buttons=[
+            ctx.btn(
+                text=f"{description_name}{check(description_type)}",
+                result=description_type.value,
+            )
+            for description_type, description_name in DESCRIPTION_DISPLAY.items()
+        ],
+        columns=1,
+    )
+
 
 add_media_source = s.bool_settings_template(
     id_=Keys.ADD_MEDIA_SOURCE,

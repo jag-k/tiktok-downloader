@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import random
 from collections.abc import Callable
@@ -15,6 +16,7 @@ from app import constants, settings
 from app.commands.registrator import CommandRegistrator
 from app.constants import DEFAULT_LOCALE
 from app.context import CallbackContext
+from app.database import Reporter
 from app.parsers.base import Parser
 from app.utils import a, b, notify
 from app.utils.i18n import _
@@ -39,22 +41,30 @@ def start_text() -> str:
 
 @commands.add(description=_("Start using the bot"))
 async def start(update: Update, ctx: CallbackContext) -> None:
-    report = ctx.report_args
-    if report:
-        await notify.send_message(
-            message_type=notify.MessageType.REPORT,
-            text="Report with urls:\n" + "\n".join(report),
-            update=update,
-            ctx=ctx,
-            extras={"report_args": report},
+    reports = await Reporter.from_context(ctx)
+    if reports:
+        report_str = "\n".join(map(str, reports))
+        await asyncio.gather(
+            *(
+                notify.send_message(
+                    message_type=notify.MessageType.REPORT,
+                    text=f"Report with messages:\n{r}",
+                    update=update,
+                    ctx=ctx,
+                    extras={"report": r},
+                )
+                for r in reports
+            )
         )
+
         await update.message.reply_html(
             _(
                 "Thank you for your report!\n"
-                "We will try to fix this issue as soon as possible."
-            )
+                "We will try to fix this issue as soon as possible.\n\n"
+                "Your report:\n<code>{report}</code>"
+            ).format(report=report_str)
         )
-        logger.info("Report from %s: %s", update.message.from_user, report)
+        logger.info("Report from %s: %s", update.message.from_user, reports)
         return
 
     await update.message.reply_html(

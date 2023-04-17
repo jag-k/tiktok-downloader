@@ -1,15 +1,11 @@
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 
 from telegram import Update
-from telegram import Video as TelegramVideo
 from telegram.constants import ChatType
 from telegram.ext import Application, ExtBot
 from telegram.ext import CallbackContext as CallbackContextBase
 
 from app.constants import DEFAULT_LOCALE, Keys
-
-if TYPE_CHECKING:
-    from app.parsers import Media
 
 _SET_DEFAULT = TypeVar("_SET_DEFAULT", bound=Any)
 
@@ -48,6 +44,27 @@ class ContextSettings:
     def __str__(self):
         return str(self._data)
 
+    def is_history_enabled(self, update: Update) -> bool:
+        from app.settings.user_settings import HistoryTypes
+
+        ht: HistoryTypes = self[Keys.HISTORY]
+        match ht:
+            case HistoryTypes.NONE:
+                return False
+            case HistoryTypes.ALL:
+                return True
+            case HistoryTypes.PRIVATE:
+                return update.effective_chat.type == ChatType.PRIVATE
+            case HistoryTypes.GROUPS:
+                return update.effective_chat.type in (
+                    ChatType.GROUP,
+                    ChatType.SUPERGROUP,
+                    ChatType.PRIVATE,
+                )
+            case HistoryTypes.INLINE:
+                return update.inline_query is not None
+        return False
+
 
 class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
     def __init__(self, *args, **kwargs):
@@ -58,7 +75,11 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
 
     @property
     def history(self) -> list:
-        return self.user_data.setdefault(Keys.HISTORY, [])
+        return self.user_data.setdefault(Keys.HISTORY.value, [])
+
+    @history.setter
+    def history(self, value: list):
+        self.user_data[Keys.HISTORY.value] = value
 
     @property
     def temp_history(self):
@@ -67,10 +88,6 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
     @temp_history.setter
     def temp_history(self, value: dict):
         self.user_data["tmp_history"] = value
-
-    @history.setter
-    def history(self, value: list):
-        self.user_data[Keys.HISTORY] = value
 
     @property
     def _chat_type(self) -> ChatType | None:
@@ -106,18 +123,17 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
         return obj
 
     @property
-    def report_args(self) -> list[str]:
-        self.args: list[str] | None
-        return [
-            "https://" + arg[7:].replace("--", ".").replace("__", "/")
-            for arg in (self.args or [])
-            if arg.startswith("report_")
-        ]
-
-    @property
-    def media_cache(self) -> dict[str, "Media"]:
+    def media_cache(self) -> dict[str, dict]:
         return self.bot_data.setdefault("media_cache", {})
 
+    @media_cache.setter
+    def media_cache(self, value: dict[str, dict]):
+        self.bot_data["media_cache"] = value
+
     @property
-    def tg_video_cache(self) -> dict[str, TelegramVideo]:
+    def tg_video_cache(self) -> dict[str, dict]:
         return self.bot_data.setdefault("tg_video_cache", {})
+
+    @tg_video_cache.setter
+    def tg_video_cache(self, value: dict[str, dict]):
+        self.bot_data["tg_video_cache"] = value

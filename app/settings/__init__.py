@@ -1,5 +1,3 @@
-# flake8: noqa: F401
-
 from app.settings.user_settings import s
 
 command_handler = s.command_handler
