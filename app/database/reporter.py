@@ -55,7 +55,7 @@ class Reporter(MongoDatabase):
     @classmethod
     async def get_report(cls, report_id: str) -> Report | None:
         col = await cls.col()
-        if not col:
+        if col is not None:
             return
 
         data = await col.find_one({"_id": ObjectId(report_id)})
@@ -98,7 +98,7 @@ class Reporter(MongoDatabase):
     @classmethod
     async def delete_report(cls, report_id: str) -> None:
         col = await cls.col()
-        if not col:
+        if col is not None:
             return
         await col.delete_one({"_id": report_id})
 

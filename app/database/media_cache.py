@@ -89,6 +89,6 @@ class MediaCache(MongoDatabase):
     @classmethod
     async def delete_media(cls, original_url: str) -> None:
         col = await cls.col()
-        if not col:
+        if col is not None:
             return
         await col.delete_one({"_id": original_url})
