@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Video Downloader\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-04-15 04:14+0400\n"
+"POT-Creation-Date: 2023-04-18 02:22+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -293,7 +293,8 @@ msgid ""
 "\n"
 "Current: <b>{}</b>"
 msgstr ""
-"Выберите тип добавления описания из исходного источника к видео/изображениям:\n"
+"Выберите тип добавления описания из исходного источника к видео/изображениям:"
+"\n"
 "\n"
 "Текущий: <b>{}</b>"
 
@@ -369,7 +370,7 @@ msgstr ""
 "Выберите источник для сохранения в истории. Чтобы посмотреть историю, "
 "используйте <i>Inline запросы</i>.\n"
 
-#: main.py:47
+#: main.py:42
 msgid ""
 "\n"
 "\n"
@@ -383,7 +384,7 @@ msgstr ""
 "<i>Оригинальное видео больше, чем <b>20 МБ</b>, и бот не может его "
 "отправить.</i> <a href=\"{url}\">Это прямая ссылка на оригинальное видео</a>"
 
-#: main.py:89
+#: main.py:75
 msgid ""
 "Error sending video: {title}\n"
 "\n"
@@ -395,27 +396,27 @@ msgstr ""
 "\n"
 "<a href=\"{url}\">Прямая ссылка на видео</a>"
 
-#: main.py:151
+#: main.py:137
 msgid "by @{author} "
 msgstr "от @{author} "
 
-#: main.py:152
+#: main.py:138
 msgid "from {m_type}"
 msgstr "с {m_type}"
 
-#: main.py:166
+#: main.py:152
 msgid "{m_type} video"
 msgstr "{m_type} видео"
 
-#: main.py:203
+#: main.py:192
 msgid "Recently added"
 msgstr "Недавно добавленные"
 
-#: main.py:215
+#: main.py:204
 msgid "No videos found. You don't think it's correct? Press here!"
 msgstr "Видео не найдены. Вы думаете, что это неправильно? Нажмите здесь!"
 
-#: main.py:259
+#: main.py:250
 #, python-format
 msgid "Found %d video"
 msgid_plural "Found %d videos"
@@ -423,6 +424,6 @@ msgstr[0] "Найдено %d видео"
 msgstr[1] "Найдено %d видео"
 msgstr[2] "Найдено %d видео"
 
-#: main.py:260
+#: main.py:251
 msgid ". Is it correct media? Press here if not!"
 msgstr ". Это правильное видео? Нажмите здесь, если нет!"

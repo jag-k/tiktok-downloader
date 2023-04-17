@@ -98,6 +98,7 @@ jobs:
               -d \
               --name $CONTAINER_NAME \
               --restart=unless-stopped \
+              --network=bridge \
               --volume $CONTAINER_PATH/config:/config \
               --volume $CONTAINER_PATH/data:/data \
               $FULL_IMAGE_NAME

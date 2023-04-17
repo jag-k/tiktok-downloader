@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: video-downloader-bot 0.1.0\n"
+"Project-Id-Version: video-downloader-bot 0.2.0\n"
 "Report-Msgid-Bugs-To: jag-k@users.noreply.github.com\n"
-"POT-Creation-Date: 2023-04-15 04:14+0400\n"
+"POT-Creation-Date: 2023-04-18 02:22+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -309,7 +309,7 @@ msgid ""
 "Current: <b>{}</b>"
 msgstr ""
 
-#: main.py:47
+#: main.py:42
 msgid ""
 "\n"
 "\n"
@@ -318,7 +318,7 @@ msgid ""
 "href=\"{url}\">This is original link</a>"
 msgstr ""
 
-#: main.py:89
+#: main.py:75
 msgid ""
 "Error sending video: {title}\n"
 "\n"
@@ -326,33 +326,33 @@ msgid ""
 "<a href=\"{url}\">Direct link to video</a>"
 msgstr ""
 
-#: main.py:151
+#: main.py:137
 msgid "by @{author} "
 msgstr ""
 
-#: main.py:152
+#: main.py:138
 msgid "from {m_type}"
 msgstr ""
 
-#: main.py:166
+#: main.py:152
 msgid "{m_type} video"
 msgstr ""
 
-#: main.py:203
+#: main.py:192
 msgid "Recently added"
 msgstr ""
 
-#: main.py:215
+#: main.py:204
 msgid "No videos found. You don't think it's correct? Press here!"
 msgstr ""
 
-#: main.py:259
+#: main.py:250
 #, python-format
 msgid "Found %d video"
 msgid_plural "Found %d videos"
 msgstr[0] ""
 msgstr[1] ""
 
-#: main.py:260
+#: main.py:251
 msgid ". Is it correct media? Press here if not!"
 msgstr ""
