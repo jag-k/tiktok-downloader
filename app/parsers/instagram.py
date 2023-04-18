@@ -5,13 +5,7 @@ import re
 from re import Match
 
 import aiohttp
-from aiohttp import (
-    ClientProxyConnectionError,
-    ClientHttpProxyError,
-    ServerDisconnectedError,
-    ClientConnectorCertificateError,
-    ClientResponseError,
-)
+from aiohttp import ClientError
 
 from app.constants import CONFIG_PATH
 from app.models.medias import Media, ParserType, Video
@@ -30,7 +24,6 @@ USER_AGENT = (
 )
 
 proxy_file = CONFIG_PATH / "http_proxies.txt"
-
 
 PROXIES: list[str] = (
     list(filter(bool, proxy_file.read_text().split()))
@@ -117,13 +110,7 @@ class Parser(BaseParser):
                     proxy=proxy,
                 ) as response:
                     data: dict = await response.json()
-            except (
-                ClientProxyConnectionError,
-                ClientHttpProxyError,
-                ServerDisconnectedError,
-                ClientConnectorCertificateError,
-                ClientResponseError,
-            ) as e:
+            except ClientError as e:
                 logger.error("Proxy error", exc_info=e)
                 del_proxy(proxy)
                 continue
