@@ -43,9 +43,13 @@ class MediaCache(MongoDatabase):
 
     @classmethod
     async def save_medias(cls, *medias: Media) -> str | None:
+        if not medias:
+            return
+
         col: Collection = await cls.col()
         if col is None:
             return
+
         now = datetime.utcnow()
         url = medias[0].original_url
         data = [m.to_dict() for m in medias]
