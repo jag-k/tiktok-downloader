@@ -5,7 +5,13 @@ import re
 from re import Match
 
 import aiohttp
-from aiohttp import ClientProxyConnectionError, ClientHttpProxyError
+from aiohttp import (
+    ClientProxyConnectionError,
+    ClientHttpProxyError,
+    ServerDisconnectedError,
+    ClientConnectorCertificateError,
+    ClientResponseError,
+)
 
 from app.constants import CONFIG_PATH
 from app.models.medias import Media, ParserType, Video
@@ -107,12 +113,18 @@ class Parser(BaseParser):
                             variables, separators=(",", ":")
                         ),
                     },
-                    timeout=1.5,
+                    timeout=1.2,
                     proxy=proxy,
                 ) as response:
                     data: dict = await response.json()
-            except (ClientProxyConnectionError, ClientHttpProxyError):
-                logger.error("Proxy error")
+            except (
+                ClientProxyConnectionError,
+                ClientHttpProxyError,
+                ServerDisconnectedError,
+                ClientConnectorCertificateError,
+                ClientResponseError,
+            ) as e:
+                logger.error("Proxy error", exc_info=e)
                 del_proxy(proxy)
                 continue
             except TimeoutError:
