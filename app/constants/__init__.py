@@ -52,7 +52,7 @@ if CONTACTS_PATH.exists():
         CONTACTS = json.load(f)
 
 # Telegram file limit
-TG_FILE_LIMIT = 50 * 1024 * 1024  # 20 MB
+TG_FILE_LIMIT = 20 * 1024 * 1024  # 20 MB
 
 # region MongoDB support
 # mongodb://user:password@localhost:27017/database
