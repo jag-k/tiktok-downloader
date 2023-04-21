@@ -311,7 +311,7 @@ class Chanify(Notify):
                 f"Context Vars:\n"
                 f"{context_vars}\n\n"
                 f"{user_copy}"
-            ),
+            ).strip(),
             copy=user_copy,
             sound=True,
             actions=actions,
