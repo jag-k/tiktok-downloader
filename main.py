@@ -104,10 +104,10 @@ async def link_parser(update: Update, ctx: CallbackContext):
     if not message or not message.entities:
         return
 
+    text = message.text or message.caption
     message_links: list[str] = [
-        entity.url
+        entity.url or text[entity.offset : entity.offset + entity.length]
         for entity in message.entities
-        if entity.url
         if entity.type in (MessageEntityType.URL, MessageEntityType.TEXT_LINK)
     ]
 
