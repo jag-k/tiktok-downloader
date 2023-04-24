@@ -49,7 +49,10 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Build
-        run: make generate_notify_schema
+        run: |
+          export MONGO_URL="123123"
+          export MONGO_DB="123123"
+          make generate_notify_schema
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
