@@ -54,6 +54,9 @@ if CONTACTS_PATH.exists():
 # Telegram file limit
 TG_FILE_LIMIT = 20 * 1024 * 1024  # 20 MB
 
+# LamadavaSaas API Token
+LAMADAVA_SAAS_TOKEN = os.getenv("LAMADAVA_SAAS_TOKEN", None)
+
 # region MongoDB support
 # mongodb://user:password@localhost:27017/database
 # mongodb://user:password@localhost:27017/
