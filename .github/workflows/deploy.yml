@@ -69,12 +69,12 @@ jobs:
 
     steps:
       - name: Deploy by SSH Remote Commands
-        uses: appleboy/ssh-action@v0.1.5
+        uses: appleboy/ssh-action@v0.1.10
         env:
           CONTAINER_NAME: ${{ github.event.repository.name }}
           CONTAINER_PATH: /opt/docker_containers/${{ github.event.repository.name }}
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          FULL_IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          FULL_IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.slug.outputs.sha }}
           CR_PAT: ${{ secrets.CR_PAT }}
           CR_USER: ${{ secrets.CR_USER }}
         with:
@@ -85,7 +85,6 @@ jobs:
           script_stop: true
           envs: CONTAINER_NAME,CONTAINER_PATH,IMAGE_NAME,FULL_IMAGE_NAME,CR_PAT,CR_USER
           script: |
-            whoami
             mkdir -p $CONTAINER_PATH
             cd $CONTAINER_PATH
             mkdir -p data config
