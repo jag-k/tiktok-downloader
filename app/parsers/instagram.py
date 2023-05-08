@@ -52,24 +52,6 @@ def save_proxy():
     proxy_file.write_text("\n".join(PROXIES))
 
 
-async def get_media_from_saas(
-    session: aiohttp.ClientSession, media_code: str
-) -> dict | None:
-    if not LAMADAVA_SAAS_TOKEN:
-        return
-
-    async with session.get(
-        "https://api.lamadava.com/v1/media/by/code",
-        params={"code": media_code},
-        headers={"x-access-key": LAMADAVA_SAAS_TOKEN},
-    ) as resp:
-        if resp.status == 200:
-            return await resp.json()
-        else:
-            logger.error("Error: %s %s", resp.status, await resp.text())
-            return
-
-
 async def make_proxy_request(
     session: aiohttp.ClientSession, url: str, params: dict, **kwargs
 ) -> dict | None:
@@ -151,20 +133,12 @@ class Parser(BaseParser):
             data: dict = await response.json()
 
         if data.get("status") == "fail" and LAMADAVA_SAAS_TOKEN:
-            data = await get_media_from_saas(session, post_id) or {
-                "status": "fail"
-            }
-
-        if data.get("status") == "fail":
-            logger.info("Getting video link from %r with proxy", original_url)
-            data = await make_proxy_request(
-                session,
-                "https://www.instagram.com/graphql/query/",
-                params=params,
-                timeout=2,
-                headers={"User-Agent": USER_AGENT},
+            return await cls.get_media_from_saas(
+                session=session,
+                cache=cache,
+                media_code=post_id,
+                original_url=original_url,
             )
-            data = data or {}
 
         logger.info("Got data: %s", data)
         shortcode_media = data.get("data", {}).get("shortcode_media") or {}
@@ -204,6 +178,54 @@ class Parser(BaseParser):
             ),
             video_duration=int(shortcode_media.get("video_duration", "0"))
             or None,
+        )
+        return await cache.save_group([video])
+
+    @classmethod
+    async def get_media_from_saas(
+        cls,
+        session: aiohttp.ClientSession,
+        cache: MediaCache,
+        media_code: str,
+        original_url: str,
+    ) -> list[Media]:
+        if not LAMADAVA_SAAS_TOKEN:
+            return []
+        logger.info("Using lamadava saas for %r", original_url)
+
+        async with session.get(
+            "https://api.lamadava.com/v1/media/by/code",
+            params={"code": media_code},
+            headers={"x-access-key": LAMADAVA_SAAS_TOKEN},
+        ) as resp:
+            if resp.status != 200:
+                logger.error("Error: %s %s", resp.status, await resp.text())
+                return []
+            data: dict = await resp.json()
+
+        logger.info("Got data: %s", data)
+        if not data:
+            return []
+
+        if not (url := data.get("video_url", None)):
+            logger.info("%s is not a video", original_url)
+            return []
+
+        caption = data.get("title", data.get("caption_text", None))
+
+        thumbnail_url = data.get("thumbnail_url", None)
+        video_meta = data.get("video_versions", [{}])[0]
+        video = Video(
+            caption=caption or None,
+            type=cls.TYPE,
+            original_url=original_url,
+            thumbnail_url=thumbnail_url,
+            author=data.get("user", {}).get("username", None),
+            url=url,
+            mime_type="video/mp4",
+            video_width=video_meta.get("width", None),
+            video_height=video_meta.get("height", None),
+            video_duration=int(data.get("video_duration", 0)) or None,
         )
         return await cache.save_group([video])
 
