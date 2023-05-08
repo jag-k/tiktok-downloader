@@ -1,15 +1,15 @@
 [tool.poetry]
 name = "video-downloader-bot"
-version = "0.2.0"
+version = "0.2.1"
 description = "Telegram bot for downloading videos from social networks"
 authors = ["Jag_k <jag-k@users.noreply.github.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-python-telegram-bot = "^20.1"
+python-telegram-bot = "^20.3"
 aiohttp = "^3.8.3"
-pytube = "^12.1.2"
+pytube = "^15.0.0"
 python-dotenv = "^1.0.0"
 pytz = "^2023.2"
 aiofiles = "^23.1.0"
@@ -21,7 +21,7 @@ mongopersistence = "^0.3.0"
 babel = "^2.11.0"
 black = "^22.3.0"
 pre-commit = "^2.20.0"
-ruff = "^0.0.257"
+ruff = "^0.0.265"
 
 [build-system]
 requires = ["poetry-core"]
@@ -59,5 +59,3 @@ ignore = ["E501"]
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["E402", "F401", "F403", "F405", "F811"]
 "__main__.py" = ["E402", "F401", "F403", "F405", "F811"]
-
-
