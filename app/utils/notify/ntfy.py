@@ -209,6 +209,8 @@ class NtfyApi:
                 f"X-{k.replace('_', '-').title()}": v for k, v in kwargs.items()
             }
 
+        headers = {k: str(v) for k, v in headers.items() if v}
+
         async with self:
             return await self._session_enter.request(
                 method_type, self.url, data=data, headers=headers
@@ -335,7 +337,6 @@ class Ntfy(Notify):
             ),
             priority=4,
             tags=["report"],
-            sound=True,
             actions=actions,
         )
 
