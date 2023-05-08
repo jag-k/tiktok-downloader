@@ -211,7 +211,7 @@ class Parser(BaseParser):
             logger.info("%s is not a video", original_url)
             return []
 
-        caption = data.get("title", data.get("caption_text", None))
+        caption = data.get("title", None) or data.get("caption_text", None)
 
         thumbnail_url = data.get("thumbnail_url", None)
         video_meta = data.get("video_versions", [{}])[0]
