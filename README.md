@@ -115,22 +115,23 @@ This service can send notifications about errors and other events to different s
 
 ### Supported services
 
-| Support | Service      | Code Name       | Description                                 | Events type support         |
-|---------|--------------|-----------------|---------------------------------------------|-----------------------------|
-| ✅       | Save to file | `file_reporter` | Saving data to JSON file                    | `REPORT`                    |
-| ✅       | Chanify      | `chanify`       | [Chanify.net](https://chanify.net)          | [Any](#all-supported-event) |
-| ❌       | Pushsafer    | `pushsafer`     | [pushsafer.com](https://www.pushsafer.com/) | [Any](#all-supported-event) |
-| ❌       | Email        | `email`         | Email notification                          | [Any](#all-supported-event) |
-| ❌       | Gotify       | `gotify`        | [Gotify.net](https://gotify.net/)           | [Any](#all-supported-event) |
-| ❌       | Pushover     | `pushover`      | [Pushover.net](https://pushover.net/)       | [Any](#all-supported-event) |
-| ❌       | PushBullet   | `pushbullet`    | [PushBullet.com](https://pushbullet.com/)   | [Any](#all-supported-event) |
-| ❌       | Telegram     | `telegram`      | [Telegram.org](https://telegram.org)        | [Any](#all-supported-event) |
-| ❌       | Discord      | `discord`       | [Discord.com](https://discord.com/)         | [Any](#all-supported-event) |
+| Support | Service                               | Code Name       | Description                                 | Events type support         |
+|---------|---------------------------------------|-----------------|---------------------------------------------|-----------------------------|
+| ✅       | [Save to file](#module-file_reporter) | `file_reporter` | Saving data to JSON file                    | `REPORT`                    |
+| ✅       | [Chanify](#module-chanify)            | `chanify`       | [Chanify.net](https://chanify.net)          | [Any](#all-supported-event) |
+| ✅       | [Ntfy](#module-ntfy)                  | `ntfy`          | [ntfy.sh](https://ntyf.sh)                  | [Any](#all-supported-event) |
+| ❌       | Pushsafer                             | `pushsafer`     | [pushsafer.com](https://www.pushsafer.com/) | [Any](#all-supported-event) |
+| ❌       | Email                                 | `email`         | Email notification                          | [Any](#all-supported-event) |
+| ❌       | Gotify                                | `gotify`        | [Gotify.net](https://gotify.net/)           | [Any](#all-supported-event) |
+| ❌       | Pushover                              | `pushover`      | [Pushover.net](https://pushover.net/)       | [Any](#all-supported-event) |
+| ❌       | PushBullet                            | `pushbullet`    | [PushBullet.com](https://pushbullet.com/)   | [Any](#all-supported-event) |
+| ❌       | Telegram                              | `telegram`      | [Telegram.org](https://telegram.org)        | [Any](#all-supported-event) |
+| ❌       | Discord                               | `discord`       | [Discord.com](https://discord.com/)         | [Any](#all-supported-event) |
 
 - ✅ -- Full Supported now
 - ❌ -- Not yet implemented
 
-### All supported event
+### All supported events
 
 - [x] `REPORT` -- The user submits an error while parsing from inline
 - [x] `EXCEPTION` -- Bot catch exception on top level
@@ -207,6 +208,20 @@ Config:
 | Name        | Description         | Default value  | Required |
 |-------------|---------------------|----------------|----------|
 | `file_path` | Path to report file | `$REPORT_PATH` | ❌ False  |
+
+#### Module `ntfy`
+
+A wrapper for [Ntfy](https://ntfy.sh) Notifications
+
+Config:
+
+| Name         | Description                       | Default value       | Required |
+|--------------|-----------------------------------|---------------------|----------|
+| `url`        | Ntfy server url                   | `https://ntfy.sh`   | ❌ False  |
+| `topic`      | Ntfy topic                        | `tiktok-downloader` | ❌ False  |
+| `token`      | Ntfy token                        | `None`              | ❌ False  |
+| `token_type` | Ntfy token type (Bearer or Basic) | `Bearer`            | ❌ False  |
+| `send_file`  | Send file with notification       | `False`             | ❌ False  |
 
 <!--endregion:notify-->
 

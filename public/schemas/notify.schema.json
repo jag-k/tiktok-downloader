@@ -13,7 +13,8 @@
                         "type": "string",
                         "enum": [
                             "chanify",
-                            "file_reporter"
+                            "file_reporter",
+                            "ntfy"
                         ]
                     }
                 },
@@ -91,6 +92,63 @@
                                             "type": "string",
                                             "default": "config/report.json",
                                             "example": "config/report.json"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "service": {
+                                    "const": "ntfy"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "types": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "enum": [
+                                            "exception",
+                                            "report",
+                                            "shutdown",
+                                            "start",
+                                            "stop"
+                                        ]
+                                    }
+                                },
+                                "config": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "url": {
+                                            "type": "string",
+                                            "default": "https://ntfy.sh",
+                                            "example": "https://ntfy.sh"
+                                        },
+                                        "topic": {
+                                            "type": "string",
+                                            "default": "tiktok-downloader",
+                                            "example": "tiktok-downloader"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "default": null,
+                                            "example": null
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "default": "Bearer",
+                                            "example": "Bearer"
+                                        },
+                                        "send_file": {
+                                            "type": "boolean",
+                                            "default": false,
+                                            "example": false
                                         }
                                     }
                                 }
