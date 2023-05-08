@@ -28,27 +28,23 @@ class FileAttachment:
 
     @property
     def headers(self) -> dict[str, str]:
-        if isinstance(self.content, str):
-            return {
-                "X-Attach": self.content,
-                "X-Filename": self.filename,
-            }
         return {
             "X-Filename": self.filename,
         }
 
     @property
     def method(self) -> Literal["POST", "PUT"]:
-        if isinstance(self.content, str):
-            return "POST"
         return "PUT"
 
     @property
-    def files(self) -> bytes | None:
+    def files(self) -> bytes:
         if isinstance(self.content, str):
-            return None
+            return self.content.encode("utf-8")
 
         return self.content
+
+    def __bool__(self):
+        return bool(self.content)
 
 
 @dataclass
@@ -106,7 +102,7 @@ class ActionHttp(Action):
         if self.headers:
             a.extend(f"headers.{k}={v}" for k, v in self.headers.items())
         if self.body:
-            a.append(f"body={self.intent}")
+            a.append(f"body={self.body}")
         if self.clear:
             a.append("clear=true")
         return ", ".join(a)
@@ -144,7 +140,6 @@ class NtfyApi:
         return f"{self._url}/{self._topic}"
 
     async def __aenter__(self):
-        # self._session = getattr(self, '_session', None)
         self._session: httpx.AsyncClient | None = getattr(
             self, "_session", None
         )
@@ -182,12 +177,12 @@ class NtfyApi:
 
         method_type = file.method if file else "POST"
         data = file.files if file else None
+        print(type(message))
+        print(message)
 
-        headers = {}
+        headers: dict[str, str] = {}
         if self._token:
             headers["Authorization"] = f"{self._token_type} {self._token}"
-        if message:
-            headers["X-Message"] = message
         if title:
             headers["X-Title"] = title
         if priority:
@@ -206,11 +201,19 @@ class NtfyApi:
             headers["X-Icon"] = icon
         if kwargs:
             headers |= {
-                f"X-{k.replace('_', '-').title()}": v for k, v in kwargs.items()
+                f"X-{k.replace('_', '-').title()}": str(v)
+                for k, v in kwargs.items()
             }
-
-        headers = {k: str(v) for k, v in headers.items() if v}
-
+        if message:
+            if not data:
+                data = message
+            else:
+                headers["X-Message"] = message
+        print(headers)
+        headers = {
+            k: v.decode("utf-8") if isinstance(v, bytes) else str(v)
+            for k, v in headers.items()
+        }
         async with self:
             return await self._session_enter.request(
                 method_type, self.url, data=data, headers=headers
