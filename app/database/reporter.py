@@ -55,7 +55,7 @@ class Reporter(MongoDatabase):
     @classmethod
     async def get_report(cls, report_id: str) -> Report | None:
         col = await cls.col()
-        if col is not None:
+        if col is None:
             return
 
         data = await col.find_one({"_id": ObjectId(report_id)})
