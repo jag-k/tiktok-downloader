@@ -1,4 +1,3 @@
-import base64
 import logging
 import traceback
 from abc import ABC, abstractmethod
