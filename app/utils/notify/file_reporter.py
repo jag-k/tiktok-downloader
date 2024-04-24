@@ -26,7 +26,7 @@ class FileReporter(Notify):
         self,
         *,
         file_path: PathLike = REPORT_PATH,
-        types: set[MessageType] = None
+        types: set[MessageType] = None,
     ):
         super().__init__(types=types)
         p = Path(file_path)

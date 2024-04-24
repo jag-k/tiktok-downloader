@@ -274,7 +274,7 @@ class Settings:
         parent: str | Context = BASE_SETTINGS_ID,
     ) -> Callable[[Callable], SubSettings]:
         def wrap(
-            func: Callable[[Settings.Context], Coroutine[..., ..., str | None]]
+            func: Callable[[Settings.Context], Coroutine[..., ..., str | None]],
         ) -> Settings.SubSettings:
             sub = self.SubSettings(
                 func=func,

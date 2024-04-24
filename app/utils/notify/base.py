@@ -138,6 +138,9 @@ class Notify(ABC, metaclass=NotifyMeta):
     @classmethod
     @final
     def load_from_json(cls) -> Self:
+        if not NOTIFY_PATH.exists():
+            logger.error("Can't find notification services file")
+            return []
         with NOTIFY_PATH.open("r") as file:
             data: list[dict] = (json.load(file) or {}).get("services", [])
         services: list[Notify] = []

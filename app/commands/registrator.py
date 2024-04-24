@@ -85,10 +85,7 @@ class CommandRegistrator:
     async def send_commands(self, update: Update, context: CallbackContext):
         commands = self.get_command_description()
         await context.bot.set_my_commands(
-            commands=[
-                (cmd_name, desc)
-                for cmd_name, desc in self.get_command_description().items()
-            ],
+            commands=list(self.get_command_description().items()),
             scope=BotCommandScopeChat(update.effective_chat.id),
             language_code=update.effective_user.language_code,
         )

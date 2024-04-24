@@ -173,7 +173,6 @@ class NtfyApi:
         file: FileAttachment = None,
         **kwargs,
     ) -> httpx.Response:
-
         method_type = file.method if file else "POST"
         data = file.files if file else None
         print(type(message))
