@@ -257,9 +257,9 @@ class Settings:
                     title=update.effective_chat.title
                 )
 
-        self.settings_title: Str | Callable[
-            [Update, CallbackContext], Awaitable[Str]
-        ] = settings_title
+        self.settings_title: (
+            Str | Callable[[Update, CallbackContext], Awaitable[Str]]
+        ) = settings_title
         self._settings: dict[str, Settings.SubSettings] = {
             BASE_SETTINGS_ID: self._base_settings
         }
@@ -269,9 +269,7 @@ class Settings:
         display_name: Str | None = None,
         settings_data_key: Keys | None = None,
         settings_data_default: _KEY_TYPE | None = None,
-        short_display: (
-            dict[_KEY_TYPE, Str] | Callable[[_KEY_TYPE], Str]
-        ) = None,
+        short_display: dict[_KEY_TYPE, Str] | Callable[[_KEY_TYPE], Str] = None,
         display_in_chat: bool = True,
         parent: str | Context = BASE_SETTINGS_ID,
     ) -> Callable[[Callable], SubSettings]:
@@ -289,9 +287,9 @@ class Settings:
                 display_in_chat=display_in_chat,
             )
             logger.info("Adding settings %s", sub.full_id)
-            ContextSettings.DEFAULTS[
-                sub.settings_data_key
-            ] = sub.settings_data_default
+            ContextSettings.DEFAULTS[sub.settings_data_key] = (
+                sub.settings_data_default
+            )
 
             self._settings[sub.full_id] = sub
             return sub
