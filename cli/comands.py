@@ -1,4 +1,3 @@
-import json
 import logging
 from collections.abc import Callable
 
@@ -83,32 +82,8 @@ def full_update_locale(lang: str = DEFAULT_LOCALE) -> None:
     update_locale(lang)
 
 
-@add_command(description="Generate schema for notify.json file")
-def generate_notify_schema() -> None:
-    from app.utils.notify.generate_schemas import generate_jsonschema
-
-    schemas = BASE_PATH / "public" / "schemas"
-    schemas.mkdir(parents=True, exist_ok=True)
-
-    with open(schemas / "notify.schema.json", "w") as f:
-        json.dump(generate_jsonschema(), f, indent=4, ensure_ascii=False, default=str)
-
-
-@add_command(description="Generate markdown for notify.json file")
-def generate_notify_md() -> None:
-    from app.utils.notify.generate_schemas import generate_markdown
-
-    readme_file = BASE_PATH / "README.md"
-    readme = readme_file.read_text()
-
-    readme = markdown_update_region(readme, "notify", generate_markdown())
-
-    readme_file.write_text(readme.strip() + "\n")
-    print("README.md updated")
-
-
 @add_command(description="Generate Makefile")
-def generate_makefile() -> None:
+def generate_makefile() -> list[dict]:
     makefile = BASE_PATH / "Makefile"
 
     data = [
@@ -122,6 +97,7 @@ def generate_makefile() -> None:
         if (extra := f" {func.__extra__}" if hasattr(func, "__extra__") else "") or True
     ]
 
+    # noinspection PyTypeChecker,PydanticTypeChecker
     cmds = "\n".join(
         f"{name}:{description}\n" f"\tpoetry run -- python -m cli {name}{extra}\n"
         for name, description, extra in map(dict.values, data)
@@ -141,6 +117,7 @@ def generate_makefile() -> None:
 def generate_makefile_md() -> None:
     data = generate_makefile()
     text = "```bash"
+    # noinspection PyTypeChecker,PydanticTypeChecker
     for name, description, extra in map(dict.values, data):
         text += f"\nmake {name}{description}"
     text += "\n```"
@@ -153,5 +130,4 @@ def generate_makefile_md() -> None:
 
 @add_command(description="Full update README.md")
 def full_update_readme() -> None:
-    generate_notify_md()
     generate_makefile_md()

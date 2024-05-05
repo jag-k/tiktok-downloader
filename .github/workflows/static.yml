@@ -31,28 +31,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
+      - name: Install poetry
+        run: pipx install poetry
+
       - name: Set up python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Load cached Poetry installation
-        id: cached-poetry
-        uses: actions/cache@v4
-        with:
-          path: ~/.local  # the path depends on the OS
-          key: poetry-0  # increment to reset cache
-      - name: Install Poetry
-        if: steps.cached-poetry.outputs.cache-hit != 'true'
-        uses: snok/install-poetry@v1
+          cache: poetry
+
       - name: Install dependencies
         run: poetry install
+
       - name: Build
         run: |
           export MONGO_URL="123123"
           export MONGO_DB="123123"
-          make generate_notify_schema
+          # make generate_notify_schema
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

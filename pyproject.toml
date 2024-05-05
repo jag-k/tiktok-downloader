@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-python-telegram-bot = "^20.1"
+python-telegram-bot = "^21.1.1"
 aiohttp = "^3.8.3"
 pytube = "^15.0.0"
 python-dotenv = "^1.0.0"
@@ -15,7 +15,7 @@ pytz = "^2024.1"
 aiofiles = "^23.1.0"
 pydantic = "^1.10.15"
 motor = "^3.1.2"
-mongopersistence = "^0.3.0"
+mongopersistence = "^0.3.1"
 contextvars = "^2.4"
 
 [tool.poetry.group.dev.dependencies]
