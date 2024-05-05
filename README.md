@@ -63,7 +63,7 @@ Telegram bot for downloading videos from social networks.
 
 ### Constant Path
 
-These constants using for getting path to files. You can see these paths in this document.
+These are constants used for getting a path to files. You can see these paths in this document.
 
 | Name         | Description               | Value                            |
 |--------------|---------------------------|----------------------------------|
@@ -96,7 +96,7 @@ This is .json file like this:
 
 This file will be used in `/help` command.
 
-You can image this like these structure:
+You can image this like these structures:
 
 ```markdown
 Contacts:
@@ -104,141 +104,26 @@ Contacts:
 - {type}: [{text}]({url})
 ```
 
-Any of these fields can be internationalized.
+Any of these fields can be internationalised.
 For this you need to set `_{lang}` suffix in keys.
 For example: `type_ru` or `text_en`.
 By default, using `DEFAULT_LOCALE` env variable or suffix-less key.
 
-## 🔊 Notification service
-
-This service can send notifications about errors and other events to different services.
-
-### Supported services
-
-| Support | Service                               | Code Name       | Description                                 | Events type support         |
-|---------|---------------------------------------|-----------------|---------------------------------------------|-----------------------------|
-| ✅       | [Save to file](#module-file_reporter) | `file_reporter` | Saving data to JSON file                    | `REPORT`                    |
-| ✅       | [Chanify](#module-chanify)            | `chanify`       | [Chanify.net](https://chanify.net)          | [Any](#all-supported-event) |
-| ✅       | [Ntfy](#module-ntfy)                  | `ntfy`          | [ntfy.sh](https://ntyf.sh)                  | [Any](#all-supported-event) |
-| ❌       | Pushsafer                             | `pushsafer`     | [pushsafer.com](https://www.pushsafer.com/) | [Any](#all-supported-event) |
-| ❌       | Email                                 | `email`         | Email notification                          | [Any](#all-supported-event) |
-| ❌       | Gotify                                | `gotify`        | [Gotify.net](https://gotify.net/)           | [Any](#all-supported-event) |
-| ❌       | Pushover                              | `pushover`      | [Pushover.net](https://pushover.net/)       | [Any](#all-supported-event) |
-| ❌       | PushBullet                            | `pushbullet`    | [PushBullet.com](https://pushbullet.com/)   | [Any](#all-supported-event) |
-| ❌       | Telegram                              | `telegram`      | [Telegram.org](https://telegram.org)        | [Any](#all-supported-event) |
-| ❌       | Discord                               | `discord`       | [Discord.com](https://discord.com/)         | [Any](#all-supported-event) |
-
-- ✅ -- Full Supported now
-- ❌ -- Not yet implemented
-
-### All supported events
-
-- [x] `REPORT` -- The user submits an error while parsing from inline
-- [x] `EXCEPTION` -- Bot catch exception on top level
-- [x] `START` -- Bot started
-- [x] `STOP` -- Bot stopped
-- [x] `SHUTDOWN` -- Bot shutdown
-
-### Configurate
-
-Set env `NOTIFY_PATH` with a path to config. Default path is `CONFIG_PATH/notify.json`
-
-Example of `notify.json`:
-
-```json5
-{
-  // This is optional, used for validation in your IDE
-  "$schema": "https://jag-k.github.io/tiktok-downloader/schemas/notify.schema.json",
-  "services": [
-    {
-      "service": "file_reporter"
-    },
-    {
-      "service": "file_reporter",
-      "config": {
-        "file_path": "/path/to/reporter/file.json"
-      }
-    },
-    {
-      "service": "chanify",
-      "types": [
-        "report"
-      ],
-      "config": {
-        "url": "https://api.chanify.net",
-        "token": "123"
-      }
-    },
-    {
-      "service": "chanify",
-      "types": [
-        "exception"
-      ],
-      "config": {
-        "url": "https://api.example.com",
-        "token": "456"
-      }
-    }
-  ]
-}
-```
-
-You can validate your config with [JSON Schema](https://json-schema.org/).
-[Link to schema](https://jag-k.github.io/tiktok-downloader/schemas/notify.schema.json)
-
-<!--region:notify-->
-
-#### Module `chanify`
-
-A wrapper for [Chanify](https://chanify.net) Notifications
-
-Config:
-
-| Name    | Description        | Default value             | Required |
-|---------|--------------------|---------------------------|----------|
-| `token` | Chanify token      |                           | ✅ True   |
-| `url`   | Chanify server url | `https://api.chanify.net` | ❌ False  |
-
-#### Module `file_reporter`
-
-Reporter that writes reports to a file.
-
-Config:
-
-| Name        | Description         | Default value  | Required |
-|-------------|---------------------|----------------|----------|
-| `file_path` | Path to report file | `$REPORT_PATH` | ❌ False  |
-
-#### Module `ntfy`
-
-A wrapper for [Ntfy](https://ntfy.sh) Notifications
-
-Config:
-
-| Name         | Description                       | Default value       | Required |
-|--------------|-----------------------------------|---------------------|----------|
-| `url`        | Ntfy server url                   | `https://ntfy.sh`   | ❌ False  |
-| `topic`      | Ntfy topic                        | `tiktok-downloader` | ❌ False  |
-| `token`      | Ntfy token                        | `None`              | ❌ False  |
-| `token_type` | Ntfy token type (Bearer or Basic) | `Bearer`            | ❌ False  |
-| `send_file`  | Send file with notification       | `False`             | ❌ False  |
-
-<!--endregion:notify-->
-
 ## Development
 
-This project use [Poetry](https://python-poetry.org/) for dependency management.
+This project uses [Poetry](https://python-poetry.org/) for dependency management.
 
 For database project use MongoDB. More about this you can read [here](#database).
 
 ### Install project
 
-Python version: **3.11**
-Poetry version: **1.4.1**
+Python version: **3.12**
+Poetry version: **1.8.2**
 
 ```bash
 poetry install
 pre-commit install
+pre-commit install-hooks
 ```
 
 ### Database
@@ -277,7 +162,7 @@ poetry run python main.py
 
 ### Makefile commands
 
-You can use this for updating I18n files, generate schemas and more.
+You can use this for updating I18n files, generate schemas, and more.
 
 <!--region:makefile-->
 
@@ -286,8 +171,6 @@ make compile_locale  # Extract strings from code to .POT file
 make extract_locale  # Update .PO file for Russian language
 make update_locale  # Extract strings and update .PO file for Russian language
 make full_update_locale  # Compile .PO files to .MO files
-make generate_notify_schema  # Generate schema for notify.json file
-make generate_notify_md  # Generate markdown for notify.json file
 make generate_makefile  # Generate Makefile
 make generate_makefile_md  # Generate Makefile and update README.md
 make full_update_readme  # Full update README.md

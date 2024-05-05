@@ -14,12 +14,6 @@ update_locale:  # Extract strings and update .PO file for Russian language
 full_update_locale:  # Compile .PO files to .MO files
 	poetry run -- python -m cli full_update_locale
 
-generate_notify_schema:  # Generate schema for notify.json file
-	poetry run -- python -m cli generate_notify_schema
-
-generate_notify_md:  # Generate markdown for notify.json file
-	poetry run -- python -m cli generate_notify_md
-
 generate_makefile:  # Generate Makefile
 	poetry run -- python -m cli generate_makefile
 
