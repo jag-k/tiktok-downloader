@@ -2,6 +2,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from re import Match, Pattern
+from typing import ClassVar
 
 import aiohttp
 
@@ -13,13 +14,13 @@ logger = logging.getLogger(__name__)
 
 class MediaCache:
     class FoundCache(Exception):
-        def __init__(self, medias: list[Media], original_url: str, *args):
+        def __init__(self, medias: list[Media], original_url: str, *args) -> None:
             super().__init__(medias, original_url, *args)
             self.medias = medias
             self.original_url = original_url
 
     @classmethod
-    async def find_by_original_url(cls, original_url: str | None = None):
+    async def find_by_original_url(cls, original_url: str | None = None) -> None:
         data = await MediaCacheDB.get_medias(original_url)
         if data:
             raise cls.FoundCache(
@@ -41,10 +42,10 @@ class MediaCache:
 
 
 class Parser(ABC):
-    TYPE: ParserType | None = None
-    REG_EXPS: list[Pattern] = []
-    _parsers: list[type["Parser"]] = []
-    CUSTOM_EMOJI_ID: int = 0
+    TYPE: ClassVar[ParserType | None] = None
+    REG_EXPS: ClassVar[list[Pattern]] = []
+    _parsers: ClassVar[list[type["Parser"]]] = []
+    CUSTOM_EMOJI_ID: ClassVar[int] = 0
 
     @classmethod
     @abstractmethod
@@ -79,13 +80,9 @@ class Parser(ABC):
                     match = reg_exp.match(string)
                     if not match:
                         continue
-                    logger.info(
-                        "Found match for %s: %r", parser.TYPE, match.string
-                    )
+                    logger.info("Found match for %s: %r", parser.TYPE, match.string)
                     try:
-                        medias = await parser._parse(
-                            session, match, cache=MediaCache()
-                        )
+                        medias = await parser._parse(session, match, cache=MediaCache())
                     except MediaCache.FoundCache as e:
                         medias = e.medias
                         logger.info("Found cache for %s", e.original_url)
@@ -98,7 +95,7 @@ class Parser(ABC):
         )
         return result
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         if cls._is_supported():
             logger.info("Registering Parser[%s]", cls.TYPE)

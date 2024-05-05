@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class CommandRegistrator:
-    def __init__(self):
+    def __init__(self) -> None:
         self._command_descriptions: dict[CommandHandler, Str] = {}
 
     def connect_commands(self, app: Application) -> Application:
@@ -25,15 +25,15 @@ class CommandRegistrator:
             logger.info("Added commands %s to %s", cmds, app)
         return app
 
-    def add(
+    def add[C: Callable](
         self,
-        name: str = None,
-        description: Str = None,
+        name: str | None = None,
+        description: Str | None = None,
         auto_send_commands: bool = True,
-        filters: BaseFilter = None,
+        filters: BaseFilter | None = None,
         block: DVType[bool] = DEFAULT_TRUE,
-    ) -> Callable[[Callable], Callable]:
-        def decorator(func: Callable) -> Callable:
+    ) -> Callable[[C], C]:
+        def decorator(func: C) -> C:
             self.add_handler(
                 CommandHandler(
                     name or func.__name__,
@@ -48,22 +48,20 @@ class CommandRegistrator:
 
         return decorator
 
-    def add_handler(
+    def add_handler[CH: CommandHandler](
         self,
-        handler: CommandHandler,
-        description: Str = None,
+        handler: CH,
+        description: Str | None = None,
         auto_send_commands: bool = True,
-    ):
+    ) -> CH:
         if description is None:
-            description = (
-                (handler.callback.__doc__ or "").strip().split("\n")[0].strip()
-            )
+            description = (handler.callback.__doc__ or "").strip().split("\n")[0].strip()
 
         old_callback = handler.callback
         command = list(handler.commands)[0]
 
         @functools.wraps(old_callback)
-        async def wrap(update: Update, context: CallbackContext):
+        async def wrap(update: Update, context: CallbackContext) -> None:
             logger.info("Command /%s called", command)
 
             res = await old_callback(update, context)
@@ -77,18 +75,12 @@ class CommandRegistrator:
         return handler
 
     def get_command_description(self) -> dict[str, str]:
-        return {
-            list(command.commands)[0]: description
-            for command, description in self._command_descriptions.items()
-        }
+        return {list(command.commands)[0]: description for command, description in self._command_descriptions.items()}
 
-    async def send_commands(self, update: Update, context: CallbackContext):
+    async def send_commands(self, update: Update, context: CallbackContext) -> dict[str, str]:
         commands = self.get_command_description()
         await context.bot.set_my_commands(
-            commands=[
-                (cmd_name, desc)
-                for cmd_name, desc in self.get_command_description().items()
-            ],
+            commands=list(self.get_command_description().items()),
             scope=BotCommandScopeChat(update.effective_chat.id),
             language_code=update.effective_user.language_code,
         )

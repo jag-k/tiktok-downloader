@@ -13,7 +13,7 @@ _SET_DEFAULT = TypeVar("_SET_DEFAULT", bound=Any)
 class ContextSettings:
     DEFAULTS: dict[Keys, str | bool] = {}
 
-    def __init__(self, ctx: "CallbackContext"):
+    def __init__(self, ctx: "CallbackContext") -> None:
         self.ctx = ctx
 
     @property
@@ -23,7 +23,7 @@ class ContextSettings:
             return self.ctx.user_data
         return self.ctx.chat_data
 
-    def get(self, key: Keys, default: Any = None) -> Any:
+    def get(self, key: Keys, default: Any | None = None) -> Any:
         if default is None:
             default = self.DEFAULTS.get(key, None)
 
@@ -41,7 +41,7 @@ class ContextSettings:
     def __setitem__(self, key: Keys, value: Any) -> None:
         self.set(key, value)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._data)
 
     def is_history_enabled(self, update: Update) -> bool:
@@ -67,7 +67,7 @@ class ContextSettings:
 
 
 class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.__chat_type: ChatType | None = None
         self._user_lang: str | None = None
@@ -78,15 +78,15 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
         return self.user_data.setdefault(Keys.HISTORY.value, [])
 
     @history.setter
-    def history(self, value: list):
+    def history(self, value: list) -> None:
         self.user_data[Keys.HISTORY.value] = value
 
     @property
-    def temp_history(self):
+    def temp_history(self) -> dict:
         return self.user_data.setdefault("tmp_history", {})
 
     @temp_history.setter
-    def temp_history(self, value: dict):
+    def temp_history(self, value: dict) -> None:
         self.user_data["tmp_history"] = value
 
     @property
@@ -99,9 +99,7 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
 
     @property
     def user_lang(self) -> str:
-        return self.settings.get(
-            Keys.LANGUAGE, self._user_lang or DEFAULT_LOCALE
-        )
+        return self.settings.get(Keys.LANGUAGE, self._user_lang or DEFAULT_LOCALE)
 
     @classmethod
     def from_update(
@@ -110,16 +108,10 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
         application: Application,
     ) -> "CallbackContext":
         obj: CallbackContext = super().from_update(update, application)
-        obj._chat_type = (
-            update.effective_chat.type
-            if update.effective_chat
-            else ChatType.PRIVATE
-        )
+        obj._chat_type = update.effective_chat.type if update.effective_chat else ChatType.PRIVATE
         if update.effective_user:
             obj._user_lang = update.effective_user.language_code
-            obj.settings.setdefault(
-                Keys.LANGUAGE, obj._user_lang or DEFAULT_LOCALE
-            )
+            obj.settings.setdefault(Keys.LANGUAGE, obj._user_lang or DEFAULT_LOCALE)
         return obj
 
     @property
@@ -127,7 +119,7 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
         return self.bot_data.setdefault("media_cache", {})
 
     @media_cache.setter
-    def media_cache(self, value: dict[str, dict]):
+    def media_cache(self, value: dict[str, dict]) -> None:
         self.bot_data["media_cache"] = value
 
     @property
@@ -135,5 +127,5 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
         return self.bot_data.setdefault("tg_video_cache", {})
 
     @tg_video_cache.setter
-    def tg_video_cache(self, value: dict[str, dict]):
+    def tg_video_cache(self, value: dict[str, dict]) -> None:
         self.bot_data["tg_video_cache"] = value

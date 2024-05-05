@@ -5,21 +5,17 @@ from pathlib import Path
 
 import pytz
 
-from app.constants.json_logger import JsonFormatter
+from .json_logger import JsonFormatter
 
 
-def init_logger_config(
-    log_path: Path, time_zone: tzinfo = pytz.timezone("Europe/Moscow")
-):
+def init_logger_config(log_path: Path, time_zone: tzinfo = pytz.timezone("Europe/Moscow")) -> None:
     log_filename = datetime.now(time_zone).strftime("_%Y-%m-%d-%H-%M-%S.jsonl")
     config = {
         "version": 1,
         "disable_existing_loggers": False,
         "formatters": {
             "default": {
-                "format": (
-                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-                ),
+                "format": ("%(asctime)s - %(name)s - %(levelname)s - %(message)s"),
                 "datefmt": "%Y-%m-%d %H:%M:%S",
             },
             "json": {

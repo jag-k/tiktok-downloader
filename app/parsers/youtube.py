@@ -21,18 +21,10 @@ class Parser(BaseParser):
     REG_EXPS = [
         # https://www.youtube.com/watch?v=TCrP1SE2DkY
         # https://youtu.be/TCrP1SE2DkY
-        re.compile(
-            r"(?:https?://)?"
-            r"(?:"
-            r"(?:www\.)?youtube\.com/watch\?v="
-            r"|youtu.be/"
-            r")(?P<id>[\w-]+)"
-        ),
+        re.compile(r"(?:https?://)?" r"(?:" r"(?:www\.)?youtube\.com/watch\?v=" r"|youtu.be/" r")(?P<id>[\w-]+)"),
         # https://youtube.com/shorts/hBOLCcvbGHM
         # https://youtube.com/watch?v=hBOLCcvbGHM
-        re.compile(
-            r"(?:https?://)?(?:www\.)?youtube\.com/shorts/(?P<id>[\w-]+)"
-        ),
+        re.compile(r"(?:https?://)?(?:www\.)?youtube\.com/shorts/(?P<id>[\w-]+)"),
     ]
     CUSTOM_EMOJI_ID = 5463206079913533096  # 📹
 
@@ -64,9 +56,7 @@ class Parser(BaseParser):
                 logger.info('No "fmt_streams" found for %r', original_url)
                 return []
 
-        streams = streams_obj.filter(
-            type="video", progressive=True, file_extension="mp4"
-        ).order_by("resolution")
+        streams = streams_obj.filter(type="video", progressive=True, file_extension="mp4").order_by("resolution")
         logger.info("Found %s streams", len(streams))
         stream = streams.last()
         if not stream:
@@ -79,9 +69,7 @@ class Parser(BaseParser):
         for st in streams:
             logger.info("Stream: %s", st)
             async with session.head(st.url) as resp:
-                file_size = int(
-                    resp.headers.get(aiohttp.hdrs.CONTENT_LENGTH, "0")
-                )
+                file_size = int(resp.headers.get(aiohttp.hdrs.CONTENT_LENGTH, "0"))
             logger.info("Stream file size: %s", file_size)
             if constants.TG_FILE_LIMIT >= file_size > max_fs:
                 logger.info("Found suitable stream with filesize %s", file_size)
@@ -102,8 +90,6 @@ class Parser(BaseParser):
                 mime_type=stream.mime_type,
             )
         except PytubeError as err:
-            logger.error(
-                "Failed to get video %r with error: %s", original_url, err
-            )
+            logger.error("Failed to get video %r with error: %s", original_url, err)
             return []
         return await cache.save_group([video])

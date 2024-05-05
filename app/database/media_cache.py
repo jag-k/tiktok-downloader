@@ -1,40 +1,33 @@
 from datetime import datetime
 
+import pytz
 from motor.motor_asyncio import AsyncIOMotorCollection as Collection
-from pymongo.errors import CollectionInvalid
 
 from app.database.connector import MongoDatabase
 from app.models.medias import Media
 
 
 class MediaCache(MongoDatabase):
-    _collection: Collection = None
+    _collection: Collection | None = None
 
     @classmethod
     async def col(cls) -> Collection | None:
         if cls._db is None:
-            return
+            return None
 
         name = "media_cache"
-        if cls._collection is not None:
-            return cls._collection
-        try:
-            cls._collection = await cls._db.create_collection(name)
-        except CollectionInvalid as e:
-            if e.args[0] != f"collection {name} already exists":
-                raise e
-            cls._collection = cls._db.get_collection(name)
-        return cls._collection
+
+        return await cls._get_col(name)
 
     @classmethod
     async def get_medias(cls, original_url: str) -> list[Media] | None:
         col = await cls.col()
         if col is None:
-            return
+            return None
 
         data = await col.find_one({"_id": original_url})
         if not data:
-            return
+            return None
         d = dict(data)
         d.pop("_id", None)
         d.pop("created_at", None)
@@ -44,13 +37,13 @@ class MediaCache(MongoDatabase):
     @classmethod
     async def save_medias(cls, *medias: Media) -> str | None:
         if not medias:
-            return
+            return None
 
         col: Collection = await cls.col()
         if col is None:
-            return
+            return None
 
-        now = datetime.utcnow()
+        now = datetime.now(tz=pytz.UTC)
         url = medias[0].original_url
         data = [m.to_dict() for m in medias]
 
@@ -80,19 +73,19 @@ class MediaCache(MongoDatabase):
     @classmethod
     async def update_medias(cls, original_url: str, *medias: Media) -> None:
         if not cls._db:
-            return
+            return None
         col = await cls.col()
         await col.update_one(
             {"_id": original_url},
             {
                 "content": [m.to_dict() for m in medias],
-                "updated_at": datetime.utcnow(),
+                "updated_at": datetime.now(tz=pytz.UTC),
             },
         )
 
     @classmethod
     async def delete_media(cls, original_url: str) -> None:
         col = await cls.col()
-        if col is not None:
-            return
+        if col is None:
+            return None
         await col.delete_one({"_id": original_url})

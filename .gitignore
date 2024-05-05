@@ -6,3 +6,6 @@ config/
 .env
 .ruff_cache/
 **/tmp.json
+
+*.local
+*.local.*

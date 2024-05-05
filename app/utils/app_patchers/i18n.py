@@ -3,8 +3,9 @@ import functools
 from telegram import Update
 
 from app.context.callback_context import CallbackContext
-from app.utils.app_patchers.base import HandlerCallback, Patcher
 from app.utils.i18n.base import CURRENT_LANG
+
+from .base import HandlerCallback, Patcher
 
 
 class I18nPatcher(Patcher):

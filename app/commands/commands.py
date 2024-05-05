@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import random
 from collections.abc import Callable
@@ -16,9 +15,8 @@ from app import constants, settings
 from app.commands.registrator import CommandRegistrator
 from app.constants import DEFAULT_LOCALE
 from app.context import CallbackContext
-from app.database import Reporter
 from app.parsers.base import Parser
-from app.utils import a, b, notify
+from app.utils import a, b
 from app.utils.i18n import _
 
 commands = CommandRegistrator()
@@ -41,50 +39,19 @@ def start_text() -> str:
 
 @commands.add(description=_("Start using the bot"))
 async def start(update: Update, ctx: CallbackContext) -> None:
-    reports = await Reporter.from_context(ctx)
-    if reports:
-        report_str = "\n".join(map(str, reports))
-        await asyncio.gather(
-            *(
-                notify.send_message(
-                    message_type=notify.MessageType.REPORT,
-                    text=f"Report with messages:\n{r}",
-                    update=update,
-                    ctx=ctx,
-                    extras={"report": r},
-                )
-                for r in reports
-            )
-        )
-
-        await update.message.reply_html(
-            _(
-                "Thank you for your report!\n"
-                "We will try to fix this issue as soon as possible.\n\n"
-                "Your report:\n<code>{report}</code>"
-            ).format(report=report_str)
-        )
-        logger.info("Report from %s: %s", update.message.from_user, reports)
-        return
-
-    await update.message.reply_html(
-        _("{}\n\nUse /{} to get more information.").format(
-            start_text(), HELP_COMMAND_NAME
-        )
-    )
+    __ = ctx
+    await update.message.reply_html(_("{}\n\nUse /{} to get more information.").format(start_text(), HELP_COMMAND_NAME))
 
 
 @commands.add(HELP_COMMAND_NAME, _("Get more information about the bot."))
 async def help_command(update: Update, ctx: CallbackContext) -> None:
     is_private = update.message.chat.type == ChatType.PRIVATE
     cmds = commands.get_command_description()
-    supported_commands = "\n".join(
-        f"- /{command} - {description}" for command, description in cmds.items()
-    )
+    supported_commands = "\n".join(f"- /{command} - {description}" for command, description in cmds.items())
     add_to_group_text = _("Add to group")
 
-    def get_by_lang(obj: dict[str, str]) -> Callable[[str], str]:
-        def get(key: str) -> str:
+    def get_by_lang(obj: dict[str, str]) -> Callable[[str], str | None]:
+        def get(key: str) -> str | None:
             if res := obj.get(f"{key}_{ctx.user_lang}"):
                 return res
             if res := obj.get(f"{key}_{ctx.user_lang.split('-')[0]}"):
@@ -98,10 +65,10 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
     contacts = ""
     if constants.CONTACTS:
         contacts_list = "\n".join(
-            f'- {g("type")}: {a(g("text"), g("url"))}'
+            f'- {g("type")}: {a(g("text"), g("url"))}'  # type: ignore[arg-type]
             for c in constants.CONTACTS
             if all(map(c.get, ("type", "text", "url")))
-            if (g := get_by_lang(c))
+            if (g := get_by_lang(c))  # type: ignore[arg-type]
         )
         if contacts_list:
             contacts = _("\n\nContacts:\n{contacts_list}").format(

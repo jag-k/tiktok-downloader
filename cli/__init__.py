@@ -19,7 +19,7 @@ parser.add_argument(
 parser.add_argument("-l", "--lang", default="ru")
 
 
-def main():
+def main() -> None:
     n = parser.parse_args()
     cmd = commands.get(n.command, None)
     if cmd:

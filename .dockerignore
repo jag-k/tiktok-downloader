@@ -1,14 +1,7 @@
-.idea/
-.vscode/
-.github/
-.git/
 data/
 config/
-.gitignore
-.env.local
 README.md
-.DS_Store
 docker-compose.yml
 **/tmp.json
-.ruff_cache/
 public/
+.*

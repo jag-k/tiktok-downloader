@@ -3,7 +3,7 @@ from datetime import datetime
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection as Collection
-from pymongo.errors import CollectionInvalid, OperationFailure
+from pymongo.errors import OperationFailure
 
 from app.context import CallbackContext
 from app.database.connector import MongoDatabase
@@ -11,22 +11,15 @@ from app.models.report import Report
 
 
 class Reporter(MongoDatabase):
-    _collection: Collection = None
+    _collection: Collection | None = None
 
     @classmethod
     async def col(cls) -> Collection | None:
         if cls._db is None:
-            return
+            return None
 
         name = "reports"
-        if cls._collection is not None:
-            return cls._collection
-        try:
-            cls._collection = await cls._db.create_collection(name)
-        except CollectionInvalid as e:
-            if e.args[0] != f"collection {name} already exists":
-                raise e
-            cls._collection = cls._db.get_collection(name)
+        await cls._get_col(name)
 
         # Авто удаление старых записей
         index_name = "created_at_ttl"
@@ -56,11 +49,11 @@ class Reporter(MongoDatabase):
     async def get_report(cls, report_id: str) -> Report | None:
         col = await cls.col()
         if col is None:
-            return
+            return None
 
         data = await col.find_one({"_id": ObjectId(report_id)})
         if not data:
-            return
+            return None
         d = dict(data)
         d.pop("_id", None)
         d.pop("created_at", None)
@@ -71,7 +64,7 @@ class Reporter(MongoDatabase):
     async def save_report(cls, report: Report) -> str | None:
         col = await cls.col()
         if col is None:
-            return
+            return None
 
         now = datetime.utcnow()
         data = report.to_dict()
@@ -88,7 +81,7 @@ class Reporter(MongoDatabase):
     @classmethod
     async def update_report(cls, report_id: str, report: Report) -> None:
         if not cls._db:
-            return
+            return None
         col = await cls.col()
         await col.update_one(
             {"_id": report_id},
@@ -99,15 +92,9 @@ class Reporter(MongoDatabase):
     async def delete_report(cls, report_id: str) -> None:
         col = await cls.col()
         if col is not None:
-            return
+            return None
         await col.delete_one({"_id": report_id})
 
     @classmethod
     async def from_context(cls, ctx: CallbackContext) -> list[Report]:
-        return await asyncio.gather(
-            *(
-                cls.get_report(arg[7:])
-                for arg in (ctx.args or [])
-                if arg.startswith("report_")
-            )
-        )
+        return await asyncio.gather(*(cls.get_report(arg[7:]) for arg in (ctx.args or []) if arg.startswith("report_")))

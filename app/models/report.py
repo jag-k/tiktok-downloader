@@ -1,6 +1,6 @@
 from enum import Enum
 
-from app.models.base import Model
+from .base import Model
 
 
 class ReportType(str, Enum):
@@ -23,5 +23,5 @@ class Report(Model):
     report_place: ReportPlace = ReportPlace.OTHER
     extra_data: dict | None = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.message

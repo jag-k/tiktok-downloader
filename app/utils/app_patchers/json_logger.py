@@ -5,12 +5,13 @@ from telegram import Update
 
 from app.constants.json_logger import DATA_TYPE, QUERY, USER_ID, USERNAME
 from app.context import CallbackContext
-from app.utils.app_patchers.base import HandlerCallback, Patcher
+
+from .base import HandlerCallback, Patcher
 
 
 def env_wrapper(callback: HandlerCallback) -> HandlerCallback:
     @functools.wraps(callback)
-    async def wrapper(update: Update, context: CallbackContext):
+    async def wrapper(update: Update, context: CallbackContext) -> None:
         tokens: dict[ContextVar, Token] = {}
         if update:
             if update.effective_user:

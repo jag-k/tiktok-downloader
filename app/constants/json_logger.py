@@ -2,12 +2,12 @@ import json
 import logging.config
 from contextvars import ContextVar
 
-USER_ID = ContextVar("USER_ID", default=0)
-USERNAME = ContextVar("USERNAME", default="")
-QUERY = ContextVar("QUERY", default="")
+USER_ID: ContextVar[int] = ContextVar("USER_ID", default=0)
+USERNAME: ContextVar[str] = ContextVar("USERNAME", default="")
+QUERY: ContextVar[str] = ContextVar("QUERY", default="")
 DATA_TYPE: ContextVar[str] = ContextVar("DATA_TYPE", default="")
 
-CONTEXT_VARS = [
+CONTEXT_VARS: list[ContextVar] = [
     USER_ID,
     USERNAME,
     QUERY,
@@ -33,7 +33,7 @@ class JsonFormatter(logging.Formatter):
 
     def __init__(
         self,
-        fmt_dict: dict = None,
+        fmt_dict: dict | None = None,
         time_format: str = "%Y-%m-%dT%H:%M:%S",
         msec_format: str = "%s.%03dZ",
     ):
@@ -50,16 +50,13 @@ class JsonFormatter(logging.Formatter):
         """
         return "asctime" in self.fmt_dict.values()
 
-    def formatMessage(self, record) -> dict:
+    def formatMessage(self, record) -> dict:  # type: ignore[override]
         """
         Overwritten to return a dictionary of the relevant LogRecord attributes
         instead of a string.
         KeyError is raised if an unknown attribute is provided in the fmt_dict.
         """
-        return {
-            fmt_key: record.__dict__[fmt_val]
-            for fmt_key, fmt_val in self.fmt_dict.items()
-        }
+        return {fmt_key: record.__dict__[fmt_val] for fmt_key, fmt_val in self.fmt_dict.items()}
 
     def format(self, record) -> str:
         """

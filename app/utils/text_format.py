@@ -1,4 +1,4 @@
-def a(text: str, url: str = None) -> str:
+def a(text: str, url: str | None = None) -> str:
     if url:
         return f'<a href="{url}">{text}</a>'
     return text
@@ -20,6 +20,4 @@ def camel_to_snake(s: str) -> str:
     """
     Convert CamelCase string `s` to snake_case.
     """
-    return "".join(["_" + c.lower() if c.isupper() else c for c in s]).lstrip(
-        "_"
-    )
+    return "".join(["_" + c.lower() if c.isupper() else c for c in s]).lstrip("_")

@@ -1,14 +1,10 @@
-from typing import Self
-
 from pydantic import BaseModel, Field
 
 
 class Model(BaseModel):
-    _type = Field(
-        None, alias="@type", exclude=True, repr=False, allow_mutation=False
-    )
+    _type = Field(None, alias="@type", exclude=True, repr=False, allow_mutation=False)
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         models: dict[str, type[Model]] | None = getattr(Model, "MODELS", None)
         if models is None:
@@ -17,12 +13,12 @@ class Model(BaseModel):
         models[cls.__name__] = cls
 
     def to_dict(self) -> dict:
-        def encoder(v):
+        def encoder(v) -> dict:
             if isinstance(v, Model):
                 return v.to_dict()
             return v
 
-        d = self.__config__.json_loads(
+        d = self.__config__.json_loads(  # type: ignore[attr-defined]
             self.json(
                 exclude_defaults=True,
                 exclude_none=True,
@@ -34,9 +30,9 @@ class Model(BaseModel):
         return d
 
     @classmethod
-    def from_dict(cls, value: dict) -> Self:
+    def from_dict(cls, value: dict) -> "Model":
         models: dict[str, type[Model]] = getattr(Model, "MODELS", {})
-        type_ = value.pop("@type", None)
+        type_: str | None = value.pop("@type", None)
         return models.get(type_, cls)(**value)
 
     class Config:
