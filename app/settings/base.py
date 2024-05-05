@@ -10,8 +10,6 @@ from telegram.ext import CallbackQueryHandler, CommandHandler
 from app.constants import Keys
 from app.context import CallbackContext, ContextSettings
 from app.utils import Str
-
-# noinspection PyProtectedMember
 from app.utils.i18n import _
 
 BASE_SETTINGS_ID = "settings"
@@ -102,12 +100,19 @@ class Settings:
             await self.update.callback_query.answer()
 
             reply_markup = InlineKeyboardMarkup(_buttons)
-            msg = self.update.callback_query.message
+            cq = self.update.callback_query
+            msg = cq.message
+            if not msg:
+                return msg
 
             if msg.text_html != text:
-                return await msg.edit_text(text=text, reply_markup=reply_markup)
+                return await cq.edit_message_text(
+                    text=text, reply_markup=reply_markup
+                )
             if msg.reply_markup != reply_markup:
-                return await msg.edit_reply_markup(reply_markup=reply_markup)
+                return await cq.edit_message_reply_markup(
+                    reply_markup=reply_markup
+                )
             return msg
 
         def btn(self, text: str, result: str | None = None):
@@ -201,7 +206,7 @@ class Settings:
             update: Update,
             context: Union[CallbackContext, "Settings.Context"],
         ):
-            _, *res = update.callback_query.data.split("=", 1)
+            __, *res = update.callback_query.data.split("=", 1)
             ctx: Settings.Context
 
             if isinstance(context, Settings.Context):
@@ -274,7 +279,7 @@ class Settings:
         parent: str | Context = BASE_SETTINGS_ID,
     ) -> Callable[[Callable], SubSettings]:
         def wrap(
-            func: Callable[[Settings.Context], Coroutine[..., ..., str | None]]
+            func: Callable[[Settings.Context], Coroutine[..., ..., str | None]],
         ) -> Settings.SubSettings:
             sub = self.SubSettings(
                 func=func,
@@ -350,7 +355,7 @@ class Settings:
 
     async def _base_settings(self, update: Update, context: CallbackContext):
         send_text = (
-            update.callback_query.message.edit_text
+            update.callback_query.edit_message_text
             if update.callback_query and update.callback_query.message
             else update.message.reply_text
         )
@@ -377,7 +382,7 @@ class Settings:
                     (
                         f"{sub.display_name}: {display_current_data}"
                         if display_current_data
-                        else sub.display_name
+                        else sub.display_name.s
                     ),
                     callback_data=id_,
                 )

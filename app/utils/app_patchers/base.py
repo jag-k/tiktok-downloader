@@ -6,7 +6,7 @@ from telegram import Update
 from telegram.ext import Application, BaseHandler
 
 # noinspection PyProtectedMember
-from telegram.ext._handler import RT, HandlerCallback
+from telegram.ext._handlers.basehandler import RT, HandlerCallback
 
 from app.context import CallbackContext
 

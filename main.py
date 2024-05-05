@@ -1,12 +1,15 @@
 import logging
 import traceback
 import uuid
-from collections.abc import Callable, Coroutine
-from typing import Any
 
 import aiohttp as aiohttp
 from mongopersistence import MongoPersistence
-from telegram import InlineQueryResult, InlineQueryResultVideo, Update
+from telegram import (
+    InlineQueryResult,
+    InlineQueryResultsButton,
+    InlineQueryResultVideo,
+    Update,
+)
 from telegram import Video as TelegramVideo
 from telegram.constants import ChatType, MessageEntityType, ParseMode
 from telegram.error import BadRequest
@@ -27,10 +30,8 @@ from app.database.connector import MongoDatabase
 from app.models.medias import Media, MediaGroup, Video
 from app.models.report import Report, ReportPlace, ReportType
 from app.parsers import Parser
-from app.utils import a, notify, patch
+from app.utils import a, patch
 from app.utils.app_patchers.json_logger import env_wrapper
-
-# noinspection PyProtectedMember
 from app.utils.i18n import _, _n
 
 logger = logging.getLogger(__name__)
@@ -191,8 +192,10 @@ async def inline_query(update: Update, ctx: CallbackContext):
         return await update.inline_query.answer(
             await inline_query_video_from_media(ctx.history[::-1], ctx),
             is_personal=True,
-            switch_pm_text=_("Recently added"),
-            switch_pm_parameter="help",
+            button=InlineQueryResultsButton(
+                text=_("Recently added"),
+                start_parameter="help",
+            ),
             cache_time=1,
         )
 
@@ -223,8 +226,10 @@ async def inline_query(update: Update, ctx: CallbackContext):
         return await update.inline_query.answer(
             [],
             is_personal=True,
-            switch_pm_text=not_found_text,
-            switch_pm_parameter=f"report_{report_uid}",
+            button=InlineQueryResultsButton(
+                text=not_found_text,
+                start_parameter=f"report_{report_uid}",
+            ),
             cache_time=1,
         )
 
@@ -248,13 +253,16 @@ async def inline_query(update: Update, ctx: CallbackContext):
     return await update.inline_query.answer(
         results,
         is_personal=True,
-        switch_pm_text=(
-            _n("Found %d video", "Found %d videos", len(results)) % len(results)
-            + _(". Is it correct media? Press here if not!")
-            if results
-            else not_found_text
+        button=InlineQueryResultsButton(
+            text=(
+                _n("Found %d video", "Found %d videos", len(results))
+                % len(results)
+                + _(". Is it correct media? Press here if not!")
+                if results
+                else not_found_text
+            ),
+            start_parameter=f"report_{report_uid}",
         ),
-        switch_pm_parameter=f"report_{report_uid}",
         cache_time=1,
     )
 
@@ -265,36 +273,17 @@ async def error(update: Update, context: CallbackContext):
     exc = context.error
     logger.warning('%s: %s. Update: "%s"', type(exc).__name__, exc, update)
     traceback.print_tb(context.error.__traceback__)
-    await notify.send_message(
-        message_type=notify.MessageType.EXCEPTION,
-        text=f'{type(exc).__name__}: {exc}. Update: "{update}"',
-        update=update,
-        ctx=context,
-        extras={"exception": exc},
-    )
-
-
-def post_something(
-    message_type: notify.MessageType,
-) -> Callable[[Application], Coroutine[Any, Any, None]]:
-    async def wrap(app: Application):
-        await notify.send_message(
-            message_type=message_type,
-            text=f"Application is {message_type.value}",
-            extras={"app": app},
-        )
-
-    return wrap
 
 
 async def post_init(app: Application):
     MongoDatabase.init()
-    await post_something(notify.MessageType.START)(app)
 
 
 async def post_shutdown(app: Application):
-    MongoDatabase.close()
-    await post_something(notify.MessageType.SHUTDOWN)(app)
+    try:
+        MongoDatabase.close()
+    except AttributeError:
+        pass
 
 
 def main() -> None:
@@ -323,7 +312,6 @@ def main() -> None:
         .token(constants.TOKEN)
         .context_types(ContextTypes(context=CallbackContext))
         .post_init(post_init)
-        .post_stop(post_something(notify.MessageType.STOP))
         .post_shutdown(post_shutdown)
         .build()
     )
