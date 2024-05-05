@@ -107,14 +107,14 @@ class Parser(BaseParser):
                 exc_info=e,
             )
             return []
-        real_author = data.get("author", {}).get("unique_id", "").lower()
-        if author and author != real_author:
-            logger.info(
-                "Author mismatch: %s != %s",
-                author,
-                real_author,
-            )
-            return []
+        # real_author = data.get("author", {}).get("unique_id", "").lower()
+        # if author and author != real_author:
+        #     logger.info(
+        #         "Author mismatch: %s != %s",
+        #         author,
+        #         real_author,
+        #     )
+        #     return []
 
         media_type: Literal["video", "image", None] = data.get("type", None)
         logger.info("Media type: %s", media_type)
@@ -184,13 +184,21 @@ class Parser(BaseParser):
     async def _get_video_data(video_id: int) -> dict:
         async with ClientSession(
             headers={
-                "Accept": "application/json",
-                "User-Agent": TT_USER_AGENT,
+                # "Accept": "application/json",
+                # "User-Agent": TT_USER_AGENT,
             }
         ) as session:
             async with session.get(
-                "https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/",
+                "https://api22-normal-c-alisg.tiktokv.com/aweme/v1/feed/",
                 params={
+                    "iid": "7318518857994389254",
+                    "device_id": "7318517321748022790",
+                    "channel": "googleplay",
+                    "app_name": "musical_ly",
+                    "version_code": "300904",
+                    "device_platform": "android",
+                    "device_type": "ASUS_Z01QD",
+                    "os_version": "9",
                     "aweme_id": video_id,
                 },
             ) as resp:
@@ -198,6 +206,7 @@ class Parser(BaseParser):
             if not raw_data:
                 logger.error("Empty response with %r", resp.url)
                 return {}
+        print(raw_data)
         if not raw_data.get("aweme_list", []):
             logger.info("No aweme_list in response")
             return {}
