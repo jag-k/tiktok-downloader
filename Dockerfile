@@ -18,9 +18,8 @@ ENV PYTHONFAULTHANDLER=1 \
 
 # System deps:
 RUN --mount=type=cache,target=/var/cache/apk \
-  --update \
-  --virtual .tmp-build-deps \
-  gcc libc-dev linux-headers libffi-dev
+    apk add --update \
+    gcc libc-dev linux-headers libffi-dev
 
 RUN pip install "poetry==$POETRY_VERSION"
 
