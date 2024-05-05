@@ -3,7 +3,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-def load_envs(base_path: Path, config_path: Path, print_envs: bool = False):
+def load_envs(base_path: Path, config_path: Path, print_envs: bool = False) -> None:
     env_paths = [
         base_path / ".env",
         base_path / ".env.local",

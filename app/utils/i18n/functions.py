@@ -1,4 +1,4 @@
-from app.utils.i18n.base import ContextGetText, Str
+from .base import ContextGetText, Str
 
 __all__ = (
     "gettext",

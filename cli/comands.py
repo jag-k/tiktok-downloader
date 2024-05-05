@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 def add_command(
-    name: str = None,
-    func: Callable = None,
+    name: str | None = None,
+    func: Callable | None = None,
     *,
-    description: str = None,
-    extra: str = None,
+    description: str | None = None,
+    extra: str | None = None,
 ) -> Callable:
     def decorator(f: Callable) -> Callable:
         nonlocal name
@@ -55,13 +55,7 @@ def markdown_update_region(markdown: str, region: str, data: str) -> str:
     end_rm = markdown.split(end, 1)[1]
     logger.info("Update %r region in markdown", region)
 
-    return (
-        f"{start_rm.strip()}\n\n"
-        f"{start}\n\n"
-        f"{data.strip()}\n\n"
-        f"{end}\n\n"
-        f"{end_rm.strip()}"
-    )
+    return f"{start_rm.strip()}\n\n" f"{start}\n\n" f"{data.strip()}\n\n" f"{end}\n\n" f"{end_rm.strip()}"
 
 
 add_command(
@@ -84,26 +78,24 @@ add_command(
 
 
 @add_command(description="Compile .PO files to .MO files")
-def full_update_locale(lang: str = DEFAULT_LOCALE):
+def full_update_locale(lang: str = DEFAULT_LOCALE) -> None:
     extract_locale()
     update_locale(lang)
 
 
 @add_command(description="Generate schema for notify.json file")
-def generate_notify_schema():
+def generate_notify_schema() -> None:
     from app.utils.notify.generate_schemas import generate_jsonschema
 
     schemas = BASE_PATH / "public" / "schemas"
     schemas.mkdir(parents=True, exist_ok=True)
 
     with open(schemas / "notify.schema.json", "w") as f:
-        json.dump(
-            generate_jsonschema(), f, indent=4, ensure_ascii=False, default=str
-        )
+        json.dump(generate_jsonschema(), f, indent=4, ensure_ascii=False, default=str)
 
 
 @add_command(description="Generate markdown for notify.json file")
-def generate_notify_md():
+def generate_notify_md() -> None:
     from app.utils.notify.generate_schemas import generate_markdown
 
     readme_file = BASE_PATH / "README.md"
@@ -116,7 +108,7 @@ def generate_notify_md():
 
 
 @add_command(description="Generate Makefile")
-def generate_makefile():
+def generate_makefile() -> None:
     makefile = BASE_PATH / "Makefile"
 
     data = [
@@ -126,15 +118,12 @@ def generate_makefile():
             "extra": extra,
         }
         for name, func in commands.items()
-        if (description := f"  # {func.__doc__}" if func.__doc__ else "")
-        or True
-        if (extra := f" {func.__extra__}" if hasattr(func, "__extra__") else "")
-        or True
+        if (description := f"  # {func.__doc__}" if func.__doc__ else "") or True
+        if (extra := f" {func.__extra__}" if hasattr(func, "__extra__") else "") or True
     ]
 
     cmds = "\n".join(
-        f"{name}:{description}\n"
-        f"\tpoetry run -- python -m cli {name}{extra}\n"
+        f"{name}:{description}\n" f"\tpoetry run -- python -m cli {name}{extra}\n"
         for name, description, extra in map(dict.values, data)
     )
 
@@ -149,7 +138,7 @@ def generate_makefile():
 
 
 @add_command(description="Generate Makefile and update README.md")
-def generate_makefile_md():
+def generate_makefile_md() -> None:
     data = generate_makefile()
     text = "```bash"
     for name, description, extra in map(dict.values, data):
@@ -163,6 +152,6 @@ def generate_makefile_md():
 
 
 @add_command(description="Full update README.md")
-def full_update_readme():
+def full_update_readme() -> None:
     generate_notify_md()
     generate_makefile_md()

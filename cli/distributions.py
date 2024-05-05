@@ -1,5 +1,6 @@
 import json
 import os.path
+
 from distutils.dist import Distribution
 
 from app.constants import PROJECT_PATH

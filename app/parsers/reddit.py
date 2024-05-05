@@ -8,8 +8,9 @@ import aiohttp
 from aiohttp import InvalidURL
 
 from app.models.medias import Media, ParserType, Video
-from app.parsers.base import MediaCache
-from app.parsers.base import Parser as BaseParser
+
+from .base import MediaCache
+from .base import Parser as BaseParser
 
 logger = logging.getLogger(__name__)
 
@@ -91,9 +92,7 @@ class Parser(BaseParser):
             comment_id = match.group("id")
         except (IndexError, InvalidURL):
             try:
-                comment_id = id_from_url(
-                    f"https://reddit.com/{match.group('link')}"
-                )
+                comment_id = id_from_url(f"https://reddit.com/{match.group('link')}")
             except (IndexError, InvalidURL):
                 return []
 
@@ -108,11 +107,7 @@ class Parser(BaseParser):
             logger.info("No media found")
             return []
 
-        video_url = (
-            media.get("reddit_video", {})
-            .get("fallback_url", "")
-            .rstrip("?source=fallback")
-        )
+        video_url = media.get("reddit_video", {}).get("fallback_url", "").rstrip("?source=fallback")
         if not video_url:
             logger.info("No video found")
             return []

@@ -4,12 +4,7 @@ import uuid
 
 import aiohttp as aiohttp
 from mongopersistence import MongoPersistence
-from telegram import (
-    InlineQueryResult,
-    InlineQueryResultsButton,
-    InlineQueryResultVideo,
-    Update,
-)
+from telegram import InlineQueryResult, InlineQueryResultsButton, InlineQueryResultVideo, Update
 from telegram import Video as TelegramVideo
 from telegram.constants import ChatType, MessageEntityType, ParseMode
 from telegram.error import BadRequest
@@ -37,7 +32,7 @@ from app.utils.i18n import _, _n
 logger = logging.getLogger(__name__)
 
 
-async def _process_video(update: Update, ctx: CallbackContext, media: Video):
+async def _process_video(update: Update, ctx: CallbackContext, media: Video) -> None:
     extra_caption = ""
     if media.max_quality_url and media.max_quality_url != media.url:
         extra_caption = _(
@@ -73,11 +68,7 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video):
         if update.effective_chat.type == ChatType.PRIVATE:
             logger.info("Sending video as link: %s", media)
             await update.effective_message.reply_text(
-                _(
-                    "Error sending video: {title}\n"
-                    "\n\n"
-                    '<a href="{url}">Direct link to video</a>'
-                ).format(
+                _("Error sending video: {title}\n" "\n\n" '<a href="{url}">Direct link to video</a>').format(
                     title=a(media_caption, media.original_url),
                     url=media.url,
                 ),
@@ -86,9 +77,7 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video):
         raise e
 
 
-async def _process_media_group(
-    update: Update, _: CallbackContext, media: MediaGroup
-):
+async def _process_media_group(update: Update, _: CallbackContext, media: MediaGroup) -> None:
     i_medias = media.input_medias
 
     for m in i_medias:
@@ -99,11 +88,11 @@ async def _process_media_group(
     )
 
 
-async def link_parser(update: Update, ctx: CallbackContext):
+async def link_parser(update: Update, ctx: CallbackContext) -> None:
     """Parse link from the user message."""
     message = update.message
     if not message or not message.entities:
-        return
+        return None
 
     text = message.text or message.caption
     message_links: list[str] = [
@@ -113,16 +102,14 @@ async def link_parser(update: Update, ctx: CallbackContext):
     ]
 
     if not message_links:
-        return
+        return None
 
     async with aiohttp.ClientSession() as session:
         medias: list[Media] = await Parser.parse(session, *message_links)
 
     for media in medias:
         if isinstance(media, Video):
-            _from_location = (
-                f" from {media.language_emoji}" if media.language_emoji else ""
-            )
+            _from_location = f" from {media.language_emoji}" if media.language_emoji else ""
             logger.info("Sending video%s: %s", _from_location, media)
             return await _process_video(update, ctx, media)
 
@@ -170,25 +157,25 @@ async def inline_query_video_from_media(
     return [content(media) for media in medias if isinstance(media, Video)]
 
 
-async def chosen_inline_query(update: Update, ctx: CallbackContext):
+async def chosen_inline_query(update: Update, ctx: CallbackContext) -> None:
     video = ctx.temp_history.pop(update.chosen_inline_result.result_id, None)
     logger.info("Chosen video: %s", video)
     ctx.temp_history.clear()
 
     if not video or not ctx.settings.is_history_enabled(update):
-        return
+        return None
 
     if video not in ctx.history:
         logger.info("Add %s video to history", video)
         ctx.history.append(video)
 
 
-async def inline_query(update: Update, ctx: CallbackContext):
+async def inline_query(update: Update, ctx: CallbackContext) -> bool:
     """Handle the inline query."""
     logger.info("Checking inline query...")
     query = (update.inline_query.query or "").strip()
 
-    async def send_history():
+    async def send_history() -> bool:
         return await update.inline_query.answer(
             await inline_query_video_from_media(ctx.history[::-1], ctx),
             is_personal=True,
@@ -206,9 +193,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
 
     logger.info("Inline query: %s", query)
 
-    not_found_text = _(
-        "No videos found. You don't think it's correct? Press here!"
-    )
+    not_found_text = _("No videos found. You don't think it's correct? Press here!")
 
     async with aiohttp.ClientSession() as session:
         medias: list[Media] = await Parser.parse(session, query)
@@ -233,14 +218,10 @@ async def inline_query(update: Update, ctx: CallbackContext):
             cache_time=1,
         )
 
-    results: list[InlineQueryResult] = await inline_query_video_from_media(
-        medias, ctx
-    )
+    results: list[InlineQueryResult] = await inline_query_video_from_media(medias, ctx)
 
     if ctx.settings.is_history_enabled(update):
-        for video, iq_video in zip(
-            filter(lambda x: isinstance(x, Video), medias), results
-        ):
+        for video, iq_video in zip(filter(lambda x: isinstance(x, Video), medias), results):
             ctx.temp_history[iq_video.id] = video.to_dict()
     r = Report(
         report_type=ReportType.WRONG_MEDIA,
@@ -255,8 +236,7 @@ async def inline_query(update: Update, ctx: CallbackContext):
         is_personal=True,
         button=InlineQueryResultsButton(
             text=(
-                _n("Found %d video", "Found %d videos", len(results))
-                % len(results)
+                _n("Found %d video", "Found %d videos", len(results)) % len(results)
                 + _(". Is it correct media? Press here if not!")
                 if results
                 else not_found_text
@@ -268,18 +248,20 @@ async def inline_query(update: Update, ctx: CallbackContext):
 
 
 @env_wrapper
-async def error(update: Update, context: CallbackContext):
+async def error(update: Update, context: CallbackContext) -> None:
     """Log Errors caused by Updates."""
     exc = context.error
     logger.warning('%s: %s. Update: "%s"', type(exc).__name__, exc, update)
     traceback.print_tb(context.error.__traceback__)
 
 
-async def post_init(app: Application):
+async def post_init(app: Application) -> None:
+    __ = app
     MongoDatabase.init()
 
 
-async def post_shutdown(app: Application):
+async def post_shutdown(app: Application) -> None:
+    __ = app
     try:
         MongoDatabase.close()
     except AttributeError:

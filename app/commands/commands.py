@@ -39,24 +39,19 @@ def start_text() -> str:
 
 @commands.add(description=_("Start using the bot"))
 async def start(update: Update, ctx: CallbackContext) -> None:
-    await update.message.reply_html(
-        _("{}\n\nUse /{} to get more information.").format(
-            start_text(), HELP_COMMAND_NAME
-        )
-    )
+    __ = ctx
+    await update.message.reply_html(_("{}\n\nUse /{} to get more information.").format(start_text(), HELP_COMMAND_NAME))
 
 
 @commands.add(HELP_COMMAND_NAME, _("Get more information about the bot."))
 async def help_command(update: Update, ctx: CallbackContext) -> None:
     is_private = update.message.chat.type == ChatType.PRIVATE
     cmds = commands.get_command_description()
-    supported_commands = "\n".join(
-        f"- /{command} - {description}" for command, description in cmds.items()
-    )
+    supported_commands = "\n".join(f"- /{command} - {description}" for command, description in cmds.items())
     add_to_group_text = _("Add to group")
 
-    def get_by_lang(obj: dict[str, str]) -> Callable[[str], str]:
-        def get(key: str) -> str:
+    def get_by_lang(obj: dict[str, str]) -> Callable[[str], str | None]:
+        def get(key: str) -> str | None:
             if res := obj.get(f"{key}_{ctx.user_lang}"):
                 return res
             if res := obj.get(f"{key}_{ctx.user_lang.split('-')[0]}"):
@@ -70,10 +65,10 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
     contacts = ""
     if constants.CONTACTS:
         contacts_list = "\n".join(
-            f'- {g("type")}: {a(g("text"), g("url"))}'
+            f'- {g("type")}: {a(g("text"), g("url"))}'  # type: ignore[arg-type]
             for c in constants.CONTACTS
             if all(map(c.get, ("type", "text", "url")))
-            if (g := get_by_lang(c))
+            if (g := get_by_lang(c))  # type: ignore[arg-type]
         )
         if contacts_list:
             contacts = _("\n\nContacts:\n{contacts_list}").format(

@@ -1,8 +1,8 @@
-import app.parsers.instagram as _
-import app.parsers.reddit as _
-import app.parsers.tiktok as _
-import app.parsers.twitter as _
-import app.parsers.youtube as _
+# import app.parsers.instagram as _  # type: ignore[no-redef]
+import app.parsers.reddit as _  # type: ignore[no-redef]
+import app.parsers.tiktok as _  # type: ignore[no-redef]
+import app.parsers.twitter as _  # type: ignore[no-redef]
+import app.parsers.youtube as _  # type: ignore[no-redef]
 from app.parsers.base import Parser
 
 __all__ = ("Parser",)

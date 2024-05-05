@@ -5,10 +5,10 @@ from pathlib import Path
 
 import pytz
 
-from app.constants.init_logger import init_logger_config
-from app.constants.json_logger import CONTEXT_VARS
-from app.constants.load_envs import load_envs
-from app.constants.types import *
+from .init_logger import init_logger_config
+from .json_logger import CONTEXT_VARS
+from .load_envs import load_envs
+from .types import *
 
 # region Base paths
 APP_PATH = Path(__file__).resolve().parent.parent
@@ -66,8 +66,7 @@ MONGO_DB = os.getenv("MONGO_DB", None)
 ENABLE_MONGO = MONGO_URL and MONGO_DB
 if not ENABLE_MONGO:
     print(
-        "Bot requires MongoDB to work.\n"
-        "Please, set MONGO_URL and MONGO_DB envs.",
+        "Bot requires MongoDB to work.\n" "Please, set MONGO_URL and MONGO_DB envs.",
         file=sys.stderr,
     )
     exit(1)

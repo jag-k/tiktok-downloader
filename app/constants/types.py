@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import StrEnum
 from typing import TypedDict
 
 
-class Keys(str, Enum):
+class Keys(StrEnum):
     LANGUAGE = "language"
     ADD_AUTHOR_MENTION = "add_author_mention"
     ADD_ORIGINAL_LINK = "add_original_link"

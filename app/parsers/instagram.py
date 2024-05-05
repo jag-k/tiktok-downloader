@@ -8,39 +8,29 @@ import aiohttp
 
 from app.constants import CONFIG_PATH, LAMADAVA_SAAS_TOKEN
 from app.models.medias import Media, ParserType, Video
-from app.parsers.base import MediaCache
-from app.parsers.base import Parser as BaseParser
+
+from .base import MediaCache
+from .base import Parser as BaseParser
 
 logger = logging.getLogger(__name__)
 
-INSTAGRAM_RE = re.compile(
-    r"(?:https?://)?(?:www\.)?instagram\.com/(?P<type>\w+)/(?P<id>[\w-]+)"
-)
+INSTAGRAM_RE = re.compile(r"(?:https?://)?(?:www\.)?instagram\.com/(?P<type>\w+)/(?P<id>[\w-]+)")
 
 USER_AGENT = (
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/91.0.4472.114 Safari/537.36"
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) " "Chrome/91.0.4472.114 Safari/537.36"
 )
 
 proxy_file = CONFIG_PATH / "http_proxies.txt"
 
-PROXIES: list[str] = (
-    list(filter(bool, proxy_file.read_text().split()))
-    if proxy_file.exists()
-    else []
-)
+PROXIES: list[str] = list(filter(bool, proxy_file.read_text().split())) if proxy_file.exists() else []
 
 
-def load_proxy():
+def load_proxy() -> None:
     global PROXIES
-    PROXIES = (
-        list(filter(bool, proxy_file.read_text().split()))
-        if proxy_file.exists()
-        else []
-    )
+    PROXIES = list(filter(bool, proxy_file.read_text().split())) if proxy_file.exists() else []
 
 
-def del_proxy(proxy: str):
+def del_proxy(proxy: str) -> None:
     try:
         PROXIES.pop(PROXIES.index(proxy.rsplit("/", 1)[-1]))
         logger.info("Deleted proxy %r", proxy)
@@ -48,31 +38,24 @@ def del_proxy(proxy: str):
         pass
 
 
-def save_proxy():
+def save_proxy() -> None:
     proxy_file.write_text("\n".join(PROXIES))
 
 
-async def make_proxy_request(
-    session: aiohttp.ClientSession, url: str, params: dict, **kwargs
-) -> dict | None:
-    async def req(proxy):
+async def make_proxy_request(session: aiohttp.ClientSession, url: str, params: dict, **kwargs) -> dict | None:
+    async def req(proxy) -> None:
         try:
-            async with session.get(
-                url, params=params, **kwargs, proxy=proxy
-            ) as resp:
+            async with session.get(url, params=params, **kwargs, proxy=proxy) as resp:
                 return await resp.json()
         except Exception as e:
             del_proxy(proxy)
             raise e
 
     load_proxy()
-    tasks = [
-        asyncio.create_task(req(proxy))
-        for p in PROXIES
-        for proxy in ["http://" + p, "https://" + p]
-    ]
+    tasks = [asyncio.create_task(req(proxy)) for p in PROXIES for proxy in ["http://" + p, "https://" + p]]
     try:
         for completed_task in asyncio.as_completed(tasks):
+            # noinspection PyBroadException
             try:
                 res = await completed_task
                 if isinstance(res, dict) and res.get("status") != "fail":
@@ -151,12 +134,10 @@ class Parser(BaseParser):
             caption = " ".join(
                 [
                     node.get("node", {}).get("text", "")
-                    for node in shortcode_media.get(
-                        "edge_media_to_caption", {}
-                    ).get("edges", [])
+                    for node in shortcode_media.get("edge_media_to_caption", {}).get("edges", [])
                 ]
             ).strip()
-        url = shortcode_media.get("video_url", None)
+        url: str | None = shortcode_media.get("video_url", None)
         if not url:
             return []
 
@@ -170,14 +151,9 @@ class Parser(BaseParser):
             author=shortcode_media.get("owner", {}).get("username", None),
             url=url,
             mime_type="video/mp4",
-            video_width=shortcode_media.get("dimensions", {}).get(
-                "width", None
-            ),
-            video_height=shortcode_media.get("dimensions", {}).get(
-                "height", None
-            ),
-            video_duration=int(shortcode_media.get("video_duration", "0"))
-            or None,
+            video_width=shortcode_media.get("dimensions", {}).get("width", None),
+            video_height=shortcode_media.get("dimensions", {}).get("height", None),
+            video_duration=int(shortcode_media.get("video_duration", "0")) or None,
         )
         return await cache.save_group([video])
 
@@ -207,7 +183,8 @@ class Parser(BaseParser):
         if not data:
             return []
 
-        if not (url := data.get("video_url", None)):
+        url: str | None = data.get("video_url", None)
+        if not url:
             logger.info("%s is not a video", original_url)
             return []
 
@@ -232,7 +209,7 @@ class Parser(BaseParser):
 
 if __name__ == "__main__":
 
-    async def main():
+    async def main() -> None:
         async with aiohttp.ClientSession() as session:
             print(
                 await Parser.parse(

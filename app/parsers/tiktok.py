@@ -10,9 +10,10 @@ from aiohttp import ClientSession
 
 from app import constants
 from app.models.medias import Media, MediaGroup, ParserType, Video
-from app.parsers.base import MediaCache
-from app.parsers.base import Parser as BaseParser
 from app.utils import timeit
+
+from .base import MediaCache
+from .base import Parser as BaseParser
 
 logger = logging.getLogger(__name__)
 
@@ -35,21 +36,12 @@ class Parser(BaseParser):
     TYPE = ParserType.TIKTOK
     REG_EXPS = [
         # https://www.tiktok.com/t/ZS8s7cPmd/
-        re.compile(
-            r"(?:https?://)?"
-            r"(?:www\.)?tiktok\.com/(?P<short_suffix>\w+)/(?P<id>\w+)/?"
-        ),
+        re.compile(r"(?:https?://)?" r"(?:www\.)?tiktok\.com/(?P<short_suffix>\w+)/(?P<id>\w+)/?"),
         # https://vt.tiktok.com/ZSRq1jcrg/
         # https://vm.tiktok.com/ZSRq1jcrg/
-        re.compile(
-            r"(?:https?://)?"
-            r"(?:(?P<domain>[a-z]{2})\.)?tiktok\.com/(?P<id>\w+)/?"
-        ),
+        re.compile(r"(?:https?://)?" r"(?:(?P<domain>[a-z]{2})\.)?tiktok\.com/(?P<id>\w+)/?"),
         # https://www.tiktok.com/@thejoyegg/video/7136001098841591041
-        re.compile(
-            r"(?:https?://)?"
-            r"(?:www\.)?tiktok\.com/@(?P<author>\w+)/video/(?P<video_id>\d+)/?"
-        ),
+        re.compile(r"(?:https?://)?" r"(?:www\.)?tiktok\.com/@(?P<author>\w+)/video/(?P<video_id>\d+)/?"),
     ]
     CUSTOM_EMOJI_ID = 5465416081105493315  # 📹
 
@@ -65,7 +57,11 @@ class Parser(BaseParser):
         cache: MediaCache,
     ) -> list[Media]:
         m = match.groupdict({})
+
         author: str
+        original_url: str
+        video_id: int
+
         if "short_suffix" in m:
             suffix = m["short_suffix"]
             url_id = m["id"]
@@ -88,7 +84,7 @@ class Parser(BaseParser):
             author, video_id = video_location
 
         else:
-            author = m.get("author", "").lower()
+            author = str(m.get("author", "")).lower()
             video_id: int = int(m.get("video_id"))
             original_url = f"https://www.tiktok.com/@{author}/video/{video_id}"
 
@@ -123,13 +119,9 @@ class Parser(BaseParser):
         media_type: Literal["video", "image", None] = data.get("type", None)
         logger.info("Media type: %s", media_type)
         if media_type == "video":
-            return await cache.save_group(
-                cls._process_video(data, original_url)
-            )
+            return await cache.save_group(cls._process_video(data, original_url))
         elif media_type == "image":
-            return await cache.save_group(
-                cls._process_image(data, original_url)
-            )
+            return await cache.save_group(cls._process_image(data, original_url))
         return []
 
     @staticmethod
@@ -139,10 +131,7 @@ class Parser(BaseParser):
             url: str | None = max(
                 filter(
                     lambda x: x.get("data_size", 0) <= constants.TG_FILE_LIMIT,
-                    (
-                        x.get("play_addr", {})
-                        for x in data.get("video", {}).get("bit_rate", [])
-                    ),
+                    (x.get("play_addr", {}) for x in data.get("video", {}).get("bit_rate", [])),
                 ),
                 key=lambda x: x.get("data_size", 0),
             ).get("url_list", [None])[0]
@@ -154,11 +143,7 @@ class Parser(BaseParser):
             return []
 
         caption: str | None = data.get("desc", None)
-        thumbnail_url: str | None = (
-            data.get("cover_data", {})
-            .get("origin_cover", {})
-            .get("url_list", [None])[0]
-        )
+        thumbnail_url: str | None = data.get("cover_data", {}).get("origin_cover", {}).get("url_list", [None])[0]
         nickname: str | None = data.get("author", {}).get("nickname", None)
         language: str | None = data.get("region", None)
 
@@ -234,11 +219,7 @@ class Parser(BaseParser):
             "cover_data": {
                 "cover": data["video"]["cover"],
                 "origin_cover": data["video"]["origin_cover"],
-                "dynamic_cover": (
-                    data["video"]["dynamic_cover"]
-                    if url_type == "video"
-                    else None
-                ),
+                "dynamic_cover": (data["video"]["dynamic_cover"] if url_type == "video" else None),
             },
             "hashtags": data.pop("text_extra"),
         }
@@ -249,9 +230,7 @@ class Parser(BaseParser):
                 "wm_video_url": wm_video,
                 "wm_video_url_HQ": wm_video,
                 "nwm_video_url": (data["video"]["play_addr"]["url_list"][0]),
-                "nwm_video_url_HQ": (
-                    data["video"]["bit_rate"][0]["play_addr"]["url_list"][0]
-                ),
+                "nwm_video_url_HQ": (data["video"]["bit_rate"][0]["play_addr"]["url_list"][0]),
             }
 
         elif url_type == "image":
@@ -259,13 +238,9 @@ class Parser(BaseParser):
             watermark_image_list = []
 
             for i in data["image_post_info"]["images"]:
-                no_watermark_image_list.append(
-                    i["display_image"]["url_list"][0]
-                )
+                no_watermark_image_list.append(i["display_image"]["url_list"][0])
 
-                watermark_image_list.append(
-                    i["owner_watermark_image"]["url_list"][0]
-                )
+                watermark_image_list.append(i["owner_watermark_image"]["url_list"][0])
 
             api_data["image_data"] = {
                 "no_watermark_image_list": no_watermark_image_list,
@@ -274,7 +249,7 @@ class Parser(BaseParser):
         return data | api_data
 
 
-async def main():
+async def main() -> None:
     async with ClientSession() as session:
         print(
             await Parser.parse(

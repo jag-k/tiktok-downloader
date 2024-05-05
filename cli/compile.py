@@ -4,7 +4,7 @@ from app.constants import DOMAIN, LOCALE_PATH
 from cli.distributions import dist
 
 
-def main():
+def main() -> None:
     obj = compile_catalog(dist)
     obj.domain = DOMAIN
     obj.directory = LOCALE_PATH

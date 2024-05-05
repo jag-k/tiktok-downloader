@@ -4,7 +4,7 @@ from app.constants import DEFAULT_LOCALE, DOMAIN, LOCALE_PATH
 from cli.distributions import dist
 
 
-def main(lang: str = DEFAULT_LOCALE):
+def main(lang: str = DEFAULT_LOCALE) -> None:
     obj = update_catalog(dist)
     obj.width = 80
     obj.domain = DOMAIN

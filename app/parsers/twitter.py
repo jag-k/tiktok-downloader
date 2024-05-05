@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
 
 # https://twitter.com/Yoda4ever/status/1580609309217628160
-TWITTER_RE = re.compile(
-    r"(?:https?://)?(?:www\.)?twitter\.com/(?P<user>\w+)/status/(?P<id>\d+)"
-)
+TWITTER_RE = re.compile(r"(?:https?://)?(?:www\.)?twitter\.com/(?P<user>\w+)/status/(?P<id>\d+)")
 
 
 class Parser(BaseParser):

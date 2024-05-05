@@ -4,7 +4,7 @@ from app.constants import DOMAIN, LOCALE_PATH
 from cli.distributions import dist
 
 
-def main():
+def main() -> None:
     obj = extract_messages(dist)
     obj.width = 80
     obj.output_file = LOCALE_PATH / f"{DOMAIN}.pot"

@@ -1,3 +1,4 @@
+import enum
 import functools
 import re
 from string import ascii_uppercase
@@ -8,22 +9,18 @@ from aiohttp import ClientSession
 from pydantic import Field
 from telegram import InputFile, InputMediaVideo
 
-# noinspection PyProtectedMember
-from telegram._utils.enum import StringEnum
-
 from app.constants import Keys
 from app.context import CallbackContext
-from app.models.base import Model
 from app.settings.user_settings import DescriptionTypes
-
-# noinspection PyProtectedMember
 from app.utils.i18n import _
+
+from .base import Model
 
 MAKE_CAPTION_DEFAULT = TypeVar("MAKE_CAPTION_DEFAULT", bound=Any)
 FLAG_OFFSET = ord("🇦") - ord("A")
 
 
-class ParserType(StringEnum):
+class ParserType(enum.StrEnum):
     """Parser type."""
 
     TIKTOK = "TikTok"
@@ -57,21 +54,17 @@ class Media(Model):
         return lang_emoji(self.language.upper()) if self.language else ""
 
     @language_emoji.setter
-    def language_emoji(self, value: str):
-        if (
-            isinstance(value, str)
-            and len(value) == 2
-            and all(x in ascii_uppercase for x in value)
-        ):
+    def language_emoji(self, value: str) -> None:
+        if isinstance(value, str) and len(value) == 2 and all(x in ascii_uppercase for x in value):
             self.language = value.upper()
         else:
             self.language = None
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.original_url)
 
     def real_caption(
-        self, ctx: CallbackContext, default: MAKE_CAPTION_DEFAULT = None
+        self, ctx: CallbackContext, default: MAKE_CAPTION_DEFAULT | None = None
     ) -> str | MAKE_CAPTION_DEFAULT:
         add_caption = ctx.settings[Keys.ADD_DESCRIPTION]
         add_autor = ctx.settings[Keys.ADD_AUTHOR_MENTION]
@@ -88,9 +81,7 @@ class Media(Model):
         media_caption = media_caption.strip()
 
         if add_autor:
-            media_caption += _(" by <code>@{author}</code> ").format(
-                author=self.author
-            )
+            media_caption += _(" by <code>@{author}</code> ").format(author=self.author)
         media_caption = media_caption.strip()
 
         if add_flag:
@@ -112,7 +103,7 @@ class Video(Media):
     video_width: int | None = None
     video_duration: int | None = None
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.url)
 
     async def content(
@@ -154,10 +145,7 @@ class Video(Media):
 
 class MediaGroup(Media):
     input_medias: list[
-        telegram.InputMediaAudio
-        | telegram.InputMediaDocument
-        | telegram.InputMediaPhoto
-        | telegram.InputMediaVideo
+        telegram.InputMediaAudio | telegram.InputMediaDocument | telegram.InputMediaPhoto | telegram.InputMediaVideo
     ] = Field(default_factory=list)
 
     class Config:
