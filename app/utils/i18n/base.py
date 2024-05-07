@@ -7,7 +7,7 @@ from typing import Any, Union
 from telegram import TelegramObject
 from telegram.request._requestparameter import RequestParameter
 
-from app import constants
+from app.constants import paths, settings
 
 __all__ = (
     "CURRENT_LANG",
@@ -15,7 +15,7 @@ __all__ = (
     "Str",
 )
 
-CURRENT_LANG = ContextVar("CURRENT_LANG", default=constants.DEFAULT_LOCALE)
+CURRENT_LANG = ContextVar("CURRENT_LANG", default=settings.default_locale)
 
 _translations: dict[str, NullTranslations] = {}
 
@@ -29,11 +29,11 @@ class ContextGetText:
 
     def __str__(self) -> str:
         lang = CURRENT_LANG.get()
-        path = constants.LOCALE_PATH
+        path = paths.LOCALE_PATH
         t = _translations.get(lang, None)
         if t is None:
             t = translation(
-                domain=constants.DOMAIN,
+                domain=settings.domain,
                 localedir=path,
                 languages=[lang],
                 fallback=True,

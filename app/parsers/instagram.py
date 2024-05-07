@@ -6,7 +6,6 @@ from re import Match
 
 import aiohttp
 
-from app.constants import CONFIG_PATH, LAMADAVA_SAAS_TOKEN
 from app.models.medias import Media, ParserType, Video
 
 from .base import MediaCache
@@ -19,52 +18,7 @@ INSTAGRAM_RE = re.compile(r"(?:https?://)?(?:www\.)?instagram\.com/(?P<type>\w+)
 USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) " "Chrome/91.0.4472.114 Safari/537.36"
 )
-
-proxy_file = CONFIG_PATH / "http_proxies.txt"
-
-PROXIES: list[str] = list(filter(bool, proxy_file.read_text().split())) if proxy_file.exists() else []
-
-
-def load_proxy() -> None:
-    global PROXIES
-    PROXIES = list(filter(bool, proxy_file.read_text().split())) if proxy_file.exists() else []
-
-
-def del_proxy(proxy: str) -> None:
-    try:
-        PROXIES.pop(PROXIES.index(proxy.rsplit("/", 1)[-1]))
-        logger.info("Deleted proxy %r", proxy)
-    except ValueError:
-        pass
-
-
-def save_proxy() -> None:
-    proxy_file.write_text("\n".join(PROXIES))
-
-
-async def make_proxy_request(session: aiohttp.ClientSession, url: str, params: dict, **kwargs) -> dict | None:
-    async def req(proxy) -> None:
-        try:
-            async with session.get(url, params=params, **kwargs, proxy=proxy) as resp:
-                return await resp.json()
-        except Exception as e:
-            del_proxy(proxy)
-            raise e
-
-    load_proxy()
-    tasks = [asyncio.create_task(req(proxy)) for p in PROXIES for proxy in ["http://" + p, "https://" + p]]
-    try:
-        for completed_task in asyncio.as_completed(tasks):
-            # noinspection PyBroadException
-            try:
-                res = await completed_task
-                if isinstance(res, dict) and res.get("status") != "fail":
-                    return res
-            except Exception:
-                pass
-        return None
-    finally:
-        save_proxy()
+LAMADAVA_SAAS_TOKEN: str | None = None
 
 
 class Parser(BaseParser):

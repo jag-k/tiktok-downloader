@@ -2,7 +2,7 @@ import enum
 import functools
 import re
 from string import ascii_uppercase
-from typing import Any, TypeVar
+from typing import Any
 
 import telegram
 from aiohttp import ClientSession
@@ -16,8 +16,26 @@ from app.utils.i18n import _
 
 from .base import Model
 
-MAKE_CAPTION_DEFAULT = TypeVar("MAKE_CAPTION_DEFAULT", bound=Any)
+__all__ = (
+    "Audio",
+    "Images",
+    "Media",
+    "MediaGroup",
+    "ParserType",
+    "Video",
+    "lang_emoji",
+)
+
 FLAG_OFFSET = ord("🇦") - ord("A")
+
+
+@functools.lru_cache
+def lang_emoji(lang: str) -> str:
+    if isinstance(lang, str) and len(lang) == 2:
+        lang = lang.upper()
+        if all(x in ascii_uppercase for x in lang):
+            return "".join(chr(ord(c) + FLAG_OFFSET) for c in lang)
+    return ""
 
 
 class ParserType(enum.StrEnum):
@@ -28,15 +46,6 @@ class ParserType(enum.StrEnum):
     YOUTUBE = "YouTube"
     REDDIT = "Reddit"
     INSTAGRAM = "Instagram"
-
-
-@functools.lru_cache
-def lang_emoji(lang: str) -> str:
-    if isinstance(lang, str) and len(lang) == 2:
-        lang = lang.upper()
-        if all(x in ascii_uppercase for x in lang):
-            return "".join(chr(ord(c) + FLAG_OFFSET) for c in lang)
-    return ""
 
 
 class Media(Model):
@@ -63,7 +72,7 @@ class Media(Model):
     def __hash__(self) -> int:
         return hash(self.original_url)
 
-    def real_caption(
+    def real_caption[MAKE_CAPTION_DEFAULT: Any](
         self, ctx: CallbackContext, default: MAKE_CAPTION_DEFAULT | None = None
     ) -> str | MAKE_CAPTION_DEFAULT:
         add_caption = ctx.settings[Keys.ADD_DESCRIPTION]
@@ -173,5 +182,8 @@ if __name__ == "__main__":
     d = m.to_dict()
     print(d)
     m2 = Media.from_dict(d)
-    print(repr(m))
+    print(repr(m2))
     print(repr(m2.type))
+    print(m2.to_dict())
+    print(d)
+    print(d == m2.to_dict())

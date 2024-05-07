@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime
 
+import pytz
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection as Collection
 from pymongo.errors import OperationFailure
@@ -11,8 +12,6 @@ from app.models.report import Report
 
 
 class Reporter(MongoDatabase):
-    _collection: Collection | None = None
-
     @classmethod
     async def col(cls) -> Collection | None:
         if cls._db is None:
@@ -66,7 +65,7 @@ class Reporter(MongoDatabase):
         if col is None:
             return None
 
-        now = datetime.utcnow()
+        now = datetime.now(pytz.UTC)
         data = report.to_dict()
         data.pop("@type")
         res = await col.insert_one(
@@ -80,21 +79,30 @@ class Reporter(MongoDatabase):
 
     @classmethod
     async def update_report(cls, report_id: str, report: Report) -> None:
+        col = await cls.col()
         if not cls._db:
             return None
-        col = await cls.col()
         await col.update_one(
             {"_id": report_id},
-            {**report.to_dict(), "updated_at": datetime.utcnow()},
+            {**report.to_dict(), "updated_at": datetime.now(pytz.UTC)},
         )
 
     @classmethod
     async def delete_report(cls, report_id: str) -> None:
         col = await cls.col()
-        if col is not None:
+        if col is None:
             return None
         await col.delete_one({"_id": report_id})
 
     @classmethod
     async def from_context(cls, ctx: CallbackContext) -> list[Report]:
-        return await asyncio.gather(*(cls.get_report(arg[7:]) for arg in (ctx.args or []) if arg.startswith("report_")))
+        report_prefix = "report_"
+        return list(
+            await asyncio.gather(
+                *(
+                    cls.get_report(arg[len(report_prefix) :])
+                    for arg in (ctx.args or [])
+                    if arg.startswith(report_prefix)
+                ),
+            )
+        )

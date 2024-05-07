@@ -1,6 +1,7 @@
 from babel.messages.frontend import extract_messages
+from constants.paths import LOCALE_PATH
 
-from app.constants import DOMAIN, LOCALE_PATH
+from app.constants import DOMAIN
 from cli.distributions import dist
 
 

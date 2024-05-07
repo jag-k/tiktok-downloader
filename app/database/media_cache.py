@@ -8,8 +8,6 @@ from app.models.medias import Media
 
 
 class MediaCache(MongoDatabase):
-    _collection: Collection | None = None
-
     @classmethod
     async def col(cls) -> Collection | None:
         if cls._db is None:

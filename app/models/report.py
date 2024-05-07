@@ -1,16 +1,22 @@
-from enum import Enum
+from enum import StrEnum
 
 from .base import Model
 
+__all__ = (
+    "Report",
+    "ReportType",
+    "ReportPlace",
+)
 
-class ReportType(str, Enum):
+
+class ReportType(StrEnum):
     BUG = "bug"
     WRONG_MEDIA: str = "wrong_media"
     MEDIA_NOT_FOUND: str = "media_not_found"
     OTHER: str = "other"
 
 
-class ReportPlace(str, Enum):
+class ReportPlace(StrEnum):
     CODE = "code"
     INLINE = "inline"
     MESSAGE = "message"

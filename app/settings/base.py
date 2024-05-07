@@ -1,7 +1,7 @@
 import contextvars
 import logging
 from collections.abc import Awaitable, Callable, Coroutine
-from typing import Any, Generic, TypeVar, Union
+from typing import Any, Union
 
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -16,8 +16,6 @@ from app.utils.i18n import _
 BASE_SETTINGS_ID = "settings"
 SETTINGS_SEPARATOR = ":"
 
-_KEY_TYPE = TypeVar("_KEY_TYPE")
-
 logger = logging.getLogger(__name__)
 
 
@@ -27,7 +25,7 @@ class Settings:
         False: "❌",
     }
 
-    class Context(Generic[_KEY_TYPE]):
+    class Context[_KEY_TYPE]:
         def __init__(
             self,
             settings: "Settings",
@@ -147,7 +145,7 @@ class Settings:
         def __str__(self) -> str:
             return self.current + (f"={self.result}" if self.result else "")
 
-    class SubSettings(Generic[_KEY_TYPE]):
+    class SubSettings[KEY_TYPE]:
         def __init__(
             self,
             func: Callable,
@@ -155,8 +153,8 @@ class Settings:
             parent: Union[str, "Settings.Context"] = BASE_SETTINGS_ID,
             display_name: Str | None = None,
             settings_data_key: Keys | None = None,
-            settings_data_default: _KEY_TYPE | None = None,
-            short_display: dict[_KEY_TYPE, Str] | Callable[[_KEY_TYPE], Str] = None,
+            settings_data_default: KEY_TYPE | None = None,
+            short_display: dict[KEY_TYPE, Str] | Callable[[KEY_TYPE], Str] = None,
             display_in_chat: bool = True,
         ):
             self.func = func
@@ -231,7 +229,7 @@ class Settings:
         self.settings_title: Str | Callable[[Update, CallbackContext], Awaitable[Str]] = settings_title
         self._settings: dict[str, Settings.SubSettings] = {BASE_SETTINGS_ID: self._base_settings}
 
-    def add_settings(
+    def add_settings[_KEY_TYPE](
         self,
         display_name: Str | None = None,
         settings_data_key: Keys | None = None,
@@ -308,7 +306,7 @@ class Settings:
         )(wrap)
 
     async def _base_settings(self, update: Update, context: CallbackContext) -> telegram.Message:
-        send_text = (
+        send_text: Callable[..., Awaitable[telegram.Message]] = (
             update.callback_query.edit_message_text
             if update.callback_query and update.callback_query.message
             else update.message.reply_text

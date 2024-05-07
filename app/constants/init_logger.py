@@ -5,7 +5,12 @@ from pathlib import Path
 
 import pytz
 
+from .fmt_logger import FmtFormatter
 from .json_logger import JsonFormatter
+from .paths import LOG_PATH
+from .settings import settings
+
+__all__ = ("init_logger_config",)
 
 
 def init_logger_config(log_path: Path, time_zone: tzinfo = pytz.timezone("Europe/Moscow")) -> None:
@@ -15,16 +20,21 @@ def init_logger_config(log_path: Path, time_zone: tzinfo = pytz.timezone("Europe
         "disable_existing_loggers": False,
         "formatters": {
             "default": {
-                "format": ("%(asctime)s - %(name)s - %(levelname)s - %(message)s"),
-                "datefmt": "%Y-%m-%d %H:%M:%S",
+                "()": FmtFormatter,
+                "fmt_dict": {
+                    "timestamp": "asctime",
+                    "level": "levelname",
+                    "loggerName": "name",
+                    "message": "message",
+                },
             },
             "json": {
                 "()": JsonFormatter,
                 "fmt_dict": {
                     "timestamp": "asctime",
                     "level": "levelname",
-                    "message": "message",
                     "loggerName": "name",
+                    "message": "message",
                 },
             },
         },
@@ -76,3 +86,8 @@ def init_logger_config(log_path: Path, time_zone: tzinfo = pytz.timezone("Europe
         )
     else:
         logging.config.dictConfig(config)
+
+
+# Load custom logger config
+init_logger_config(LOG_PATH, settings.time_zone)
+logging.getLogger("httpx").setLevel(level=logging.ERROR)

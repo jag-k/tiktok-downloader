@@ -1,20 +1,9 @@
 import json
 import logging.config
-from contextvars import ContextVar
 
-USER_ID: ContextVar[int] = ContextVar("USER_ID", default=0)
-USERNAME: ContextVar[str] = ContextVar("USERNAME", default="")
-QUERY: ContextVar[str] = ContextVar("QUERY", default="")
-DATA_TYPE: ContextVar[str] = ContextVar("DATA_TYPE", default="")
+from .context_vars import CONTEXT_VARS
 
-CONTEXT_VARS: list[ContextVar] = [
-    USER_ID,
-    USERNAME,
-    QUERY,
-    DATA_TYPE,
-]
-
-logger = logging.getLogger(__name__)
+__all__ = ("JsonFormatter",)
 
 
 class JsonFormatter(logging.Formatter):

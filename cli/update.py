@@ -1,6 +1,7 @@
 from babel.messages.frontend import update_catalog
+from constants.paths import LOCALE_PATH
 
-from app.constants import DEFAULT_LOCALE, DOMAIN, LOCALE_PATH
+from app.constants import DEFAULT_LOCALE, DOMAIN
 from cli.distributions import dist
 
 

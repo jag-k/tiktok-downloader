@@ -3,7 +3,9 @@ import traceback
 import uuid
 
 import aiohttp as aiohttp
+from constants import settings
 from mongopersistence import MongoPersistence
+from settings import callback_handler
 from telegram import InlineQueryResult, InlineQueryResultsButton, InlineQueryResultVideo, Update
 from telegram import Video as TelegramVideo
 from telegram.constants import ChatType, MessageEntityType, ParseMode
@@ -18,7 +20,7 @@ from telegram.ext import (
     filters,
 )
 
-from app import commands, constants, settings
+from app import commands
 from app.context import CallbackContext
 from app.database import Reporter
 from app.database.connector import MongoDatabase
@@ -270,11 +272,9 @@ async def post_shutdown(app: Application) -> None:
 
 def main() -> None:
     """Start the bot."""
-    logger.debug("Token: %r", constants.TOKEN)
-
     persistence: MongoPersistence[dict, dict, dict] = MongoPersistence(
-        mongo_url=constants.MONGO_URL,
-        db_name=constants.MONGO_DB,
+        mongo_url=settings.mongo_url.unicode_string(),
+        db_name=settings.mongo_db,
         name_col_user_data="user-data",
         name_col_chat_data="chat-data",
         name_col_bot_data="bot-data",
@@ -285,13 +285,13 @@ def main() -> None:
     )
     defaults = Defaults(
         parse_mode=ParseMode.HTML,
-        tzinfo=constants.TIME_ZONE,
+        tzinfo=settings.time_zone,
     )
     application = (
         Application.builder()
         .persistence(persistence)
         .defaults(defaults=defaults)
-        .token(constants.TOKEN)
+        .token(settings.token.get_secret_value())
         .context_types(ContextTypes(context=CallbackContext))
         .post_init(post_init)
         .post_shutdown(post_shutdown)
@@ -301,7 +301,7 @@ def main() -> None:
     application.add_handlers(
         [
             ChosenInlineResultHandler(chosen_inline_query),
-            settings.callback_handler(),
+            callback_handler(),
             InlineQueryHandler(inline_query),
             MessageHandler(filters.TEXT & ~filters.COMMAND, link_parser),
         ]

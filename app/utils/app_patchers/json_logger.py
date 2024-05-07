@@ -3,7 +3,7 @@ from contextvars import ContextVar, Token
 
 from telegram import Update
 
-from app.constants.json_logger import DATA_TYPE, QUERY, USER_ID, USERNAME
+from app.constants.context_vars import DATA_TYPE, QUERY, USER_ID, USERNAME
 from app.context import CallbackContext
 
 from .base import HandlerCallback, Patcher

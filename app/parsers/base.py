@@ -2,7 +2,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from re import Match, Pattern
-from typing import ClassVar
+from typing import ClassVar, final
 
 import aiohttp
 
@@ -10,6 +10,11 @@ from app.database import MediaCache as MediaCacheDB
 from app.models.medias import Media, ParserType
 
 logger = logging.getLogger(__name__)
+
+__all__ = (
+    "Parser",
+    "MediaCache",
+)
 
 
 class MediaCache:
@@ -67,6 +72,7 @@ class Parser(ABC):
         raise NotImplementedError
 
     @classmethod
+    @final
     async def parse(
         cls,
         session: aiohttp.ClientSession,

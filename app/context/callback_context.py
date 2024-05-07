@@ -5,7 +5,9 @@ from telegram.constants import ChatType
 from telegram.ext import Application, ExtBot
 from telegram.ext import CallbackContext as CallbackContextBase
 
-from app.constants import DEFAULT_LOCALE, Keys
+from app.constants import Keys, settings
+
+__all__ = ("CallbackContext", "ContextSettings")
 
 _SET_DEFAULT = TypeVar("_SET_DEFAULT", bound=Any)
 
@@ -99,7 +101,7 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
 
     @property
     def user_lang(self) -> str:
-        return self.settings.get(Keys.LANGUAGE, self._user_lang or DEFAULT_LOCALE)
+        return self.settings.get(Keys.LANGUAGE, self._user_lang or settings.default_locale)
 
     @classmethod
     def from_update(
@@ -111,7 +113,7 @@ class CallbackContext(CallbackContextBase[ExtBot, dict, dict, dict]):
         obj._chat_type = update.effective_chat.type if update.effective_chat else ChatType.PRIVATE
         if update.effective_user:
             obj._user_lang = update.effective_user.language_code
-            obj.settings.setdefault(Keys.LANGUAGE, obj._user_lang or DEFAULT_LOCALE)
+            obj.settings.setdefault(Keys.LANGUAGE, obj._user_lang or settings.default_locale)
         return obj
 
     @property

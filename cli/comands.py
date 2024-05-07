@@ -1,7 +1,9 @@
 import logging
 from collections.abc import Callable
 
-from app.constants import BASE_PATH, DEFAULT_LOCALE
+from constants import BASE_PATH
+
+from app.constants import DEFAULT_LOCALE
 from cli.compile import main as compile_locale
 from cli.extract import main as extract_locale
 from cli.update import main as update_locale

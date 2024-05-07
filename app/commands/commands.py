@@ -2,6 +2,7 @@ import logging
 import random
 from collections.abc import Callable
 
+from constants import settings
 from telegram import (
     ChatAdministratorRights,
     KeyboardButton,
@@ -11,11 +12,10 @@ from telegram import (
 )
 from telegram.constants import ChatType
 
-from app import constants, settings
 from app.commands.registrator import CommandRegistrator
-from app.constants import DEFAULT_LOCALE
 from app.context import CallbackContext
 from app.parsers.base import Parser
+from app.settings import command_handler
 from app.utils import a, b
 from app.utils.i18n import _
 
@@ -56,24 +56,23 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
                 return res
             if res := obj.get(f"{key}_{ctx.user_lang.split('-')[0]}"):
                 return res
-            if res := obj.get(f"{key}_{DEFAULT_LOCALE}"):
+            if res := obj.get(f"{key}_{settings.default_locale}"):
                 return res
             return obj.get(key)
 
         return get
 
+    contacts_list = "\n".join(
+        f'- {g("type")}: {a(g("text"), g("url"))}'  # type: ignore[arg-type]
+        for c in settings.contacts
+        if all(map(c.get, ("type", "text", "url")))
+        if (g := get_by_lang(c))  # type: ignore[arg-type]
+    )
     contacts = ""
-    if constants.CONTACTS:
-        contacts_list = "\n".join(
-            f'- {g("type")}: {a(g("text"), g("url"))}'  # type: ignore[arg-type]
-            for c in constants.CONTACTS
-            if all(map(c.get, ("type", "text", "url")))
-            if (g := get_by_lang(c))  # type: ignore[arg-type]
+    if contacts_list:
+        contacts = _("\n\nContacts:\n{contacts_list}").format(
+            contacts_list=contacts_list,
         )
-        if contacts_list:
-            contacts = _("\n\nContacts:\n{contacts_list}").format(
-                contacts_list=contacts_list,
-            )
 
     reply_markup = None
     rights = ChatAdministratorRights(
@@ -146,4 +145,4 @@ async def clear_history(update: Update, ctx: CallbackContext) -> None:
     await update.message.reply_text(_("History cleared."))
 
 
-commands.add_handler(settings.command_handler(), _("Bot settings"))
+commands.add_handler(command_handler(), _("Bot settings"))

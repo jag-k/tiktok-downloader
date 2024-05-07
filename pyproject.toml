@@ -13,17 +13,17 @@ pytube = "^15.0.0"
 python-dotenv = "^1.0.0"
 pytz = "^2024.1"
 aiofiles = "^23.1.0"
-pydantic = "^1.10.15"
+pydantic = "^2"
 motor = "^3.1.2"
 mongopersistence = "^0.3.1"
 contextvars = "^2.4"
+pydantic-settings = "^2"
 
 [tool.poetry.group.dev.dependencies]
 babel = "*"
 black = "*"
 pre-commit = "*"
 ruff = "*"
-#mypy = "*"
 
 [tool.poetry.group.types.dependencies]
 types-pytz = "*"

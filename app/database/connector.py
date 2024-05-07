@@ -3,7 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorCollection as Collection
 from motor.motor_asyncio import AsyncIOMotorDatabase as Database
 from pymongo.errors import CollectionInvalid
 
-from app import constants
+from app.constants import settings
 
 _client: Client | None = None
 _db: Database | None = None
@@ -16,8 +16,8 @@ class MongoDatabase:
 
     @classmethod
     def init(cls) -> None:
-        cls._client = Client(constants.MONGO_URL)
-        cls._db = cls._client.get_database(constants.MONGO_DB)
+        cls._client = Client(settings.mongo_url.unicode_string())
+        cls._db = cls._client.get_database(settings.mongo_db)
         for sub_cls in cls.__subclasses__():
             sub_cls._client = cls._client
             sub_cls._db = cls._db
@@ -27,7 +27,7 @@ class MongoDatabase:
         cls._client.close()
 
     @classmethod
-    async def _get_col(cls, name: str) -> Collection | None:
+    async def _get_col(cls, name: str) -> Collection:
         if cls._collection is not None:
             return cls._collection
         try:
