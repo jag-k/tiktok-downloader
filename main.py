@@ -68,7 +68,7 @@ async def _process_video(update: Update, ctx: CallbackContext, media: Video) -> 
         if update.effective_chat.type == ChatType.PRIVATE:
             logger.info("Sending video as link: %s", media)
             await update.effective_message.reply_text(
-                _("Error sending video: {title}\n" "\n\n" '<a href="{url}">Direct link to video</a>').format(
+                _('Error sending video: {title}\n\n\n<a href="{url}">Direct link to video</a>').format(
                     title=a(media_caption, media.original_url),
                     url=media.url,
                 ),

@@ -66,7 +66,7 @@ MONGO_DB = os.getenv("MONGO_DB", None)
 ENABLE_MONGO = MONGO_URL and MONGO_DB
 if not ENABLE_MONGO:
     print(
-        "Bot requires MongoDB to work.\n" "Please, set MONGO_URL and MONGO_DB envs.",
+        "Bot requires MongoDB to work.\nPlease, set MONGO_URL and MONGO_DB envs.",
         file=sys.stderr,
     )
     exit(1)

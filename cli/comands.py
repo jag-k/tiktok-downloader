@@ -54,7 +54,7 @@ def markdown_update_region(markdown: str, region: str, data: str) -> str:
     end_rm = markdown.split(end, 1)[1]
     logger.info("Update %r region in markdown", region)
 
-    return f"{start_rm.strip()}\n\n" f"{start}\n\n" f"{data.strip()}\n\n" f"{end}\n\n" f"{end_rm.strip()}"
+    return f"{start_rm.strip()}\n\n{start}\n\n{data.strip()}\n\n{end}\n\n{end_rm.strip()}"
 
 
 add_command(
@@ -99,7 +99,7 @@ def generate_makefile() -> list[dict]:
 
     # noinspection PyTypeChecker,PydanticTypeChecker
     cmds = "\n".join(
-        f"{name}:{description}\n" f"\tpoetry run -- python -m cli {name}{extra}\n"
+        f"{name}:{description}\n\tpoetry run -- python -m cli {name}{extra}\n"
         for name, description, extra in map(dict.values, data)
     )
 
