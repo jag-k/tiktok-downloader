@@ -45,7 +45,7 @@ add_author_mention = s.bool_settings_template(
     display_name=_("👤 Add author in media"),
     template_str_answer=_("Add author in media are {}!"),
     template_str_menu=_(
-        "Add author in media (video/audio/images):" "\n\n{}\n\n" "Example: So funny video by <code>@username</code>"
+        "Add author in media (video/audio/images):\n\n{}\n\nExample: So funny video by <code>@username</code>"
     ),
     settings_data_default=False,
 )
@@ -55,7 +55,7 @@ add_original_link = s.bool_settings_template(
     display_name=_("🔗 Add original link in media"),
     template_str_answer=_("Add original link in media are {}!"),
     template_str_menu=_(
-        "Add original link in media:" "\n\n{}\n\n" "<i>️📝 NOTE!</i> Twitter always add original link in media."
+        "Add original link in media:\n\n{}\n\n<i>️📝 NOTE!</i> Twitter always add original link in media."
     ),
     settings_data_default=False,
 )
@@ -65,7 +65,7 @@ tiktok_flag = s.bool_settings_template(
     display_name=_("🏳️ Add flag to TikTok videos/images"),
     template_str_answer=_("Add flag to TikTok videos/images are {}!"),
     template_str_menu=_(
-        "Adds the flag of the country from which the videos/images was " "uploaded (author's country):\n\n{}"
+        "Adds the flag of the country from which the videos/images was uploaded (author's country):\n\n{}"
     ),
     settings_data_default=False,
 )
@@ -130,9 +130,7 @@ add_media_source = s.bool_settings_template(
     display_name=_("📬 Add media source to videos/images"),
     template_str_answer=_("Add media source to videos/images are {}!"),
     template_str_menu=_(
-        "Add the social network where the videos/images were taken from:"
-        "\n\n{}\n\n"
-        "Example: So funny video from TikTok"
+        "Add the social network where the videos/images were taken from:\n\n{}\n\nExample: So funny video from TikTok"
     ),
     settings_data_default=False,
 )
@@ -184,7 +182,7 @@ async def saving_history(ctx: Settings.Context[str]) -> None:
 
     await ctx.update_message(
         text=_(
-            "Choose source to save in history. " "To see the history, use <i>Inline Query</i>.\n\n" "Current: <b>{}</b>"
+            "Choose source to save in history. To see the history, use <i>Inline Query</i>.\n\nCurrent: <b>{}</b>"
         ).format(HISTORY_DISPLAY[HistoryTypes[ctx.data]]),
         buttons=[
             ctx.btn(text=f"{history_name}{check(history_type)}", result=history_type)

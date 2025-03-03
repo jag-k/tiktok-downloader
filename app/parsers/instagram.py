@@ -16,9 +16,7 @@ logger = logging.getLogger(__name__)
 
 INSTAGRAM_RE = re.compile(r"(?:https?://)?(?:www\.)?instagram\.com/(?P<type>\w+)/(?P<id>[\w-]+)")
 
-USER_AGENT = (
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) " "Chrome/91.0.4472.114 Safari/537.36"
-)
+USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
 
 proxy_file = CONFIG_PATH / "http_proxies.txt"
 

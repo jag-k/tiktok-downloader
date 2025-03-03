@@ -65,7 +65,7 @@ async def help_command(update: Update, ctx: CallbackContext) -> None:
     contacts = ""
     if constants.CONTACTS:
         contacts_list = "\n".join(
-            f'- {g("type")}: {a(g("text"), g("url"))}'  # type: ignore[arg-type]
+            f"- {g('type')}: {a(g('text'), g('url'))}"  # type: ignore[arg-type]
             for c in constants.CONTACTS
             if all(map(c.get, ("type", "text", "url")))
             if (g := get_by_lang(c))  # type: ignore[arg-type]
